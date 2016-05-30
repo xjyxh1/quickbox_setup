@@ -1,4 +1,4 @@
-case $- in
+echo "case $- in
     *i*) ;;
       *) return;;
 esac
@@ -580,3 +580,4 @@ function upgradePlex() {
   apt-get install -yqq -f --only-upgrade plexmediaserver
   service plexmediaserver restart
 }
+"

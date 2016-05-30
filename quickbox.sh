@@ -37,597 +37,8 @@ fi
 
 function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15 ; }
 
-#function _quickboxv() {
-#  curl -s -o /usr/bin/quickbox https://raw.githubusercontent.com/Swizards/QuickBox/master/commands/quickbox
-#  chmod +x /usr/bin/quickbox
-#}
-
 function _bashrc() {
-cat >/root/.bashrc<<'EOF'
-case $- in
-    *i*) ;;
-      *) return;;
-esac
-
-BASHRCVERSION="23.2"
-EDITOR=nano; export EDITOR=nano
-USER=`id -un`
-TMPDIR=$HOME/.tmp/
-HOSTNAME=`hostname -s`
-IDUSER=`id -u`
-PROMPT_COMMAND='echo -ne "\033]0;${USER}(${IDUSER})@${HOSTNAME}: ${PWD}\007"'
-export LS_COLORS='rs=0:di=01;33:ln=00;36:mh=00:pi=40;33:so=00;35:do=00;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=01;05;37;41:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.log=02;34:*.torrent=02;37:*.conf=02;34:*.sh=00;32:*.tar=00;31:*.tgz=00;31:*.arj=00;31:*.taz=00;31:*.lzh=00;31:*.lzma=00;31:*.tlz=00;31:*.txz=00;31:*.zip=00;31:*.z=00;31:*.Z=00;31:*.dz=00;31:*.gz=00;31:*.lz=00;31:*.xz=00;31:*.bz2=00;31:*.tbz=00;31:*.tbz2=00;31:*.bz=00;31:*.tz=00;31:*.tcl=00;31:*.deb=00;31:*.rpm=00;31:*.jar=00;31:*.rar=00;31:*.ace=00;31:*.zoo=00;31:*.cpio=00;31:*.7z=00;31:*.rz=00;31:*.jpg=00;35:*.jpeg=00;35:*.gif=00;35:*.bmp=00;35:*.pbm=00;35:*.pgm=00;35:*.ppm=00;35:*.tga=00;35:*.xbm=00;35:*.xpm=00;35:*.tif=00;35:*.tiff=00;35:*.png=00;35:*.svg=00;35:*.svgz=00;35:*.mng=00;35:*.pcx=00;35:*.mov=00;35:*.mpg=00;35:*.mpeg=00;35:*.m2v=00;35:*.mkv=00;35:*.ogm=00;35:*.mp4=00;35:*.m4v=00;35:*.mp4v=00;35:*.vob=00;35:*.qt=00;35:*.nuv=00;35:*.wmv=00;35:*.asf=00;35:*.rm=00;35:*.rmvb=00;35:*.flc=00;35:*.avi=00;35:*.fli=00;35:*.flv=00;35:*.gl=00;35:*.dl=00;35:*.xcf=00;35:*.xwd=00;35:*.yuv=00;35:*.cgm=00;35:*.emf=00;35:*.axv=00;35:*.anx=00;35:*.ogv=00;35:*.ogx=00;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:'
-export TERM=xterm;TERM=xterm
-export PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/home/quickbox/.bin/
-TPUT=`which tput`
-BC=`which bc`
-if [ ! -e $TPUT ]; then echo "tput is missing, please install it (yum install tput/apt install tput)";fi
-if [ ! -e $BC ]; then echo "bc is missing, please install it (yum install bc/apt install bc)";fi
-DFSCRIPT="${HOME}/.du.sh"
-if [ ! -e $DFSCRIPT ]; then
-cat >"$DFSCRIPT"<<'DS'
-#!/bin/bash
-ALERT=${BWhite}${On_Red};RED='\e[0;31m';YELLOW='\e[1;33m'
-GREEN='\e[0;32m';RESET="\e[00m";BWhite='\e[1;37m';On_Red='\e[41m'
-NCPU=$(grep -c 'processor' /proc/cpuinfo)
-SLOAD=$(( 100*${NCPU} ));MLOAD=$(( 200*${NCPU} ));XLOAD=$(( 400*${NCPU} ))
-function load() { SYSLOAD=$(cut -d " " -f1 /proc/loadavg | tr -d '.'); echo -n $((10#$SYSLOAD)); }
-SYSLOAD=$(load)
-if [ ${SYSLOAD} -gt ${XLOAD} ]; then echo -en ${ALERT}
-elif [ ${SYSLOAD} -gt ${MLOAD} ]; then echo -en ${RED}
-elif [ ${SYSLOAD} -gt ${SLOAD} ]; then echo -en ${YELLOW}
-else echo -en ${GREEN} ;fi
-let TotalBytes=0
-for Bytes in $(ls -l | grep "^-" | awk '{ print $5 }')
-do
-   let TotalBytes=$TotalBytes+$Bytes
-done
-if [ $TotalBytes -lt 1024 ]; then
-     TotalSize=$(echo -e "scale=1 \n$TotalBytes \nquit" | bc)
-     suffix="b"
-else if [ $TotalBytes -lt 1048576 ]; then
-     TotalSize=$(echo -e "scale=1 \n$TotalBytes/1024 \nquit" | bc)
-     suffix="kb"
-  else if [ $TotalBytes -lt 1073741824 ]; then
-     TotalSize=$(echo -e "scale=1 \n$TotalBytes/1048576 \nquit" | bc)
-     suffix="Mb"
-else
-     TotalSize=$(echo -e "scale=1 \n$TotalBytes/1073741824 \nquit" | bc)
-     suffix="Gb"
-fi
-fi
-fi
-echo $TotalSize$suffix
-DS
-chmod u+x $DFSCRIPT
-fi
-
-alias ls='ls --color=auto'
-alias dir='ls --color=auto'
-alias vdir='ls --color=auto'
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-
-function normal {
-if [ `id -u` == 0 ] ; then
-  DG="$(tput bold ; tput setaf 7)";LG="$(tput bold;tput setaf 7)";NC="$(tput sgr0)"
-  export PS1='[\[$LG\]\u\[$NC\]@\[$LG\]\h\[$NC\]]:(\[$LG\]\[$BN\]$($DFSCRIPT)\[$NC\])\w\$ '
-else
-  DG="$(tput bold;tput setaf 0)"
-  LG="$(tput setaf 7)"
-  NC="$(tput sgr0)"
-  export PS1='[\[$LG\]\u\[$NC\]@\[$LG\]\h\[$NC\]]:(\[$LG\]\[$BN\]$($DFSCRIPT)\[$NC\])\w\$ '
-fi
-}
-
-case $TERM in
-  rxvt*|screen*|cygwin)
-    export PS1='\u\@\h\w'
-  ;;
-  xterm*|linux*|*vt100*|cons25)
-    normal
-  ;;
-  *)
-    normal
-        ;;
-esac
-
-function rarit() { rar a -m5 -v1m $1 $1; }
-function paste() { $* | curl -F 'sprunge=<-' http://sprunge.us ; }
-function disktest() { dd if=/dev/zero of=test bs=64k count=16k conv=fdatasync;rm -rf test ; }
-function newpass() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15 ; }
-function fixhome() { chmod -R u=rwX,g=rX,o= "$HOME" ;}
-#function showspace() { cd /home/ && du */ -hs; }
-
-transfer() {
-  if [ $# -eq 0 ]; then
-    echo "No arguments specified. Usage: transfer /tmp/test.md OR: cat /tmp/test.md | transfer test.md"
-    return 1
-  fi
-tmpfile=$(mktemp -t transferXXX )
-if tty -s
-  then
-    basefile=$(basename "$1" | sed -e 's/[^a-zA-Z0-9._-]/-/g'); curl --progress-bar --upload-file "$1" "https://transfer.sh/$basefile" >> $tmpfile
-  else
-    curl --progress-bar --upload-file "-" "https://transfer.sh/$1" >> $tmpfile
-fi
-cat $tmpfile
-rm -f $tmpfile
-}
-
-function swap() {
-local TMPFILE=tmp.$$
-    [ $# -ne 2 ] && echo "swap: 2 arguments needed" && return 1
-    [ ! -e $1 ] && echo "swap: $1 does not exist" && return 1
-    [ ! -e $2 ] && echo "swap: $2 does not exist" && return 1
-    mv "$1" $TMPFILE; mv "$2" "$1"; mv $TMPFILE "$2"
-}
-
-if [ -e /etc/bash_completion ] ; then source /etc/bash_completion; fi
-if [ -e ~/.custom ]; then source ~/.custom; fi
-
-function changeUserpass() {
-REALM=rutorrent
-HTPASSWD=/etc/htpasswd
-echo -n "Username: "; read user
-        username=$(echo "$user"|sed 's/.*/\L&/')
-        if [[ ! $(grep "^${username}" ${HTPASSWD}) ]]; then
-    echo "Username ${username} wasnt found in ${HTPASSWD} .. please try again"
-    exit
-  fi
-        echo -n "Password: (hit enter to generate a password) "; read password
-        if [[ ! -z "${password}" ]]; then
-                echo "setting password to ${password}"
-                passwd=${password}
-                echo "${username}:${passwd}" | chpasswd >/dev/null 2>&1
-                sed -i "/${username}/ d" ${HTPASSWD}
-                (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
-        else
-                echo "setting password to ${genpass}"
-                sed -i "/${username}/ d" ${HTPASSWD}
-                passwd=${genpass}
-                echo "${username}:${passwd}" | chpasswd >/dev/null 2>&1
-                (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
-        fi
-  echo "$username : $passwd" >>/root/${username}.txt
-}
-
-function createSeedboxUser() {
-OK=`echo -e "[\e[0;32mOK\e[00m]"`
-realm="rutorrent"
-htpasswd="/etc/htpasswd"
-genpass=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)
-delugegenpass=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 32)
-ruconf="/srv/rutorrent/conf/users"
-IRSSI_PASS=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)
-IRSSI_PORT=$((RANDOM%64025+1024))
-PORT=$(shuf -i 2000-61000 -n 1)
-WEBPORT=$(shuf -i 8115-8145 -n 1)
-PORTEND=$(($PORT + 1500))
-while [[ "$(netstat -ln | grep ':'"$PORT"'' | grep -c 'LISTEN')" -eq "1" ]]; do PORT="$(shuf -i 2000-61000 -n 1)"; done
-RPORT=$(shuf -i 2000-61000 -n 1)
-DPORT=$(shuf -i 2000-61000 -n 1)
-while [[ "$(netstat -ln | grep ':'"$RPORT"'' | grep -c 'LISTEN')" -eq "1" ]]; do RPORT="$(shuf -i 2000-61000 -n 1)"; done
-while [[ "$(netstat -ln | grep ':'"$DPORT"'' | grep -c 'LISTEN')" -eq "1" ]]; do DPORT="$(shuf -i 2000-61000 -n 1)"; done
-ip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
-# --END HERE --
-echo -n "Username: "; read username
-  if grep -Fxq "$username" /etc/passwd; then
-    echo "$username exists! cant proceed..."
-    exit
-  else
-    useradd -m -k /etc/skel/ $username -s /usr/bin/lshell
-    echo -n "Password: (hit enter to generate a password) ";read password
-    chown $username.www-data /home/$username >/dev/null 2>&1
-    cp $htpasswd /root/rutorrent-htpasswd.`date +'%d.%m.%y-%S'`
-    if [[ "$password" == "" ]]; then
-      echo "setting password to $genpass"
-      echo "${username}:${genpass}" | chpasswd >/dev/null 2>&1
-      (echo -n "$username:$realm:" && echo -n "$username:$realm:$genpass" | md5sum | awk '{print $1}' ) >> $htpasswd
-      echo "${username} : $genpass" >/root/${username}.info
-    else
-      echo "using $password"
-      echo "${username}:${password}" | chpasswd >/dev/null 2>&1
-      (echo -n "$username:$realm:" && echo -n "$username:$realm:$password" | md5sum | awk '{print $1}' ) >> $htpasswd
-      echo "${username} : $password " >/root/${username}.info
-  fi
-  echo "Quota size for user: (EX: 500GB): "
-  read SIZE
-  case $SIZE in
-    *TB)
-      QUOTASIZE=$(echo $SIZE|cut -d'T' -f1)
-      DISKSIZE=$(($QUOTASIZE * 1024 * 1024 * 1024))
-      setquota -u ${username} ${DISKSIZE} ${DISKSIZE} 0 0 -a
-      echo "$SIZE" >>/root/${username}.info
-    ;;
-    *GB)
-      QUOTASIZE=$(echo $SIZE|cut -d'G' -f1)
-      DISKSIZE=$(($QUOTASIZE * 1024 * 1024))
-      setquota -u ${username} ${DISKSIZE} ${DISKSIZE} 0 0 -a
-      echo "$SIZE" >>/root/${username}.info
-    ;;
-    *)
-      echo "Disk Space MUST be in GB/TB, Example: 711GB OR 2.5TB, Exiting script, type bash $0 and try again";exit 0
-    ;;
-  esac
-
-echo -n "writing $username to vsftpd.chroot_list..."
-echo "$username" >> /etc/vsftpd.chroot_list
-echo $OK
-
-echo -n "writing $username .rtorrent.rc using port-range (${PORT}-${PORTEND})..."
-cat >/home/$username/.rtorrent.rc<<RC
-# -- START HERE --
-scgi_port = localhost:$RPORT
-min_peers = 1
-max_peers = 100
-min_peers_seed = -1
-max_peers_seed = -1
-max_uploads = 100
-download_rate = 0
-upload_rate = 0
-directory = /home/${username}/torrents/
-session = /home/${username}/.sessions/
-schedule = watch_directory,5,5,load_start=/home/${username}/rwatch/*.torrent
-schedule = filter_active,5,5,"view_filter = active,d.get_up_rate="
-view_add = alert
-view_sort_new = alert,less=d.get_message=
-schedule = filter_alert,30,30,"view_filter = alert,d.get_message=; view_sort = alert"
-port_range = $PORT-$PORTEND
-use_udp_trackers = yes
-encryption = allow_incoming,try_outgoing,enable_retry
-peer_exchange = no
-check_hash = no
-execute_nothrow=chmod,777,/home/${username}/.sessions/
-# -- END HERE --
-RC
-echo $OK
-
-echo -n "setting permissions ... "
-  chown $username.www-data /home/$username/{torrents,.sessions,watch,.rtorrent.rc} >/dev/null 2>&1
-  usermod -a -G www-data $username >/dev/null 2>&1
-  usermod -a -G $username www-data >/dev/null 2>&1
-  chmod 777 /home/${username}/.sessions >/dev/null 2>&1
-  usermod -a -G ${username} plex >/dev/null 2>&1
-  chown ${username}:plex /home/${username} >/dev/null 2>&1
-  chmod 750 /home/${username} >/dev/null 2>&1
-  setfacl -m g:${username}:rwx /home/${username} >/dev/null 2>&1
-echo $OK
-
-echo -n "writing $username rtorrent/irssi cron script ... "
-cat >/home/${username}/.startup<<SU
-#!/bin/bash
-export USER=\$(id -un)
-IRSSI_CLIENT=yes
-RTORRENT_CLIENT=yes
-WIPEDEAD=yes
-
-# NO NEED TO EDIT PAST HERE!
-if [ "\$WIPEDEAD" == "yes" ]; then
-  screen -wipe >/dev/null 2>&1;
-fi
-
-if [ "\$IRSSI_CLIENT" == "yes" ]; then
-  (screen -ls|grep irssi >/dev/null || (screen -fa -dmS irssi irssi && false))
-fi
-
-if [ "\$RTORRENT_CLIENT" == "yes" ]; then
-  (screen -ls|grep rtorrent >/dev/null || (screen -dmS rtorrent rtorrent && false))
-fi
-SU
-  chown ${username}.${username} /home/${username}/.startup >/dev/null 2>&1
-  chmod +x /home/${username}/.startup >/dev/null 2>&1
-echo $OK
-
-echo -n "enabling $username cron script ... "
-  mkdir "/srv/rutorrent/conf/users/${username}" >/dev/null 2>&1
-  mkdir -p /srv/rutorrent/conf/users/"${username}"/plugins/fileupload/ >/dev/null 2>&1
-  cp /srv/rutorrent/plugins/fileupload/conf.php /srv/rutorrent/conf/users/"${username}"/plugins/fileupload/conf.php
-  chown -R www-data: /srv/rutorrent/conf/users/"${username}" >/dev/null 2>&1
-  chown $username.$username /home/$username/.startup >/dev/null 2>&1
-  sudo -u $username chmod +x /home/$username/.startup  >/dev/null 2>&1
-  sudo -u $username chmod 750 /home/$username/ >/dev/null 2>&1
-  chown -R $username.www-data /home/${username} >/dev/null 2>&1
-echo $OK
-
-echo -n "writing $username rutorrent config.php ... "
-  mkdir $ruconf/$username >/dev/null 2>&1
-cat >$ruconf/$username/config.php<<DH
-<?php
-  @define('HTTP_USER_AGENT', 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0', true);
-  @define('HTTP_TIME_OUT', 30, true);
-  @define('HTTP_USE_GZIP', true, true);
-  \$httpIP = null;
-  @define('RPC_TIME_OUT', 5, true);
-  @define('LOG_RPC_CALLS', false, true);
-  @define('LOG_RPC_FAULTS', true, true);
-  @define('PHP_USE_GZIP', false, true);
-  @define('PHP_GZIP_LEVEL', 2, true);
-  \$schedule_rand = 10;
-  \$do_diagnostic = true;
-  \$log_file = '/tmp/errors.log';
-  \$saveUploadedTorrents = true;
-  \$overwriteUploadedTorrents = false;
-  \$topDirectory = '/home/$username/';
-  \$forbidUserSettings = false;
-  \$scgi_port = $RPORT;
-  \$scgi_host = "localhost";
-  \$XMLRPCMountPoint = "/RPC2";
-  \$pathToExternals = array("php" => '',"curl" => '',"gzip" => '',"id" => '',"stat" => '',);
-  \$localhosts = array("127.0.0.1", "localhost",);
-  \$profilePath = '../share';
-  \$profileMask = 0777;
-  \$diskuser = '/';
-  \$quotaUser = '${username}';
-  \$autodlPort = $IRSSI_PORT;
-  \$autodlPassword = "$IRSSI_PASS";
-DH
-echo $OK
-
-fi
-echo -n "Setting up autodl-irssi for $username ... "
-mkdir -p /home/$username/.autodl >/dev/null 2>&1
-touch /home/$username/.autodl/autodl.cfg >/dev/null 2>&1
-cat >/home/$username/.autodl/autodl.cfg<<ADC
-[options]
-gui-server-port = $IRSSI_PORT
-gui-server-password = $IRSSI_PASS
-ADC
-echo $OK
-
-echo -n "writing $username deluge config ... "
-home="/home/$username"
-cat >$home/.config/deluge/core.conf<<DL
-{
-  "file": 1,
-  "format": 1
-}{
-  "info_sent": 0.0,
-  "lsd": true,
-  "max_download_speed": -1.0,
-  "send_info": false,
-  "natpmp": true,
-  "move_completed_path": "$home/downloads/deluge.files/",
-  "peer_tos": "0x00",
-  "enc_in_policy": 1,
-  "queue_new_to_top": false,
-  "ignore_limits_on_local_network": true,
-  "rate_limit_ip_overhead": true,
-  "daemon_port": $DPORT,
-  "torrentfiles_location": "$home/deluge.torrents/",
-  "max_active_limit": 8,
-  "geoip_db_location": "/usr/share/GeoIP/GeoIP.dat",
-  "upnp": true,
-  "utpex": true,
-  "max_active_downloading": 3,
-  "max_active_seeding": 5,
-  "allow_remote": true,
-  "outgoing_ports": [
-    0,
-    0
-  ],
-  "enabled_plugins": [],
-  "max_half_open_connections": 50,
-  "download_location": "$home/downloads/deluge.files/",
-  "compact_allocation": false,
-  "max_upload_speed": -1.0,
-  "plugins_location": "$home/.config/deluge/plugins",
-  "max_connections_global": 200,
-  "enc_prefer_rc4": true,
-  "cache_expiry": 60,
-  "dht": true,
-  "stop_seed_at_ratio": false,
-  "stop_seed_ratio": 2.0,
-  "max_download_speed_per_torrent": -1,
-  "prioritize_first_last_pieces": false,
-  "max_upload_speed_per_torrent": -1,
-  "auto_managed": true,
-  "enc_level": 2,
-  "copy_torrent_file": false,
-  "max_connections_per_second": 20,
-  "listen_ports": [
-    $PORT,
-    $PORTEND
-  ],
-  "max_connections_per_torrent": -1,
-  "del_copy_torrent_file": false,
-  "move_completed": false,
-  "autoadd_enable": false,
-  "proxies": {
-    "peer": {
-      "username": "",
-      "password": "",
-      "hostname": "",
-      "type": 0,
-      "port": 8080
-    },
-    "web_seed": {
-      "username": "",
-      "password": "",
-      "hostname": "",
-      "type": 0,
-      "port": 8080
-    },
-    "tracker": {
-      "username": "",
-      "password": "",
-      "hostname": "",
-      "type": 0,
-      "port": 8080
-    },
-    "dht": {
-      "username": "",
-      "password": "",
-      "hostname": "",
-      "type": 0,
-      "port": 8080
-    }
-  },
-  "dont_count_slow_torrents": false,
-  "add_paused": false,
-  "random_outgoing_ports": true,
-  "max_upload_slots_per_torrent": -1,
-  "new_release_check": true,
-  "enc_out_policy": 1,
-  "seed_time_ratio_limit": 7.0,
-  "remove_seed_at_ratio": false,
-  "autoadd_location": "$home/dwatch",
-  "max_upload_slots_global": 4,
-  "seed_time_limit": 180,
-  "cache_size": 512,
-  "share_ratio_limit": 2.0,
-  "random_port": true,
-  "listen_interface": ""
-}
-DL
-echo $OK
-
-echo -n "writing $username deluge web config ... "
-DELUGESALT=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 32)
-SHAPASSWD=$(deluge.Userpass.py ${password} ${delugegenpass})
-home="/home/$username"
-cat >$home/.config/deluge/web.conf<<DWC
-{
-  "file": 1,
-  "format": 1
-}{
-  "sidebar_show_zero": false,
-  "show_session_speed": false,
-  "pwd_sha1": "$SHAPASSWD",
-  "show_sidebar": true,
-  "enabled_plugins": [],
-  "base": "/",
-  "first_login": false,
-  "theme": "gray",
-  "pkey": "ssl/daemon.pkey",
-  "cert": "ssl/daemon.cert",
-  "session_timeout": 3600,
-  "https": false,
-  "default_daemon": "",
-  "sidebar_multiple_filters": true,
-  "pwd_salt": "$DELUGESALT",
-  "port": $WEBPORT
-}
-DWC
-echo "You may access Deluge at http://${ip}:$WEBPORT" >>/root/${username}.info
-echo $OK
-
-echo -n "writing $username deluge hostlist config ... "
-home="/home/$username"
-cat >$home/.config/deluge/hostlist.conf.1.2<<DHL
-{
-  "file": 1,
-  "format": 1
-}{
-  "hosts": [
-    [
-      "cb612435a69cc86f21dd8a4299f81a16c73f9916",
-      "127.0.0.1",
-      $DPORT,
-      "",
-      ""
-    ]
-  ]
-}
-DHL
-echo $OK
-
-sudo -u $username /home/$username/.startup >/dev/null 2>&1
-command1="*/1 * * * * /home/${username}/.startup"
-cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
-
-cat >/etc/apache2/sites-enabled/alias.${username}.download.conf<<AS
-Alias /${username}.downloads "/home/${username}/torrents/"
-  <Directory "/home/${username}/torrents/">
-   Options Indexes FollowSymLinks MultiViews
-    AllowOverride None
-          AuthType Digest
-          AuthName "rutorrent"
-          AuthUserFile '/etc/htpasswd'
-          Require valid-user
-    Order allow,deny
-    Allow from all
-  </Directory>
-Alias /${username}.deluge.downloads "/home/${username}/downloads/deluge.files/"
-  <Directory "/home/${username}/downloads/deluge.files/">
-   Options Indexes FollowSymLinks MultiViews
-    AllowOverride None
-          AuthType Digest
-          AuthName "rutorrent"
-          AuthUserFile '/etc/htpasswd'
-          Require valid-user
-    Order allow,deny
-    Allow from all
-  </Directory>
-AS
-
-cat >/etc/apache2/sites-enabled/alias.${username}.console.conf<<CS
-Alias /${username}.console "/home/${username}/.console/"
-<Directory "/home/${username}/.console/">
-  Options Indexes FollowSymLinks MultiViews
-  AuthType Digest
-  AuthName "rutorrent"
-  AuthUserFile '/etc/htpasswd'
-  Require valid-user
-  AllowOverride None
-  Order allow,deny
-  allow from all
-</Directory>
-CS
-
-cat >>/etc/apache2/sites-enabled/scgimount.conf<<SC
-SCGIMount /${username} 127.0.0.1:$RPORT
-SC
-
-sed -i -e "s/console-username/${username}/g" \
-       -e "s/console-password/${password}/g" /home/${username}/.console/index.php
-
-pkill -u "${username}" -f rtorrent >/dev/null 2>&1
-
-service apache2 reload >/dev/null 2>&1
-
-}
-function deleteSeedboxUser() {
-
-rutorrent="/srv/rutorrent"
-htpasswd="/etc/htpasswd"
-OK=$(echo -e "[ \e[0;32mDONE\e[00m ]")
-
-echo -n "Username: "
-read username
-if [[ -z ${username} ]]
-  then echo "you want me to delete nothing? next time enter a username";exit
-fi
-echo -n "Deleting ${username} /home and rutorrent data ... "
-userdel -rf ${username} >/dev/null 2>&1
-groupdel ${username} >/dev/null 2>&1
-sed -i '/^$username/d' ${htpasswd}
-rm -rf /etc/apache2/sites-enabled/alias.${username}.download.conf  >/dev/null 2>&1
-rm -rf ${rutorrent}/conf/users/${username} >/dev/null 2>&1
-rm -rf ${rutorrent}/share/users/${username} >/dev/null 2>&1
-rm -rf /var/spool/cron/crontabs/${username} >/dev/null 2>&1
-rm -rf /home/${username} >/dev/null 2>&1
-rm -rf /var/run/screens/S-${username} >/dev/null 2>&1
-rm -rf /etc/openvpn/server-${username}.conf >/dev/null 2>&1
-service apache2 reload
-echo ${OK}
-}
-
-function upgradeBTSync() {
-  apt-get install -yqq -f --only-upgrade btsync
-  service btsync restart
-}
-
-function upgradePlex() {
-  apt-get install -yqq -f --only-upgrade plexmediaserver
-  service plexmediaserver restart
-}
-
-EOF
+  cp templates/bashrc.template ~/.bashrc
 }
 
 # intro function (1)
@@ -652,7 +63,7 @@ function _intro() {
     echo "${dis}: ${alert} It looks like you are running $DISTRO, which is not supported by QuickBox ${normal} "
     echo 'Exiting...'
     exit 1
-  elif [[ ! "${rel}" =~ ("14.04"|"15.04"|"15.10"|"16.04"|"7"|"8") ]]; then
+  elif [[ ! "${rel}" =~ ("16.04"|"8") ]]; then
     echo "${bold}${rel}:${normal} You do not appear to be running a supported $DISTRO release."
     echo 'Exiting...'
     exit 1
@@ -675,9 +86,9 @@ function _checkroot() {
 function _logcheck() {
   echo -ne "${bold}${yellow}Do you wish to write to a log file?${normal} (Default: ${green}${bold}Y${normal}) "; read input
     case $input in
-      [yY] | [yY][Ee][Ss] | "" ) OUTTO="/root/quickbox.log";echo "${bold}Output is being sent to /root/quickbox.log${normal}" ;;
+      [yY] | [yY][Ee][Ss] | "" ) OUTTO="/root/quickbox.$PPID.log";echo "${bold}Output is being sent to /root/quickbox.$PPID.log${normal}" ;;
       [nN] | [nN][Oo] ) OUTTO="/dev/null 2>&1";echo "${cyan}NO output will be logged${normal}" ;;
-    *) OUTTO="/root/quickbox.log";echo "${bold}Output is being sent to /root/quickbox.log${normal}" ;;
+    *) OUTTO="/root/quickbox.$PPID.log";echo "${bold}Output is being sent to /root/quickbox.$PPID.log${normal}" ;;
     esac
   if [[ ! -d /root/tmp ]]; then
     sed -i 's/noexec,//g' /etc/fstab
@@ -714,19 +125,12 @@ function _askpartition() {
     *) primaryroot=root ;;
   esac
   echo "Using ${green}$primaryroot mount${normal} for quotas"
-
-  #echo -ne "${bold}${yellow}Are you installing on a ${bold}${green}/${normal} ${bold}${yellow}primary partition${normal} (Default: ${green}Y${normal}): "; read responce
-  #case $responce in
-  #  [yY] | [yY][Ee][Ss] | "" ) primaryroot=yes ;;
-  #  [nN] | [nN][Oo] ) primaryroot=no ;;
-  #  *) primaryroot=yes ;;
-  #esac
 }
 
 function _askcontinue() {
-echo
-echo "Press ${standout}${green}ENTER${normal} when you're ready to begin or ${standout}${red}Ctrl+Z${normal} to cancel" ;read input
-echo
+  echo
+  echo "Press ${standout}${green}ENTER${normal} when you're ready to begin or ${standout}${red}Ctrl+Z${normal} to cancel" ;read input
+  echo
 }
 
 # This function blocks an insecure port 1900 that may lead to
@@ -738,80 +142,14 @@ function _ssdpblock() {
 
 # package and repo addition (5) _update and upgrade_
 function _updates() {
-  if lsb_release >>"${OUTTO}" 2>&1; then ver=$(lsb_release -c|awk '{print $2}')
+  apt-get -y install lsb-release >>"${OUTTO}" 2>&1
+  if [[ $DISTRO == Debian ]]; then
+    cp templates/apt.sources/debian.template /etc/apt/sources.list
+    apt-get --yes --force-yes install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   else
-    apt-get -y -q install lsb-release >>"${OUTTO}" 2>&1
-    if [[ -e /usr/bin/lsb_release ]]; then ver=$(lsb_release -c|awk '{print $2}')
-    else echo "failed to install lsb-release from apt, please install manually and re-run script"; exit
-    fi
+    cp templates/apt.sources/ubuntu.template /etc/apt/sources.list
+    apt-get -y -f install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   fi
-
-if [[ $DISTRO == Debian ]]; then
-cat >/etc/apt/sources.list<<EOF
-#------------------------------------------------------------------------------#
-#                            OFFICIAL DEBIAN REPOS                             #
-#------------------------------------------------------------------------------#
-
-
-###### Debian Main Repos
-#deb http://ftp.nl.debian.org/debian testing main contrib non-free
-#deb-src http://ftp.nl.debian.org/debian testing main contrib non-free
-
-###### Debian Update Repos
-deb http://ftp.de.debian.org/debian/ wheezy main contrib non-free
-deb-src http://ftp.de.debian.org/debian/ wheezy main contrib non-free
-deb http://security.debian.org/ wheezy/updates main contrib non-free
-deb-src http://security.debian.org/ wheezy/updates main contrib non-free
-deb http://ftp.de.debian.org/debian/ wheezy-updates main contrib non-free
-deb-src http://ftp.de.debian.org/debian/ wheezy-updates main contrib non-free
-deb http://ftp.de.debian.org/debian wheezy-backports main contrib non-free
-deb-src http://ftp.de.debian.org/debian wheezy-backports main contrib non-free
-
-deb http://ftp.debian.org/debian/ wheezy-updates main contrib non-free
-deb-src http://ftp.debian.org/debian/ wheezy-updates main contrib non-free
-
-#Third Parties Repos -- retired
-#Debian Multimedia
-#deb http://www.deb-multimedia.org squeeze main non-free
-#deb http://www.deb-multimedia.org squeeze-backports main
-
-#Third Parties Repos -- updated
-# Deb Multimedia
-deb http://www.deb-multimedia.org wheezy main non-free
-deb-src http://www.deb-multimedia.org wheezy main non-free
-
-#Debian Backports Repos
-#http://backports.debian.org/debian-backports squeeze-backports main
-EOF
-
-  apt-get --yes --force-yes update >>"${OUTTO}" 2>&1
-  apt-get --yes --force-yes install deb-multimedia-keyring >>"${OUTTO}" 2>&1
-  apt-get --yes --force-yes update >>"${OUTTO}" 2>&1
-
-else
-cat >/etc/apt/sources.list<<EOF
-#------------------------------------------------------------------------------#
-#                            OFFICIAL UBUNTU REPOS                             #
-#------------------------------------------------------------------------------#
-
-
-###### Ubuntu Main Repos
-deb http://nl.archive.ubuntu.com/ubuntu/ ${ver} main restricted universe multiverse
-deb-src http://nl.archive.ubuntu.com/ubuntu/ ${ver} main restricted universe multiverse
-
-###### Ubuntu Update Repos
-deb http://nl.archive.ubuntu.com/ubuntu/ ${ver}-security main restricted universe multiverse
-deb http://nl.archive.ubuntu.com/ubuntu/ ${ver}-updates main restricted universe multiverse
-deb http://nl.archive.ubuntu.com/ubuntu/ ${ver}-backports main restricted universe multiverse
-deb-src http://nl.archive.ubuntu.com/ubuntu/ ${ver}-security main restricted universe multiverse
-deb-src http://nl.archive.ubuntu.com/ubuntu/ ${ver}-updates main restricted universe multiverse
-deb-src http://nl.archive.ubuntu.com/ubuntu/ ${ver}-backports main restricted universe multiverse
-
-###### Ubuntu Partner Repo
-deb http://archive.canonical.com/ubuntu ${ver} partner
-deb-src http://archive.canonical.com/ubuntu ${ver} partner
-EOF
-fi
 
   if [[ $DISTRO == Debian ]]; then
     export DEBIAN_FRONTEND=noninteractive
@@ -820,9 +158,9 @@ fi
     yes '' | apt-get upgrade >>"${OUTTO}" 2>&1
   else
     export DEBIAN_FRONTEND=noninteractive
-    apt-get -y --force-yes update >>"${OUTTO}" 2>&1
+    apt-get -y update >>"${OUTTO}" 2>&1
     apt-get -y purge samba samba-common >>"${OUTTO}" 2>&1
-    apt-get -y --force-yes upgrade >>"${OUTTO}" 2>&1
+    apt-get -y upgrade >>"${OUTTO}" 2>&1
   fi
 
   if [[ -e /etc/ssh/sshd_config ]]; then
@@ -832,7 +170,7 @@ fi
   fi
 
   # Create the service lock file directory
-  mkdir /install
+  cp install /install
 
 }
 
@@ -854,15 +192,12 @@ echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
 # package and repo addition (silently add php7) _add respo sources_
 function _repos() {
-  if [[ "${rel}" = "16.04" ]]; then
-    # now working with php 7 - so let's add it
-    LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1;
-  fi
+  LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1;
 }
 
 # setting system hostname function (7)
 function _hostname() {
-echo -ne "Please enter a hostname for this server (${bold}Hit enter to make no changes${normal}): " ; read input
+echo -ne "Please enter a hostname for this server (${bold}Hit ${standout}${green}ENTER${normal} to make no changes${normal}): " ; read input
 if [[ -z $input ]]; then
         echo "No hostname supplied, no changes made!!"
 else
@@ -877,52 +212,46 @@ fi
 function _depends() {
   if [[ $DISTRO == Debian ]]; then
   apt-get -y update >>"${OUTTO}" 2>&1
-  yes '' | apt-get install --force-yes build-essential fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop git dos2unix subversion \
-    dstat automake make mktorrent libtool libcppunit-dev libssl-dev pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
-    apache2-utils autoconf cron curl libxslt-dev libncurses5-dev yasm pcregrep apache2 php5 php5-cli php-net-socket libdbd-mysql-perl libdbi-perl \
-    fontconfig quota comerr-dev ca-certificates libfontconfig1-dev libfontconfig1 rar unrar mediainfo php5-curl ifstat libapache2-mod-php5 \
-    ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl libnet-ssleay-perl php5-geoip openjdk-7-jre-headless openjdk-7-jre openjdk-7-jdk \
-    libxslt1-dev libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl libjson-perl libjson-xs-perl \
-    libxml-libxslt-perl libapache2-mod-scgi python-software-properties lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
-  elif [[ "${rel}" =~ ("14.04"|"15.04"|"15.10") ]]; then
+  yes '' | apt-get install --force-yes build-essential fail2ban bc sudo screen zip irssi \
+                                       unzip nano bwm-ng htop iotop git dos2unix subversion \
+                                       dstat automake make mktorrent libtool libcppunit-dev \
+                                       libssl-dev pkg-config libxml2-dev libcurl3 \
+                                       libcurl4-openssl-dev libsigc++-2.0-dev apache2-utils autoconf \
+                                       cron curl libxslt-dev libncurses5-dev yasm pcregrep apache2 \
+                                       php5 php5-cli php-net-socket libdbd-mysql-perl libdbi-perl \
+                                       fontconfig quota comerr-dev ca-certificates libfontconfig1-dev \
+                                       libfontconfig1 rar unrar mediainfo php5-curl ifstat \
+                                       libapache2-mod-php5 ttf-mscorefonts-installer checkinstall dtach cfv \
+                                       libarchive-zip-perl libnet-ssleay-perl php5-geoip \
+                                       openjdk-7-jre-headless openjdk-7-jre openjdk-7-jdk \
+                                       libxslt1-dev libxslt1.1 libxml2 libffi-dev python-pip python-dev \
+                                       libhtml-parser-perl libxml-libxml-perl libjson-perl libjson-xs-perl \
+                                       libxml-libxslt-perl libapache2-mod-scgi python-software-properties \
+                                       lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
+  else
   apt-get -y update >>"${OUTTO}" 2>&1
-    apt-get install -y build-essential fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop git dos2unix subversion \
-    dstat automake make mktorrent libtool libcppunit-dev libssl-dev pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
-    apache2-utils autoconf cron curl libxslt-dev libncurses5-dev yasm pcregrep apache2 php5 php5-cli php-net-socket libdbd-mysql-perl libdbi-perl \
-    fontconfig quota comerr-dev ca-certificates libfontconfig1-dev libfontconfig1 rar unrar mediainfo php5-curl ifstat libapache2-mod-php5 \
-    ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl libnet-ssleay-perl php5-geoip openjdk-7-jre-headless openjdk-7-jre openjdk-7-jdk \
-    libxslt1-dev libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl libjson-perl libjson-xs-perl \
-    libxml-libxslt-perl libapache2-mod-scgi python-software-properties lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
-  elif [[ "${rel}" = "16.04" ]]; then
-  apt-get -y update >>"${OUTTO}" 2>&1
-    apt-get -y install build-essential fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop git dos2unix subversion \
-    dstat automake make mktorrent libtool libcppunit-dev libssl-dev pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
-    apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip libxslt-dev libncurses5-dev yasm pcregrep apache2 php-net-socket \
-    libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mbstring php7.0-zip php7.0-mysql php7.0-curl php-memcached memcached php7.0-gd \
-    php7.0-json php7.0-mcrypt php7.0-opcache php7.0-xml php7.0-zip fontconfig quota comerr-dev ca-certificates libfontconfig1-dev libfontconfig1 \
-    rar unrar mediainfo ifstat libapache2-mod-php7.0 python-software-properties ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
-    libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev libxslt1.1 libxml2 libffi-dev python-pip python-dev \
-    libhtml-parser-perl libxml-libxml-perl libjson-perl libjson-xs-perl libxml-libxslt-perl libapache2-mod-scgi lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
+  apt-get -y install build-essential fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop git \
+                     dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
+                     pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
+                     apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip \
+                     libxslt-dev libncurses5-dev yasm pcregrep apache2 php-net-socket \
+                     libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mbstring php7.0-zip php7.0-mysql \
+                     php7.0-curl php-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
+                     php7.0-xml php7.0-zip fontconfig quota comerr-dev ca-certificates libfontconfig1-dev \
+                     libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 python-software-properties \
+                     ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
+                     libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
+                     libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
+                     libjson-perl libjson-xs-perl libxml-libxslt-perl libapache2-mod-scgi \
+                     lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
   fi
 }
 
-# install and adjust config server firewall function (15)
-function _askcsf() {
-  echo -n "${bold}${yellow}Do you want to install CSF (Config Server Firewall)?${normal} [${green}y${normal}]es or [n]o: "
-  read responce
-  case $responce in
-    [yY] | [yY][Ee][Ss] | "" ) csf=yes ;;
-    [nN] | [nN][Oo] ) csf=no ;;
-  esac
-}
-
 function _skel() {
-  cd
   rm -rf /etc/skel
-  if [[ -e skel.tar.gz ]]; then rm -rf skel.tar.gz;fi
   mkdir /etc/skel
-  tar -xzvf "${REPOURL}"/sources/skel.tar.gz -C /etc/skel >>"${OUTTO}" 2>&1
-  tar xzf "${REPOURL}"/sources/rarlinux-x64-5.3.0.tar.gz -C ./
+  cp -r templates/skel/. /etc/skel
+  tar xzf sources/rarlinux-x64-5.3.0.tar.gz -C ./
   cp ./rar/*rar /usr/bin
   cp ./rar/*rar /usr/sbin
   rm -rf rarlinux*.tar.gz
@@ -934,6 +263,7 @@ function _skel() {
   mv GeoLiteCity.dat /usr/share/GeoIP/GeoIPCity.dat>>"${OUTTO}" 2>&1
   (echo y;echo o conf prerequisites_policy follow;echo o conf commit)>/dev/null 2>&1|cpan Digest::SHA1 >>"${OUTTO}" 2>&1
   (echo y;echo o conf prerequisites_policy follow;echo o conf commit)>/dev/null 2>&1|cpan Digest::SHA >>"${OUTTO}" 2>&1
+  # Setup mount points for Quotas
   if [[ ${primaryroot} == "root" ]]; then
     sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
     apt-get install -y linux-image-extra-virtual >>"${OUTTO}" 2>&1
@@ -941,10 +271,6 @@ function _skel() {
     quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
     quotaon -uv / >>"${OUTTO}" 2>&1
     service quota start >>"${OUTTO}" 2>&1
-    #modprobe quota_v2
-    #modprobe quota_v1
-    #echo "modprobe quota_v2
-    #modprobe quota_v1" >> /etc/modules-load.d/modules.conf
   else
     sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
     apt-get install -y linux-image-extra-virtual >>"${OUTTO}" 2>&1
@@ -952,193 +278,27 @@ function _skel() {
     quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
     quotaon -uv /home >>"${OUTTO}" 2>&1
     service quota start >>"${OUTTO}" 2>&1
-    #modprobe quota_v2
-    #modprobe quota_v1
-    #echo "modprobe quota_v2
-    #modprobe quota_v1" >> /etc/modules-load.d/modules.conf
-
   fi
-cat >/etc/lshell.conf<<'LS'
-[global]
-logpath         : /var/log/lshell/
-loglevel        : 2
-
-[default]
-allowed         : ['cd','cp','-d','-dmS','git','irssi','ll','ls','-m','mkdir','mv','nano','pwd','-R','rm','rtorrent','rsync','-S','scp','screen','tar','unrar','unzip','nano','wget']
-forbidden       : [';', '&', '|','`','>','<', '$(', '${','sudo','vi','vim','./']
-warning_counter : 2
-aliases         : {'ls':'ls --color=auto','ll':'ls -l'}
-intro           : "== Seedbox Shell ==\nWelcome To Your QuickBox Seedbox Shell\nType '?' to get the list of allowed commands"
-home_path       : '/home/%u'
-env_path        : ':/usr/local/bin:/usr/sbin'
-allowed_cmd_path: ['/home/']
-scp             : 1
-sftp            : 0
-overssh         : ['ls', 'rsync','scp']
-LS
-}
-
-function _csf() {
-    echo -n "${green}Installing and Adjusting CSF${normal} ... "
-    apt-get -y install e2fsprogs >/dev/null 2>&1;
-    wget http://www.configserver.com/free/csf.tgz >/dev/null 2>&1;
-    tar -xzf csf.tgz >/dev/null 2>&1;
-    ufw disable >>"${OUTTO}" 2>&1;
-    cd csf
-    sh install.sh >>"${OUTTO}" 2>&1;
-    perl /usr/local/csf/bin/csftest.pl >>"${OUTTO}" 2>&1;
-    # modify csf blocklists - essentially like CloudFlare, but on your machine
-    sed -i.bak -e "s/#SPAMDROP|86400|0|/SPAMDROP|86400|100|/" \
-               -e "s/#SPAMEDROP|86400|0|/SPAMEDROP|86400|100|/" \
-               -e "s/#DSHIELD|86400|0|/DSHIELD|86400|100|/" \
-               -e "s/#TOR|86400|0|/TOR|86400|100|/" \
-               -e "s/#ALTTOR|86400|0|/ALTTOR|86400|100|/" \
-               -e "s/#BOGON|86400|0|/BOGON|86400|100|/" \
-               -e "s/#HONEYPOT|86400|0|/HONEYPOT|86400|100|/" \
-               -e "s/#CIARMY|86400|0|/CIARMY|86400|100|/" \
-               -e "s/#BFB|86400|0|/BFB|86400|100|/" \
-               -e "s/#OPENBL|86400|0|/OPENBL|86400|100|/" \
-               -e "s/#AUTOSHUN|86400|0|/AUTOSHUN|86400|100|/" \
-               -e "s/#MAXMIND|86400|0|/MAXMIND|86400|100|/" \
-               -e "s/#BDE|3600|0|/BDE|3600|100|/" \
-               -e "s/#BDEALL|86400|0|/BDEALL|86400|100|/" /etc/csf/csf.blocklists;
-    # modify csf process ignore - ignore nginx, varnish & mysql
-    echo >> /etc/csf/csf.pignore;
-    echo "[ QuickBox Additions - These are necessary to avoid noisy emails ]" >> /etc/csf/csf.pignore;
-    echo "exe:/usr/sbin/rsyslogd" >> /etc/csf/csf.pignore;
-    echo "exe:/lib/systemd/systemd-timesyncd" >> /etc/csf/csf.pignore;
-    echo "exe:/lib/systemd/systemd-resolved" >> /etc/csf/csf.pignore;
-    # modify csf conf - make suitable changes for non-cpanel environment
-    cd /etc/csf
-    rm csf.conf
-    touch /install/.csf.lock
-    wget -q https://raw.githubusercontent.com/Swizards/QuickBox/master/commands/csf.conf
-}
-
-# NOTE: Sendmail is a requirement of CSF. Using sendmail ensures that the user receives the needed
-# emails in regards to SSH access and IP blocking as well as any spikes in resources usage.
-# Don't want sendmail to be installed? Don't install CSF and adapt your own solution for security. ;)
-function _csfsendmail1() {
-    # install sendmail as it's binary is required by CSF
-    echo -n "${green}Installing Sendmail${normal} ... "
-    apt-get -y install sendmail sendmail-bin >>"${OUTTO}" 2>&1;
-    export DEBIAN_FRONTEND=noninteractive | /usr/sbin/sendmailconfig >>"${OUTTO}" 2>&1;
-}
-function _csfsendmail2() {
-    # add administrator email
-    echo "${magenta}${bold}Add an administrator email below for receiving alerts${normal}"
-    read -p "${bold}Email: ${normal}" admin_email
-    echo
-    echo "${bold}The email ${green}${bold}$admin_email${normal} ${bold}is now the forwarding address for root mail${normal}"
-}
-function _csfsendmail3() {
-    echo -n "${green}finalizing sendmail installation${normal} ... "
-    # install aliases
-    echo -e "mailer-daemon: postmaster
-postmaster: root
-nobody: root
-hostmaster: root
-usenet: root
-news: root
-webmaster: root
-www: root
-ftp: root
-abuse: root
-root: $admin_email" > /etc/aliases
-    newaliases >>"${OUTTO}" 2>&1;
-}
-
-function _nocsf() {
-  if [[ ${csf} == "no" ]]; then
-    echo "${cyan}Skipping Config Server Firewall Installation${normal} ... "
-  fi
-}
-
-# if you're using cloudlfare as a protection and/or cdn - this next bit is important
-function _askcloudflare() {
-  echo -ne "${bold}${yellow}Would you like to whitelist CloudFlare IPs?${normal} [${green}y${normal}]es or [n]o: "
-  read responce
-  case $responce in
-    [yY] | [yY][Ee][Ss] | "" ) cloudflare=yes ;;
-    [nN] | [nN][Oo] ) cloudflare=no ;;
-  esac
-}
-
-function _cloudflare() {
-    echo -n "${green}Whitelisting Cloudflare IPv4 and IPv6${normal} ... "
-    echo -e "# BEGIN CLOUDFLARE WHITELIST
-# ips-v4
-103.21.244.0/22
-103.22.200.0/22
-103.31.4.0/22
-104.16.0.0/12
-108.162.192.0/18
-131.0.72.0/22
-141.101.64.0/18
-162.158.0.0/15
-172.64.0.0/13
-173.245.48.0/20
-188.114.96.0/20
-190.93.240.0/20
-197.234.240.0/22
-198.41.128.0/17
-199.27.128.0/21
-# ips-v6
-2400:cb00::/32
-2405:8100::/32
-2405:b500::/32
-2606:4700::/32
-2803:f800::/32
-# END CLOUDFLARE WHITELIST
-" >> /etc/csf/csf.allow
-}
-
-# ban public trackers [csf option] (8)
-function _csfdenyhosts() {
-echo -ne "${bold}${yellow}Block Public Trackers?${normal}: [${green}y${normal}]es or [n]o"; read responce
-read responce
-case $responce in
-  [yY] | [yY][Ee][Ss] | "" ) csfdenyhosts=yes ;;
-  [nN] | [nN][Oo] ) csfdenyhosts=no ;;
-esac
-}
-
-function _csfblockpublic() {
-  if [[ ${csfdenyhosts} == "yes" ]]; then
-    echo -n "[ ${red}Blocking public trackers${normal} ]"
-    sed -i -e "/GLOBAL_DENY = \"\"/cGLOBAL_DENY = \"https://raw.githubusercontent.com/Swizards/QuickBox/master/commands/trackers\"" \
-       -e "/GLOBAL_DYNDNS = \"\"/cGLOBAL_DYNDNS = \"https://raw.githubusercontent.com/Swizards/QuickBox/master/commands/trackers\"" /etc/csf/csf.conf
-  else
-    echo -n "[ ${green}Allowing${normal} ]"
-  fi
+  # Setup LShell configuration file
+  cp templates/lshell.conf.template /etc/lshell.conf
 }
 
 # ban public trackers [iptables option] (8)
 function _denyhosts() {
-echo -ne "${bold}${yellow}Block Public Trackers?${normal}: [${green}y${normal}]es or [n]o"; read responce
-case $responce in
-  [yY] | [yY][Ee][Ss] | "")
-echo "[ ${red}Blocking public trackers${normal} ]"
-wget -q -O /etc/trackers https://raw.githubusercontent.com/Swizards/QuickBox/master/commands/trackers
-cat >/etc/cron.daily/denypublic<<'EOF'
-IFS=$'\n'
-L=$(/usr/bin/sort /etc/trackers | /usr/bin/uniq)
-for fn in $L; do
-        /sbin/iptables -D INPUT -d $fn -j DROP
-        /sbin/iptables -D FORWARD -d $fn -j DROP
-        /sbin/iptables -D OUTPUT -d $fn -j DROP
-        /sbin/iptables -A INPUT -d $fn -j DROP
-        /sbin/iptables -A FORWARD -d $fn -j DROP
-        /sbin/iptables -A OUTPUT -d $fn -j DROP
-done
-EOF
-chmod +x /etc/cron.daily/denypublic
-curl -s -LO https://raw.githubusercontent.com/Swizards/QuickBox/master/commands/hostsTrackers
-cat hostsTrackers >> /etc/hosts
-  ;;
-  [nN] | [nN][Oo] ) echo "[ ${green}Allowing${normal} ]"
-                ;;
-        esac
+  echo -ne "${bold}${yellow}Block Public Trackers?${normal}: [${green}y${normal}]es or [n]o"; read responce
+  case $responce in
+    [yY] | [yY][Ee][Ss] | "")
+
+  echo "[ ${red}Blocking public trackers${normal} ]"
+  cp templates/trackers.template /etc/trackers
+  cp templates/denypublic.template /etc/cron.daily/denypublic
+  chmod +x /etc/cron.daily/denypublic
+  cat templates/hostTrackers.template >> /etc/hosts
+    ;;
+
+    [nN] | [nN][Oo] ) echo "[ ${green}Allowing${normal} ]"
+    ;;
+  esac
 }
 
 # install ffmpeg question (9)
@@ -1154,7 +314,6 @@ function _askffmpeg() {
 # build function for ffmpeg (9.1)
 function _ffmpeg() {
   if [[ ${ffmpeg} == "yes" ]]; then
-    echo -n "Building ffmpeg from source for screenshots ... "
     MAXCPUS=$(echo "$(nproc) / 2"|bc)
     cd /root/tmp
     if [[ -d /root/tmp/ffmpeg ]]; then rm -rf ffmpeg;fi
@@ -2122,23 +1281,15 @@ _askpartition
 _askcontinue
 _ssdpblock
 clear
-#_locale
-_repos
 
+_repos
 _hostname
-#_askcsf
-#if [[ ${csf} == "yes" ]]; then
-#  _askcloudflare
-#  _csfdenyhosts
-#else
-#  _denyhosts
-#fi
-echo
 _askrtorrent
-#_askdeluge
 _adduser
 _askffmpeg
 _denyhosts
+
+echo
 echo ""
 echo "${bold}${magenta}QuickBox will now install, this may take between${normal}"
 echo "${bold}${magenta}10 and 30 minutes depending on your systems specs${normal}"
@@ -2146,34 +1297,15 @@ echo ""
 echo -n "Updating system ... ";_updates & spinner $!;echo
 echo -n "Installing all needed dependencies ... ";_depends & spinner $!;echo
 _additionalsyscommands
-#if [[ ${csf} == "yes" ]]; then
-#    _csf & spinner $!;echo
-#    _csfsendmail1 & spinner $!;echo
-#    _csfsendmail2
-#    _csfsendmail3 & spinner $!;echo
-#    if [[ ${cloudflare} == "yes" ]]; then
-#        _cloudflare & spinner $!;echo;
-#    fi
-#    if [[ ${csfdenyhosts} == "yes" ]]; then
-#      _csfblockpublic & spinner $!;echo;
-#    fi
-#elif [[ ${csf} == "no" ]]; then
-#    _nocsf;
-#fi
 echo -n "Building required user directories ... ";_skel & spinner $!;echo
 if [[ ${ffmpeg} == "yes" ]]; then
-    _ffmpeg & spinner $!;echo;
+    echo -n "Building ffmpeg from source for screenshots ... ";_ffmpeg & spinner $!;echo
 fi
 _apachesudo
 echo -n "Installing xmlrpc-c-${green}1.33.12${normal} ... ";_xmlrpc & spinner $!;echo
 echo -n "Installing libtorrent-${green}$LTORRENT${normal} ... ";_libtorrent & spinner $!;echo
 echo -n "Installing rtorrent-${green}$RTVERSION${normal} ... ";_rtorrent & spinner $!;echo
-echo -n "Installing rutorrent into /srv ... ";_rutorrent & spinner $!;echo;
-#if [[ ${deluge} == "yes" ]]; then
-#  echo -n "Building and Installing Deluge-${DELUGE_VERSION} ... ";_deluge & spinner $!;echo;
-#  echo -n "Writing ${username} deluge config ... ";_delugecore & spinner $!;echo;
-#  echo -n "Writing ${username} deluge web config ... ";_delugeconf & spinner $!;echo;
-#fi
+echo -n "Installing rutorrent into /srv ... ";_rutorrent & spinner $!;echo
 echo -n "Setting up seedbox.conf for apache ... ";_apacheconf & spinner $!;echo
 echo -n "Installing .rtorrent.rc for ${username} ... ";_rconf & spinner $!;echo
 echo -n "Installing rutorrent plugins ... ";_plugins & spinner $!;echo
