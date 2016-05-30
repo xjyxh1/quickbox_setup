@@ -406,10 +406,16 @@ function _rtorrent() {
 
 # function to install rutorrent (13)
 function _rutorrent() {
-  cd && git clone https://github.com/QuickBox/quickbox_rutorrent
-  mkdir /srv && cd /srv
+  cd && mkdir /srv && cd /srv
   if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent;fi
   cp -R ${local_rutorrent}. .
+}
+
+# function to install dashboard (14)
+function _rutorrent() {
+  cd && mkdir -p /srv/rutorrent/home
+  if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent;fi
+  cp -R ${local_dashboard}home/. /srv/rutorrent/home
 }
 
 # ask for bash or lshell function (14)
@@ -496,171 +502,6 @@ phpenmod -v 7.0 opcache >>"${OUTTO}" 2>&1
   sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.0/apache2/php.ini
 }
 
-# install deluge question ()
-function _askdeluge() {
-  echo -n "${bold}${yellow}Would you like to install Deluge?${normal} [${green}y${normal}]es or [n]o: "; read responce
-  case $responce in
-    [yY] | [yY][Ee][Ss] | "" ) deluge=yes ;;
-    [nN] | [nN][Oo] ) deluge=no ;;
-    *) deluge=yes ;;
-  esac
-}
-
-# build deluge from source ()
-function _deluge() {
-  DELUGE_VERSION=1.3.12
-  cd /root/tmp
-  apt-get -y install python python-geoip python-libtorrent python-notify python-pygame python-gtk2 python-gtk2-dev python-twisted python-twisted-web2 python-openssl python-simplejson python-setuptools gettext python-xdg python-chardet librsvg2-dev xdg-utils python-mako >>"${OUTTO}" 2>&1
-  sudo kill -9 `sudo ps aux | grep deluge | grep -v grep | awk '{print $2}' | cut -d. -f 1` &> /dev/null
-  sudo wget https://github.com/Swizards/QuickBox/raw/experimental/sources/deluge_"${DELUGE_VERSION}".tar.gz &> /dev/null
-  mkdir -p /etc/quickbox/sources
-  cd /etc/quickbox/sources
-  sudo tar xvfz deluge_"${DELUGE_VERSION}".tar.gz &> /dev/null
-  sudo rm deluge_"${DELUGE_VERSION}".tar.gz &> /dev/null
-  cd deluge_"${DELUGE_VERSION}"
-  sudo python setup.py build >>"${OUTTO}" 2>&1
-  sudo python setup.py install >>"${OUTTO}" 2>&1
-  sudo ldconfig >>"${OUTTO}" 2>&1
-}
-
-function _delugecore() {
-  home="/home/${username}"
-  #mkdir -p /home/${username}/{.config/deluge/{icons,plugins,ssl,state},deluge.torrents,downloads/deluge.files,dwatch} >>"${OUTTO}" 2>&1
-cat >"${home}"/.config/deluge/core.conf<<DL
-{
-  "file": 1,
-  "format": 1
-}{
-  "info_sent": 0.0,
-  "lsd": true,
-  "max_download_speed": -1.0,
-  "send_info": false,
-  "natpmp": true,
-  "move_completed_path": "$home/downloads/deluge.files/",
-  "peer_tos": "0x00",
-  "enc_in_policy": 1,
-  "queue_new_to_top": false,
-  "ignore_limits_on_local_network": true,
-  "rate_limit_ip_overhead": true,
-  "daemon_port": $DPORT,
-  "torrentfiles_location": "$home/deluge.torrents/",
-  "max_active_limit": 8,
-  "geoip_db_location": "/usr/share/GeoIP/GeoIP.dat",
-  "upnp": true,
-  "utpex": true,
-  "max_active_downloading": 3,
-  "max_active_seeding": 5,
-  "allow_remote": true,
-  "outgoing_ports": [
-    0,
-    0
-  ],
-  "enabled_plugins": [],
-  "max_half_open_connections": 50,
-  "download_location": "$home/downloads/deluge.files/",
-  "compact_allocation": false,
-  "max_upload_speed": -1.0,
-  "plugins_location": "$home/.config/deluge/plugins",
-  "max_connections_global": 200,
-  "enc_prefer_rc4": true,
-  "cache_expiry": 60,
-  "dht": true,
-  "stop_seed_at_ratio": false,
-  "stop_seed_ratio": 2.0,
-  "max_download_speed_per_torrent": -1,
-  "prioritize_first_last_pieces": false,
-  "max_upload_speed_per_torrent": -1,
-  "auto_managed": true,
-  "enc_level": 2,
-  "copy_torrent_file": false,
-  "max_connections_per_second": 20,
-  "listen_ports": [
-    $PORT,
-    $PORTEND
-  ],
-  "max_connections_per_torrent": -1,
-  "del_copy_torrent_file": false,
-  "move_completed": false,
-  "autoadd_enable": false,
-  "proxies": {
-    "peer": {
-      "username": "",
-      "password": "",
-      "hostname": "",
-      "type": 0,
-      "port": 8080
-    },
-    "web_seed": {
-      "username": "",
-      "password": "",
-      "hostname": "",
-      "type": 0,
-      "port": 8080
-    },
-    "tracker": {
-      "username": "",
-      "password": "",
-      "hostname": "",
-      "type": 0,
-      "port": 8080
-    },
-    "dht": {
-      "username": "",
-      "password": "",
-      "hostname": "",
-      "type": 0,
-      "port": 8080
-    }
-  },
-  "dont_count_slow_torrents": false,
-  "add_paused": false,
-  "random_outgoing_ports": true,
-  "max_upload_slots_per_torrent": -1,
-  "new_release_check": true,
-  "enc_out_policy": 1,
-  "seed_time_ratio_limit": 7.0,
-  "remove_seed_at_ratio": false,
-  "autoadd_location": "$home/dwatch",
-  "max_upload_slots_global": 4,
-  "seed_time_limit": 180,
-  "cache_size": 512,
-  "share_ratio_limit": 2.0,
-  "random_port": true,
-  "listen_interface": ""
-}
-DL
-}
-
-function _delugeconf() {
-  DELUGESALT=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 32)
-  SHAPASSWD=$(deluge.Userpass.py ${password} ${delugegenpass})
-  home="/home/${username}"
-cat >"${home}"/.config/deluge/web.conf<<DWC
-{
-  "file": 1,
-  "format": 1
-}{
-  "sidebar_show_zero": false,
-  "show_session_speed": false,
-  "pwd_sha1": "$SHAPASSWD",
-  "show_sidebar": true,
-  "enabled_plugins": [],
-  "base": "/",
-  "first_login": false,
-  "theme": "gray",
-  "pkey": "ssl/daemon.pkey",
-  "cert": "ssl/daemon.cert",
-  "session_timeout": 3600,
-  "https": false,
-  "default_daemon": "",
-  "sidebar_multiple_filters": true,
-  "pwd_salt": "$DELUGESALT",
-  "port": $WEBPORT
-}
-DWC
-  echo "You may access Deluge at http://${ip}:$WEBPORT" >>/root/"${username}".info
-}
-
 # function to configure first user config (18)
 function _rconf() {
   cp ${local_setup}templates/rtorrent.rc.template /home/${username}/.rtorrent.rc
@@ -739,7 +580,8 @@ ADC
 }
 
 function _syscommands() {
-  cp -r ~/quickbox_packages/. /usr/local/bin
+  mkdir -p /usr/local/bin/quickbox
+  cp -r ${local_packages}quickbox/. /usr/local/bin/quickbox
   dos2unix $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
   chmod +x $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
   done
@@ -756,28 +598,7 @@ function _makedirs() {
 
 # function to make crontab .statup file (22)
 function _cronfile() {
-cat >"/home/${username}/.startup"<<'EOF'
-#!/bin/bash
-export USER=`id -un`
-IRSSI_CLIENT=yes
-RTORRENT_CLIENT=yes
-WIPEDEAD=yes
-ADDRESS=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
-
-if [ "$WIPEDEAD" == "yes" ]; then
-  screen -wipe >/dev/null 2>&1;
-fi
-
-if [ "$IRSSI_CLIENT" == "yes" ]; then
-  (screen -ls|grep irssi >/dev/null || (screen -S irssi -d -t irssi -m irssi -h "${ADDRESS}" && false))
-fi
-
-if [ "$RTORRENT_CLIENT" == "yes" ]; then
-  (screen -ls|grep rtorrent >/dev/null || (screen -fa -dmS rtorrent rtorrent && false))
-fi
-
-EOF
-
+  cp ${local_setup}templates/startup.template /home/${username}/.startup
 }
 
 # function to set permissions on first user (23)
@@ -795,36 +616,7 @@ function _perms() {
 function _ruconf() {
   mkdir -p ${rutorrent}conf/users/${username}/
 
-cat >"${rutorrent}conf/users/${username}/config.php"<<EOF
-<?php
-  @define('HTTP_USER_AGENT', 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0', true);
-  @define('HTTP_TIME_OUT', 30, true);
-  @define('HTTP_USE_GZIP', true, true);
-  \$httpIP = null;
-  @define('RPC_TIME_OUT', 5, true);
-  @define('LOG_RPC_CALLS', false, true);
-  @define('LOG_RPC_FAULTS', true, true);
-  @define('PHP_USE_GZIP', false, true);
-  @define('PHP_GZIP_LEVEL', 2, true);
-  \$schedule_rand = 10;
-  \$do_diagnostic = true;
-  \$log_file = '/tmp/errors.log';
-  \$saveUploadedTorrents = true;
-  \$overwriteUploadedTorrents = false;
-  \$topDirectory = '/home/${username}/';
-  \$forbidUserSettings = false;
-  \$scgi_port = $PORT;
-  \$scgi_host = "localhost";
-  \$XMLRPCMountPoint = "/RPC2";
-  \$pathToExternals = array("php" => '',"curl" => '',"gzip" => '',"id" => '',"stat" => '',);
-  \$localhosts = array("127.0.0.1", "localhost",);
-  \$profilePath = '../share';
-  \$profileMask = 0777;
-  \$autodlPort = ${IRSSI_PORT};
-  \$autodlPassword = "${IRSSI_PASS}";
-  \$diskuser = "";
-  \$quotaUser = "";
-EOF
+  cp ${local_setup}templates/rutorrent.users.conf.template ${rutorrent}conf/users/${username}/config.php
 
   chown -R www-data.www-data "${rutorrent}conf/users/" >>"${OUTTO}" 2>&1
   if [[ ${primaryroot} == "root" ]]; then
@@ -832,20 +624,11 @@ EOF
   else
     sed -i "/diskuser/c\$diskuser = \"\/home\";" /srv/rutorrent/conf/users/${username}/config.php
   fi
-  sed -i "/quotaUser/c\$quotaUser = \"${username}\";" /srv/rutorrent/conf/users/${username}/config.php
-}
-
-# create reload script (25)
-function _reloadscript() {
-cat >/usr/bin/reload<<'EOF'
-#!/bin/bash
-export USER=$(id -un)
-pkill -u $USER irssi >/dev/null 2>&1
-pkill -u $USER rtorrent >/dev/null 2>&1
-killall -u $USER main >/dev/null 2>&1
-rm -rf ~/.sessions/rtorrent.lock
-EOF
-chmod +x /usr/bin/reload
+  sed -i -e "/quotaUser/c\$quotaUser = \"${username}\";" \
+         -e "/USERNAME/${username}" \
+         -e "/PORT/$PORT" \
+         -e "/IRRSI-PORT/${IRSSI_PORT}" \
+         -e "/IRRSI-PASS/\"${IRSSI_PASS}\"" /srv/rutorrent/conf/users/${username}/config.php
 }
 
 # seedbox boot for first user (26)
