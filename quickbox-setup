@@ -318,6 +318,7 @@ function _askffmpeg() {
 function _ffmpeg() {
   if [[ ${ffmpeg} == "yes" ]]; then
     MAXCPUS=$(echo "$(nproc) / 2"|bc)
+    mkdir /root/tmp
     cd /root/tmp
     if [[ -d /root/tmp/ffmpeg ]]; then rm -rf ffmpeg;fi
     ####---- Old source ----####
