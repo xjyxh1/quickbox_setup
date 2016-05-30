@@ -34,9 +34,6 @@ elif [ -f "/etc/debian_version" ]; then
     DISTRO=='Debian'
 fi
 #################################################################################
-local_setup=/root/quickbox_setup/
-local_rutorrent=/root/quickbox_rutorrent/
-local_dashboard=/root/quickbox_dashboard/
 
 function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15 ; }
 
@@ -196,6 +193,9 @@ echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 # package and repo addition (silently add php7) _add respo sources_
 function _repos() {
   LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1;
+  git clone https://github.com/QuickBox/quickbox_rutorrent
+  git clone https://github.com/QuickBox/quickbox_packages
+  git clone https://github.com/QuickBox/quickbox_dashboard
 }
 
 # setting system hostname function (7)
@@ -862,62 +862,11 @@ function _installftpd() {
 
 # function to configure pure-ftpd (28)
 function _ftpdconfig() {
-cat >/root/.openssl.cnf <<EOF
-[ req ]
-prompt = no
-distinguished_name = req_distinguished_name
-[ req_distinguished_name ]
-C = US
-ST = Some State
-L = LOCALLY
-O = SELF
-OU = SELF
-CN = SELF
-emailAddress = dont@think.so
-EOF
+  cp ${local_setup}templates/openssl.cnf.template /root/.openssl.cnf
 
   openssl req -config /root/.openssl.cnf -x509 -nodes -days 365 -newkey rsa:1024 -keyout /etc/ssl/private/vsftpd.pem -out /etc/ssl/private/vsftpd.pem >/dev/null 2>&1
 
-cat >/etc/vsftpd.conf<<'VSD'
-listen=YES
-anonymous_enable=NO
-guest_enable=NO
-dirmessage_enable=YES
-dirlist_enable=YES
-download_enable=YES
-secure_chroot_dir=/var/run/vsftpd/empty
-chroot_local_user=YES
-chroot_list_file=/etc/vsftpd.chroot_list
-passwd_chroot_enable=YES
-allow_writeable_chroot=YES
-pam_service_name=vsftpd
-ssl_enable=YES
-allow_anon_ssl=NO
-force_local_data_ssl=NO
-force_local_logins_ssl=NO
-ssl_tlsv1=YES
-ssl_sslv2=NO
-ssl_sslv3=NO
-require_ssl_reuse=NO
-ssl_request_cert=YES
-ssl_ciphers=HIGH
-rsa_cert_file=/etc/ssl/private/vsftpd.pem
-local_enable=YES
-write_enable=YES
-local_umask=022
-max_per_ip=0
-pasv_enable=YES
-port_enable=YES
-pasv_promiscuous=NO
-port_promiscuous=NO
-pasv_min_port=0
-pasv_max_port=0
-listen_port=5757
-pasv_promiscuous=YES
-port_promiscuous=YES
-seccomp_sandbox=no
-VSD
-
+  cp ${local_setup}templates/vsftpd.conf.template /etc/vsftpd.conf
   echo "" > /etc/vsftpd.chroot_list
 }
 
@@ -933,8 +882,7 @@ function _quickstats() {
   sed -i "s/eth0/$IFACE/g" /srv/rutorrent/home/widgets/stat.php
   sed -i "s/eth0/$IFACE/g" /srv/rutorrent/home/widgets/data.php
   sed -i "s/eth0/$IFACE/g" /srv/rutorrent/home/widgets/config.php
-  sed -i -e "s/eth0/$IFACE/g" \
-         -e "s/qb-version/$QBVERSION/g" /srv/rutorrent/home/inc/config.php
+  sed -i -e "s/eth0/$IFACE/g" /srv/rutorrent/home/inc/config.php
   # Use server timezone
   cd /usr/share/zoneinfo
   find * -type f -exec sh -c "diff -q /etc/localtime '{}' > /dev/null && echo {}" \; > ~/tz.txt
@@ -943,8 +891,8 @@ function _quickstats() {
   echo "" >> /srv/rutorrent/home/widgets/config.php
   echo "?>" >> /srv/rutorrent/home/widgets/config.php
   if [[ ${primaryroot} == "home" ]]; then
-    cd /srv/rutorrent/home/widgets && rm disk_data.php && { curl -O -s https://raw.githubusercontent.com/Swizards/QuickBox/master/rutorrent/home/widgets/disk_datah.php; }
-    mv disk_datah.php disk_data.php
+    cd /srv/rutorrent/home/widgets && rm disk_data.php
+    mv ${local_dashboard}home/widgetsdisk_datah.php disk_data.php
     chown -R www-data:www-data /srv/rutorrent/home/widgets
   else
     rm /srv/rutorrent/home/widgets/disk_datah.php
@@ -1034,13 +982,16 @@ spinner() {
     echo -ne "${OK}"
 }
 
+local_setup=/root/quickbox_setup/
+local_rutorrent=/root/quickbox_rutorrent/
+local_packages=/root/quickbox_packages/
+local_dashboard=/root/quickbox_dashboard/
 Reth0=$(ifconfig | grep -m 1 "Link encap" | sed 's/[ \t].*//;/^\(lo\|\)$/d' | awk '{ print $1 '});
 IFACE=$(echo -n "${Reth0}");
 HOSTNAME1=$(hostname -s);
 REPOURL="/root/tmp/QuickBox"
 PLUGINURL="/root/tmp/QuickBox/commands/rutorrent/plugins/"
 PACKAGEURL="/root/tmp/QuickBox/commands/system/packages/"
-QBVERSION="2.2.2"
 PORT=$(shuf -i 2000-61000 -n 1)
 PORTEND=$((${PORT} + 1500))
 while [[ "$(netstat -ln | grep ':'"$PORT"'' | grep -c 'LISTEN')" -eq "1" ]]; do PORT="$(shuf -i 2000-61000 -n 1)"; done
@@ -1053,20 +1004,17 @@ while [[ "$(netstat -ln | grep ':'"$DPORT"'' | grep -c 'LISTEN')" -eq "1" ]]; do
 S=$(date +%s)
 OK=$(echo -e "[ ${bold}${green}DONE${normal} ]")
 genpass=$(_string)
-delugegenpass=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 32)
 HTPASSWD="/etc/htpasswd"
 rutorrent="/srv/rutorrent/"
 REALM="rutorrent"
 IRSSI_PASS=$(_string)
 IRSSI_PORT=$(shuf -i 2000-61000 -n 1)
-#ip=$(curl -s http://ipecho.net/plain || curl -s http://ifconfig.me/ip ; echo)
 ip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 BTSYNCIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 export DEBIAN_FRONTEND=noninteractive
 cd
 
 # QuickBox STRUCTURE
-#_quickboxv
 _bashrc
 _intro
 _checkroot
@@ -1076,7 +1024,6 @@ _askcontinue
 _ssdpblock
 clear
 
-_repos
 _hostname
 _askrtorrent
 _adduser
@@ -1088,6 +1035,7 @@ echo ""
 echo "${bold}${magenta}QuickBox will now install, this may take between${normal}"
 echo "${bold}${magenta}10 and 30 minutes depending on your systems specs${normal}"
 echo ""
+echo -n "Pulling QuickBox Ecosystem ... ";_repos & spinner $!;echo
 echo -n "Updating system ... ";_updates & spinner $!;echo
 echo -n "Installing all needed dependencies ... ";_depends & spinner $!;echo
 _syscommands
