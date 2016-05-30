@@ -584,7 +584,6 @@ function _syscommands() {
   cp -r ${local_packages}quickbox/. /usr/local/bin/quickbox
   dos2unix $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
   chmod +x $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
-  done
 }
 
 # function to make dirs for first user (21)
