@@ -296,7 +296,7 @@ function _denyhosts() {
   cp ${local_setup}templates/trackers.template /etc/trackers
   cp ${local_setup}templates/denypublic.template /etc/cron.daily/denypublic
   chmod +x /etc/cron.daily/denypublic
-  cat ${local_setup}templates/hostTrackers.template >> /etc/hosts
+  cat ${local_setup}templates/hostsTrackers.template >> /etc/hosts
     ;;
 
     [nN] | [nN][Oo] ) echo "[ ${green}Allowing${normal} ]"
