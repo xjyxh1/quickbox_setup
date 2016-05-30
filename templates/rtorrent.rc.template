@@ -1,0 +1,25 @@
+# -- START HERE --
+min_peers = 1
+max_peers = 100
+min_peers_seed = -1
+max_peers_seed = -1
+max_uploads = 100
+download_rate = 0
+upload_rate = 0
+directory = /home/USERNAME/torrents/
+session = /home/USERNAME/.sessions/
+schedule = watch_directory,5,5,load_start=/home/USERNAME/rwatch/*.torrent
+schedule = filter_active,5,5,"view_filter = active,d.get_up_rate="
+view_add = alert
+view_sort_new = alert,less=d.get_message=
+schedule = filter_alert,30,30,"view_filter = alert,d.get_message=; view_sort = alert"
+port_range = PORT-PORTEND
+use_udp_trackers = yes
+encryption = allow_incoming,try_outgoing,enable_retry
+peer_exchange = no
+port_random = yes
+scgi_port = localhost:PORT
+execute_nothrow=chmod,777,/home/USERNAME/.config/rpc.socket
+execute_nothrow=chmod,777,/home/USERNAME/.sessions/
+check_hash = no
+# -- END HERE --

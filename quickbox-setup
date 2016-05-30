@@ -34,12 +34,14 @@ elif [ -f "/etc/debian_version" ]; then
     DISTRO=='Debian'
 fi
 #################################################################################
-local=/root/quickbox_setup/
+local_setup=/root/quickbox_setup/
+local_rutorrent=/root/quickbox_rutorrent/
+local_dashboard=/root/quickbox_dashboard/
 
 function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15 ; }
 
 function _bashrc() {
-  cp ${local}templates/bashrc.template ~/.bashrc
+  cp ${local_setup}templates/bashrc.template ~/.bashrc
 }
 
 # intro function (1)
@@ -171,7 +173,7 @@ function _updates() {
   fi
 
   # Create the service lock file directory
-  cp install /install
+  cp ${local_setup}install /install
 
 }
 
@@ -251,8 +253,8 @@ function _depends() {
 function _skel() {
   rm -rf /etc/skel
   mkdir /etc/skel
-  cp -r templates/skel/. /etc/skel
-  tar xzf sources/rarlinux-x64-5.3.0.tar.gz -C ./
+  cp -r ${local_setup}templates/skel/. /etc/skel
+  tar xzf ${local_setup}sources/rarlinux-x64-5.3.0.tar.gz -C ./
   cp ./rar/*rar /usr/bin
   cp ./rar/*rar /usr/sbin
   rm -rf rarlinux*.tar.gz
@@ -281,7 +283,7 @@ function _skel() {
     service quota start >>"${OUTTO}" 2>&1
   fi
   # Setup LShell configuration file
-  cp templates/lshell.conf.template /etc/lshell.conf
+  cp ${local_setup}templates/lshell.conf.template /etc/lshell.conf
 }
 
 # ban public trackers [iptables option] (8)
@@ -291,10 +293,10 @@ function _denyhosts() {
     [yY] | [yY][Ee][Ss] | "")
 
   echo "[ ${red}Blocking public trackers${normal} ]"
-  cp templates/trackers.template /etc/trackers
-  cp templates/denypublic.template /etc/cron.daily/denypublic
+  cp ${local_setup}templates/trackers.template /etc/trackers
+  cp ${local_setup}templates/denypublic.template /etc/cron.daily/denypublic
   chmod +x /etc/cron.daily/denypublic
-  cat templates/hostTrackers.template >> /etc/hosts
+  cat ${local_setup}templates/hostTrackers.template >> /etc/hosts
     ;;
 
     [nN] | [nN][Oo] ) echo "[ ${green}Allowing${normal} ]"
@@ -371,7 +373,7 @@ function _libtorrent() {
   MAXCPUS=$(echo "$(nproc) / 2"|bc)
   rm -rf xmlrpc-c  >>"${OUTTO}" 2>&1
   if [[ -e /root/tmp/libtorrent-${LTORRENT}.tar.gz ]]; then rm -rf libtorrent-${LTORRENT}.tar.gz;fi
-  cp $REPOURL/sources/libtorrent-${LTORRENT}.tar.gz .
+  cp ${local_setup}sources/libtorrent-${LTORRENT}.tar.gz .
   tar -xzvf libtorrent-${LTORRENT}.tar.gz >>"${OUTTO}" 2>&1
   cd libtorrent-${LTORRENT}
   ./autogen.sh >>"${OUTTO}" 2>&1
@@ -386,7 +388,7 @@ function _rtorrent() {
   MAXCPUS=$(echo "$(nproc) / 2"|bc)
   rm -rf libtorrent-${LTORRENT}* >>"${OUTTO}" 2>&1
   if [[ -e /root/tmp/libtorrent-${LTORRENT}.tar.gz ]]; then rm -rf libtorrent-${LTORRENT}.tar.gz;fi
-  cp $REPOURL/sources/rtorrent-${RTVERSION}.tar.gz .
+  cp ${local_setup}sources/rtorrent-${RTVERSION}.tar.gz .
   tar -xzvf rtorrent-${RTVERSION}.tar.gz >>"${OUTTO}" 2>&1
   cd rtorrent-${RTVERSION}
   ./autogen.sh >>"${OUTTO}" 2>&1
@@ -404,23 +406,10 @@ function _rtorrent() {
 
 # function to install rutorrent (13)
 function _rutorrent() {
-  mkdir -p /srv/
-  cd /srv
+  cd && git clone https://github.com/QuickBox/quickbox_rutorrent
+  mkdir /srv && cd /srv
   if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent;fi
-  cp -R ${REPOURL}/rutorrent .
-  sed -i '31i\<script type=\"text/javascript\" src=\"./js/jquery.browser.js\"></script> ' /srv/rutorrent/index.html
-
-cat >/srv/rutorrent/.htaccess<<'EOF'
-RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
-EOF
-
-cat >/srv/rutorrent/home/.htaccess<<'EOF'
-RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
-EOF
+  cp -R ${local_rutorrent}. .
 }
 
 # ask for bash or lshell function (14)
@@ -464,9 +453,8 @@ function _adduser() {
 
 # function to enable sudo for www-data function (16)
 function _apachesudo() {
-  cd /etc
-  rm sudoers
-  wget -q https://raw.githubusercontent.com/Swizards/QuickBox/master/sources/sudoers
+  rm /etc/sudoers
+  cp ${local_setup}templates/sudoers.template /etc/sudoers
   #if [[ $sudoers == "yes" ]]; then
     awk -v username=${username} '/^root/ && !x {print username    " ALL=(ALL:ALL) NOPASSWD: ALL"; x=1} 1' /etc/sudoers > /tmp/sudoers;mv /tmp/sudoers /etc
     echo -n "${username}" > /etc/apache2/master.txt
@@ -476,72 +464,12 @@ function _apachesudo() {
 
 # function to configure apache (17)
 function _apacheconf() {
-  if [[ "${rel}" = "16.04" ]]; then
   a2enmod actions >>"${OUTTO}" 2>&1
   a2enmod fastcgi >>"${OUTTO}" 2>&1
   #a2dismod mpm_prefork >>"${OUTTO}" 2>&1
   #a2enmod mpm_worker >>"${OUTTO}" 2>&1
-cat >"/etc/php/7.0/fpm/pool.d/${username}.conf"<<EOF
-[${username}]
-    user = ${username}
-    group = ${username}
-    listen = /run/php/php7.0-fpm.${username}.sock
-    listen.owner = ${username}
-    listen.group = ${username}
-
-    pm = dynamic
-    pm.max_children = 5
-    pm.start_servers = 2
-    pm.min_spare_servers = 1
-    pm.max_spare_servers = 3
-EOF
-  fi
-cat >/etc/apache2/sites-enabled/aliases-seedbox.conf<<EOF
-Alias /rutorrent "/srv/rutorrent"
-<Directory "/srv/rutorrent">
-  Options Indexes FollowSymLinks MultiViews
-  AuthType Digest
-  AuthName "rutorrent"
-  AuthUserFile '/etc/htpasswd'
-  Require valid-user
-  AllowOverride None
-  Order allow,deny
-  allow from all
-</Directory>
-Alias /${username}.downloads "/home/${username}/torrents/"
-<Directory "/home/${username}/torrents/">
-  Options Indexes FollowSymLinks MultiViews
-  AuthType Digest
-  AuthName "rutorrent"
-  AuthUserFile '/etc/htpasswd'
-  Require valid-user
-  AllowOverride None
-  Order allow,deny
-  allow from all
-</Directory>
-Alias /${username}.deluge.downloads "/home/${username}/downloads/deluge.files/"
-<Directory "/home/${username}/downloads/deluge.files/">
-  Options Indexes FollowSymLinks MultiViews
-  AllowOverride None
-  AuthType Digest
-  AuthName "rutorrent"
-  AuthUserFile '/etc/htpasswd'
-  Require valid-user
-  Order allow,deny
-  Allow from all
-</Directory>
-Alias /${username}.console "/home/${username}/.console/"
-<Directory "/home/${username}/.console/">
-  Options Indexes FollowSymLinks MultiViews
-  AuthType Digest
-  AuthName "rutorrent"
-  AuthUserFile '/etc/htpasswd'
-  Require valid-user
-  AllowOverride None
-  Order allow,deny
-  allow from all
-</Directory>
-EOF
+  cp ${local_setup}templates/aliases-seedbox.conf.template /etc/apache2/sites-enabled/aliases-seedbox.conf
+  sed -i "s/USERNAME/$username/g" > /etc/apache2/sites-enabled/aliases-seedbox.conf
   a2enmod auth_digest >>"${OUTTO}" 2>&1
   a2enmod ssl >>"${OUTTO}" 2>&1
   a2enmod scgi >>"${OUTTO}" 2>&1
