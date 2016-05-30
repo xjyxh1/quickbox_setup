@@ -34,11 +34,12 @@ elif [ -f "/etc/debian_version" ]; then
     DISTRO=='Debian'
 fi
 #################################################################################
+local=/root/quickbox_setup/
 
 function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15 ; }
 
 function _bashrc() {
-  cp templates/bashrc.template ~/.bashrc
+  cp ${local}templates/bashrc.template ~/.bashrc
 }
 
 # intro function (1)
