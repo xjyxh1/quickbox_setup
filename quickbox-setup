@@ -170,7 +170,7 @@ function _updates() {
   fi
 
   # Create the service lock file directory
-  cp ${local_setup}install /install
+  mkdir /install
 
 }
 
