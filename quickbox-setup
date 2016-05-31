@@ -613,8 +613,8 @@ function _ruconf() {
 
 # function to install pure-ftpd (31)
 function _installftpd() {
-  apt purge -q -y vsftpd pure-ftpd >>"${OUTTO}" 2>&1
-  apt install -q -y vsftpd >>"${OUTTO}" 2>&1
+  apt-get purge -q -y vsftpd pure-ftpd >>"${OUTTO}" 2>&1
+  apt-get install -q -y vsftpd >>"${OUTTO}" 2>&1
 }
 
 # function to configure pure-ftpd (32)
@@ -658,10 +658,10 @@ function _quickconsole() {
 
 # seedbox boot for first user (35)
 function _boot() {
-        command1="*/1 * * * * /home/${username}/.startup"
-        cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
-        command2="*/1 * * * * /usr/local/bin/quickbox/system/interface"
-        echo "*/1 * * * * /usr/local/bin/quickbox/system/set_interface" > /etc/cron.d/set_interface
+  command1="*/1 * * * * /home/${username}/.startup"
+  cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
+
+  echo "*/1 * * * * /usr/local/bin/quickbox/system/set_interface" > /etc/cron.d/set_interface
 }
 
 # function to set permissions on first user (36)
@@ -678,7 +678,7 @@ function _perms() {
 
 
 ################################################################################
-#   BEGIN UNUSED FUNCTIONS
+#   //BEGIN UNUSED FUNCTIONS//
 ################################################################################
 # ask for bash or lshell function ()
 # Heads Up: lshell is disabled for the initial user on install as your first user
@@ -704,7 +704,7 @@ function _pureftpcert() {
   /bin/true
 }
 ################################################################################
-#   END UNUSED FUNCTIONS
+#   //END UNUSED FUNCTIONS//
 ################################################################################
 
 # function to show finished data (37)
@@ -747,13 +747,6 @@ cat >/root/information.info<<EOF
 EOF
 
   rm -rf "$0" >>"${OUTTO}" 2>&1
-  service quota stop >>"${OUTTO}" 2>&1
-  quotaoff -a >>"${OUTTO}" 2>&1
-  quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
-  quotaon -a >>"${OUTTO}" 2>&1
-  service quota start >>"${OUTTO}" 2>&1
-  service apache2 restart >>"${OUTTO}" 2>&1
-  service php7.0-fpm restart >>"${OUTTO}" 2>&1
     for i in ssh apache2 php7.0-fpm vsftpd fail2ban quota memcached cron; do
       service $i restart >>"${OUTTO}" 2>&1
       systemctl enable $i >>"${OUTTO}" 2>&1
@@ -836,7 +829,7 @@ echo ""
 echo -n "Pulling QuickBox Ecosystem ... ";_repos & spinner $!;echo
 echo -n "Updating system ... ";_updates & spinner $!;echo
 echo -n "Installing all needed dependencies ... ";_depends & spinner $!;echo
-_syscommands
+echo -n "Setting up system executables ... ";_syscommands & spinner $!;echo
 echo -n "Building required user directories ... ";_skel & spinner $!;echo
 if [[ ${ffmpeg} == "yes" ]]; then
     echo -n "Building ffmpeg from source for screenshots ... ";_ffmpeg & spinner $!;echo
