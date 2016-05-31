@@ -642,7 +642,7 @@ function _quickstats() {
   echo "?>" >> /srv/rutorrent/home/widgets/config.php
   if [[ ${primaryroot} == "home" ]]; then
     cd /srv/rutorrent/home/widgets && rm disk_data.php
-    mv ${local_dashboard}home/widgetsdisk_datah.php disk_data.php
+    mv ${local_dashboard}home/widgets/disk_datah.php disk_data.php
     chown -R www-data:www-data /srv/rutorrent/home/widgets
   else
     rm /srv/rutorrent/home/widgets/disk_datah.php
