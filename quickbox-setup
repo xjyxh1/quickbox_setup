@@ -143,15 +143,15 @@ function _ssdpblock() {
 # package and repo addition (5) _update and upgrade_
 function _updates() {
   apt-get -y install lsb-release >>"${OUTTO}" 2>&1
-  VERSION=$(lsb_release -sc)
+  RELEASE=$(lsb_release -sc)
   if [[ $DISTRO == Debian ]]; then
     cp ${local_setup}templates/apt.sources/debian.template /etc/apt/sources.list
-    sed -i "s/VERSION/$VERSION/g" /etc/apt/sources.list
+    sed -i "s/RELEASE/${RELEASE}/g" /etc/apt/sources.list
     apt-get --yes --force-yes install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   else
     cp ${local_setup}templates/apt.sources/ubuntu.template /etc/apt/sources.list
-    sed -i "s/VERSION/$VERSION/g" /etc/apt/sources.list
-    apt-get -y -f install deb-multimedia-keyring >>"${OUTTO}" 2>&1
+    sed -i "s/RELEASE/${RELEASE}/g" /etc/apt/sources.list
+    apt-get -y -f --allow-unauthenticated install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   fi
 
   if [[ $DISTRO == Debian ]]; then
@@ -237,7 +237,7 @@ function _depends() {
                                        lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
   else
   apt-get -y update >>"${OUTTO}" 2>&1
-  apt-get -y --allow-unauthenticated install build-essential fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop git \
+  apt-get -y -f --allow-unauthenticated install build-essential fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop git \
                      dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
                      pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip \
