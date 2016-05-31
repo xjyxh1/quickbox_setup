@@ -415,8 +415,9 @@ function _rtorrent() {
 
 # function to install rutorrent (13)
 function _rutorrent() {
-  cd && mkdir /srv && cd /srv
+  cd /srv
   if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent;fi
+  mkdir rutorrent
   cp -R ${local_rutorrent}/. rutorrent
 }
 
@@ -671,7 +672,8 @@ function _pureftpcert() {
 function _quickstats() {
   # Dynamically adjust to use the servers active network adapter
   mkdir /srv/rutorrent/home/db/
-  echo -e "${IFACE}" /srv/rutorrent/home/db/interface.db
+  echo -e "${IFACE}" > /srv/rutorrent/home/db/interface.db
+  echo -e "${username}" > /srv/rutorrent/home/db/master.db
   sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/stat.php
   sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/data.php
   sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/config.php
