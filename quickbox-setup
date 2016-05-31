@@ -631,13 +631,8 @@ function _ftpdconfig() {
 # the proper functionality of the QuickBox Dashboard.
 function _quickstats() {
   # Dynamically adjust to use the servers active network adapter
-  #mkdir /srv/rutorrent/home/db/
   echo -e "${IFACE}" > /srv/rutorrent/home/db/interface.txt
   echo -e "${username}" > /srv/rutorrent/home/db/master.txt
-  #sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/stat.php
-  #sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/data.php
-  #sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/config.php
-  #sed -i -e "s/eth0/${IFACE}/g" /srv/rutorrent/home/inc/config.php
   # Use server timezone
   cd /usr/share/zoneinfo
   find * -type f -exec sh -c "diff -q /etc/localtime '{}' > /dev/null && echo {}" \; > ~/tz.txt
@@ -665,6 +660,8 @@ function _quickconsole() {
 function _boot() {
         command1="*/1 * * * * /home/${username}/.startup"
         cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
+        command2="*/1 * * * * /usr/local/bin/quickbox/system/interface"
+        cat "*/1 * * * * /usr/local/bin/quickbox/system/set_interface" > /etc/cron.d/set_interface
 }
 
 # function to set permissions on first user (36)
