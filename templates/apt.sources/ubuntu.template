@@ -4,20 +4,20 @@
 
 
 ###### Ubuntu Main Repos
-deb http://nl.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) main restricted universe multiverse
-deb-src http://nl.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) main restricted universe multiverse
+deb http://nl.archive.ubuntu.com/ubuntu/ VERSION main restricted universe multiverse
+deb-src http://nl.archive.ubuntu.com/ubuntu/ VERSION main restricted universe multiverse
 
 ###### Ubuntu Update Repos
-deb http://nl.archive.ubuntu.com/ubuntu/ $(lsb_release -sc)-security main restricted universe multiverse
-deb http://nl.archive.ubuntu.com/ubuntu/ $(lsb_release -sc)-updates main restricted universe multiverse
-deb http://nl.archive.ubuntu.com/ubuntu/ $(lsb_release -sc)-backports main restricted universe multiverse
-deb-src http://nl.archive.ubuntu.com/ubuntu/ $(lsb_release -sc)-security main restricted universe multiverse
-deb-src http://nl.archive.ubuntu.com/ubuntu/ $(lsb_release -sc)-updates main restricted universe multiverse
-deb-src http://nl.archive.ubuntu.com/ubuntu/ $(lsb_release -sc)-backports main restricted universe multiverse
+deb http://nl.archive.ubuntu.com/ubuntu/ VERSION-security main restricted universe multiverse
+deb http://nl.archive.ubuntu.com/ubuntu/ VERSION-updates main restricted universe multiverse
+deb http://nl.archive.ubuntu.com/ubuntu/ VERSION-backports main restricted universe multiverse
+deb-src http://nl.archive.ubuntu.com/ubuntu/ VERSION-security main restricted universe multiverse
+deb-src http://nl.archive.ubuntu.com/ubuntu/ VERSION-updates main restricted universe multiverse
+deb-src http://nl.archive.ubuntu.com/ubuntu/ VERSION-backports main restricted universe multiverse
 
 ###### Ubuntu Partner Repo
-deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
-deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
+deb http://archive.canonical.com/ubuntu VERSION partner
+deb-src http://archive.canonical.com/ubuntu VERSION partner
 
 ###### Ubuntu Multimedia
 deb http://www.deb-multimedia.org jessie main non-free
