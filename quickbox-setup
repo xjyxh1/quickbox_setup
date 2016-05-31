@@ -511,9 +511,9 @@ function _rconf() {
 function _plugins() {
   cd "${local_rutorrent}plugins/"
   if [[ ${primaryroot} == "root" ]]; then
-    rm -r diskspaceh
+    rm -r ${rutorrent}plugins/diskspaceh
   else
-    rm -r diskspace
+    rm -r ${rutorrent}plugins/diskspace
   fi
 
   cp /srv/rutorrent/home/fileshare/.htaccess /srv/rutorrent/plugins/fileshare/
