@@ -140,7 +140,112 @@ function _ssdpblock() {
   iptables -I INPUT 1 -p udp -m udp --dport 1900 -j DROP
 }
 
-# package and repo addition (5) _update and upgrade_
+# setting locale function (6)
+function _locale() {
+echo 'LANGUAGE="en_US.UTF-8"' >> /etc/default/locale
+echo 'LC_ALL="en_US.UTF-8"' >> /etc/default/locale
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+  if [[ -e /usr/sbin/locale-gen ]]; then locale-gen >>"${OUTTO}" 2>&1
+  else
+    apt-get -y update >>"${OUTTO}" 2>&1
+    apt-get install locales -y >>"${OUTTO}" 2>&1
+    locale-gen >>"${OUTTO}" 2>&1
+    export LANG="en_US.UTF-8"
+    export LC_ALL="en_US.UTF-8"
+    export LANGUAGE="en_US.UTF-8"
+  fi
+}
+
+# setting system hostname function (7)
+function _hostname() {
+echo -ne "Please enter a hostname for this server (${bold}Hit ${standout}${green}ENTER${normal} to make no changes${normal}): " ; read input
+if [[ -z $input ]]; then
+        echo "No hostname supplied, no changes made!!"
+else
+        hostname ${input}
+        echo "${input}">/etc/hostname
+        echo "hostname ${input}">> /etc/rc.local
+        echo "Hostname set to ${input}"
+fi
+echo
+}
+
+# ask what rtorrent version (8)
+function _askrtorrent() {
+  echo -e "1) rtorrent ${green}0.9.6${normal}"
+  echo -e "2) rtorrent ${green}0.9.4${normal}"
+  echo -e "3) rtorrent ${green}0.9.3${normal}"
+  echo -ne "${bold}${yellow}What version of rtorrent do you want?${normal} (Default ${green}1${normal}): "; read version
+  case $version in
+    1 | "") RTVERSION=0.9.6;LTORRENT=0.13.6  ;;
+    2) RTVERSION=0.9.4;LTORRENT=0.13.4  ;;
+    3) RTVERSION=0.9.3;LTORRENT=0.13.3 ;;
+    *) RTVERSION=0.9.6;LTORRENT=0.13.6 ;;
+  esac
+  echo "We will be using rtorrent-${green}$RTVERSION${normal}/libtorrent-${green}$LTORRENT${normal}"
+  echo
+}
+
+# adduser function (9)
+function _adduser() {
+  theshell="/bin/bash";
+  echo "${bold}${yellow}Add a Master Account user to sudoers${normal}";
+  echo -n "Username: "; read user
+  username=$(echo "$user"|sed 's/.*/\L&/')
+  useradd "${username}" -m -G www-data -s "${theshell}"
+  echo -n "Password: (hit enter to generate a password) "; read password
+  if [[ ! -z "${password}" ]]; then
+    echo "setting password to ${password}"
+    passwd=${password}
+    echo "${username}:${passwd}" | chpasswd >>"${OUTTO}" 2>&1
+    (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
+  else
+    echo "setting password to ${genpass}"
+    passwd=${genpass}
+    echo "${username}:${passwd}" | chpasswd >>"${OUTTO}" 2>&1
+    (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
+  fi
+  echo
+}
+
+# install ffmpeg question (10)
+function _askffmpeg() {
+  echo -ne "${bold}${yellow}Would you like to install ffmpeg? (Used for screenshots)${normal} [${green}y${normal}]es or [n]o: "; read responce
+  case $responce in
+    [yY] | [yY][Ee][Ss] | "" ) ffmpeg=yes ;;
+    [nN] | [nN][Oo] ) ffmpeg=no ;;
+    *) ffmpeg=yes ;;
+  esac
+  echo
+}
+
+# ban public trackers [iptables option] (11)
+function _denyhosts() {
+  echo -ne "${bold}${yellow}Block Public Trackers?${normal}: [${green}y${normal}]es or [n]o: "; read responce
+  case $responce in
+    [yY] | [yY][Ee][Ss] | "")
+
+  echo "[ ${red}Blocking public trackers${normal} ]"
+  cp ${local_setup}templates/trackers.template /etc/trackers
+  cp ${local_setup}templates/denypublic.template /etc/cron.daily/denypublic
+  chmod +x /etc/cron.daily/denypublic
+  cat ${local_setup}templates/hostsTrackers.template >> /etc/hosts
+    ;;
+
+    [nN] | [nN][Oo] ) echo "[ ${green}Allowing${normal} ]"
+    ;;
+  esac
+}
+
+# package and repo addition (silently add php7) _add respo sources_ (12)
+function _repos() {
+  LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1;
+  git clone https://github.com/QuickBox/quickbox_rutorrent >> /dev/null 2>&1
+  git clone https://github.com/QuickBox/quickbox_packages >> /dev/null 2>&1
+  git clone https://github.com/QuickBox/quickbox_dashboard >> /dev/null 2>&1
+}
+
+# package and repo addition (13) _update and upgrade_
 function _updates() {
   apt-get -y install lsb-release >>"${OUTTO}" 2>&1
   RELEASE=$(lsb_release -sc)
@@ -177,45 +282,7 @@ function _updates() {
 
 }
 
-# setting locale function (6)
-function _locale() {
-echo 'LANGUAGE="en_US.UTF-8"' >> /etc/default/locale
-echo 'LC_ALL="en_US.UTF-8"' >> /etc/default/locale
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-  if [[ -e /usr/sbin/locale-gen ]]; then locale-gen >>"${OUTTO}" 2>&1
-  else
-    apt-get -y update >>"${OUTTO}" 2>&1
-    apt-get install locales -y >>"${OUTTO}" 2>&1
-    locale-gen >>"${OUTTO}" 2>&1
-    export LANG="en_US.UTF-8"
-    export LC_ALL="en_US.UTF-8"
-    export LANGUAGE="en_US.UTF-8"
-  fi
-}
-
-# package and repo addition (silently add php7) _add respo sources_
-function _repos() {
-  LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1;
-  git clone https://github.com/QuickBox/quickbox_rutorrent >> /dev/null 2>&1
-  git clone https://github.com/QuickBox/quickbox_packages >> /dev/null 2>&1
-  git clone https://github.com/QuickBox/quickbox_dashboard >> /dev/null 2>&1
-}
-
-# setting system hostname function (7)
-function _hostname() {
-echo -ne "Please enter a hostname for this server (${bold}Hit ${standout}${green}ENTER${normal} to make no changes${normal}): " ; read input
-if [[ -z $input ]]; then
-        echo "No hostname supplied, no changes made!!"
-else
-        hostname ${input}
-        echo "${input}">/etc/hostname
-        echo "hostname ${input}">> /etc/rc.local
-        echo "Hostname set to ${input}"
-fi
-echo
-}
-
-# package and repo addition (9) _install softwares and packages_
+# package and repo addition (14) _install softwares and packages_
 function _depends() {
   if [[ $DISTRO == Debian ]]; then
   apt-get -y update >>"${OUTTO}" 2>&1
@@ -254,6 +321,13 @@ function _depends() {
   fi
 }
 
+function _syscommands() {
+  mkdir -p /usr/local/bin/quickbox
+  cp -r ${local_packages}quickbox/. /usr/local/bin/quickbox
+  dos2unix $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
+  chmod +x $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
+}
+
 function _skel() {
   if [[ -d /etc/skel ]]; then rm -r /etc/skel;fi
   mkdir /etc/skel
@@ -290,36 +364,7 @@ function _skel() {
   cp ${local_setup}templates/lshell.conf.template /etc/lshell.conf
 }
 
-# ban public trackers [iptables option] (8)
-function _denyhosts() {
-  echo -ne "${bold}${yellow}Block Public Trackers?${normal}: [${green}y${normal}]es or [n]o: "; read responce
-  case $responce in
-    [yY] | [yY][Ee][Ss] | "")
-
-  echo "[ ${red}Blocking public trackers${normal} ]"
-  cp ${local_setup}templates/trackers.template /etc/trackers
-  cp ${local_setup}templates/denypublic.template /etc/cron.daily/denypublic
-  chmod +x /etc/cron.daily/denypublic
-  cat ${local_setup}templates/hostsTrackers.template >> /etc/hosts
-    ;;
-
-    [nN] | [nN][Oo] ) echo "[ ${green}Allowing${normal} ]"
-    ;;
-  esac
-}
-
-# install ffmpeg question (9)
-function _askffmpeg() {
-  echo -ne "${bold}${yellow}Would you like to install ffmpeg? (Used for screenshots)${normal} [${green}y${normal}]es or [n]o: "; read responce
-  case $responce in
-    [yY] | [yY][Ee][Ss] | "" ) ffmpeg=yes ;;
-    [nN] | [nN][Oo] ) ffmpeg=no ;;
-    *) ffmpeg=yes ;;
-  esac
-  echo
-}
-
-# build function for ffmpeg (9.1)
+# build function for ffmpeg (17)
 function _ffmpeg() {
   if [[ ${ffmpeg} == "yes" ]]; then
     MAXCPUS=$(echo "$(nproc) / 2"|bc)
@@ -344,23 +389,18 @@ function _ffmpeg() {
   fi
 }
 
-# ask what rtorrent version (10)
-function _askrtorrent() {
-  echo -e "1) rtorrent ${green}0.9.6${normal}"
-  echo -e "2) rtorrent ${green}0.9.4${normal}"
-  echo -e "3) rtorrent ${green}0.9.3${normal}"
-  echo -ne "${bold}${yellow}What version of rtorrent do you want?${normal} (Default ${green}1${normal}): "; read version
-  case $version in
-    1 | "") RTVERSION=0.9.6;LTORRENT=0.13.6  ;;
-    2) RTVERSION=0.9.4;LTORRENT=0.13.4  ;;
-    3) RTVERSION=0.9.3;LTORRENT=0.13.3 ;;
-    *) RTVERSION=0.9.6;LTORRENT=0.13.6 ;;
-  esac
-  echo "We will be using rtorrent-${green}$RTVERSION${normal}/libtorrent-${green}$LTORRENT${normal}"
-  echo
+# function to enable sudo for www-data function (18)
+function _apachesudo() {
+  rm /etc/sudoers
+  cp ${local_setup}templates/sudoers.template /etc/sudoers
+  #if [[ $sudoers == "yes" ]]; then
+    awk -v username=${username} '/^root/ && !x {print username    " ALL=(ALL:ALL) NOPASSWD: ALL"; x=1} 1' /etc/sudoers > /tmp/sudoers;mv /tmp/sudoers /etc
+    echo -n "${username}" > /etc/apache2/master.txt
+  #fi
+  cd
 }
 
-# xmlrpc-c function (11)
+# xmlrpc-c function (19)
 function _xmlrpc() {
   if [[ -d /root/tmp ]]; then rm -r tmp;fi
   mkdir /root/tmp && cd /root/tmp
@@ -374,7 +414,7 @@ function _xmlrpc() {
   make install >>"${OUTTO}" 2>&1
 }
 
-# libtorent function (12)
+# libtorent function (20)
 function _libtorrent() {
   if [[ -d /root/tmp ]]; then rm -r tmp;fi
   mkdir /root/tmp && cd /root/tmp
@@ -390,7 +430,7 @@ function _libtorrent() {
   make install >>"${OUTTO}" 2>&1
 }
 
-# rtorrent function (10.1)
+# rtorrent function (21)
 function _rtorrent() {
   if [[ -d /root/tmp ]]; then rm -r tmp;fi
   mkdir /root/tmp && cd /root/tmp
@@ -410,10 +450,10 @@ function _rtorrent() {
   touch /install/.rtorrent.lock
 }
 
-# scgi enable function (13-nixed)
+# scgi enable function (22-nixed)
 # function _scgi() { ln -s /etc/apache2/mods-available/scgi.load /etc/apache2/mods-enabled/scgi.load >>"${OUTTO}" 2>&1 ; }
 
-# function to install rutorrent (13)
+# function to install rutorrent (22)
 function _rutorrent() {
   cd /srv
   if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent;fi
@@ -421,64 +461,13 @@ function _rutorrent() {
   cp -R ${local_rutorrent}/. rutorrent
 }
 
-# function to install dashboard (14)
+# function to install dashboard (23)
 function _dashboard() {
   cd && mkdir -p /srv/rutorrent/home
   cp -R ${local_dashboard}home/. /srv/rutorrent/home
 }
 
-# ask for bash or lshell function (14)
-# Heads Up: lshell is disabled for the initial user on install as your first user should not be limited in shell.
-# Additional created users are automagically added to a limited shell environment.
-function _askshell() {
-  #echo -ne "${yellow}Set user shell to lshell?${normal} (Default: ${red}N${normal}): "; read responce
-  #case $responce in
-  #  [yY] | [yY][Ee][Ss] ) theshell="/usr/bin/lshell" ;;
-  #  [nN] | [nN][Oo] | "" ) theshell="/bin/bash" ;;
-  #  *) theshell="yes" ;;
-  #esac
-  echo -ne "${bold}${yellow}Add user to /etc/sudoers${normal} [${green}y${normal}]es or [n]o: "; read answer
-  case $answer in
-    [yY] | [yY][Ee][Ss] | "" ) sudoers="yes" ;;
-    [nN] | [nN][Oo] ) sudoers="no" ;;
-    *) sudoers="yes" ;;
-  esac
-}
-
-# adduser function (15)
-function _adduser() {
-  theshell="/bin/bash";
-  echo "${bold}${yellow}Add a Master Account user to sudoers${normal}";
-  echo -n "Username: "; read user
-  username=$(echo "$user"|sed 's/.*/\L&/')
-  useradd "${username}" -m -G www-data -s "${theshell}"
-  echo -n "Password: (hit enter to generate a password) "; read password
-  if [[ ! -z "${password}" ]]; then
-    echo "setting password to ${password}"
-    passwd=${password}
-    echo "${username}:${passwd}" | chpasswd >>"${OUTTO}" 2>&1
-    (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
-  else
-    echo "setting password to ${genpass}"
-    passwd=${genpass}
-    echo "${username}:${passwd}" | chpasswd >>"${OUTTO}" 2>&1
-    (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
-  fi
-  echo
-}
-
-# function to enable sudo for www-data function (16)
-function _apachesudo() {
-  rm /etc/sudoers
-  cp ${local_setup}templates/sudoers.template /etc/sudoers
-  #if [[ $sudoers == "yes" ]]; then
-    awk -v username=${username} '/^root/ && !x {print username    " ALL=(ALL:ALL) NOPASSWD: ALL"; x=1} 1' /etc/sudoers > /tmp/sudoers;mv /tmp/sudoers /etc
-    echo -n "${username}" > /etc/apache2/master.txt
-  #fi
-  cd
-}
-
-# function to configure apache (17)
+# function to configure apache (24)
 function _apacheconf() {
   a2enmod actions >>"${OUTTO}" 2>&1
   a2enmod fastcgi >>"${OUTTO}" 2>&1
@@ -492,10 +481,10 @@ function _apacheconf() {
   a2enmod rewrite >>"${OUTTO}" 2>&1
   mv /etc/apache2/sites-enabled/000-default.conf /etc/apache2/ >>"${OUTTO}" 2>&1
   cp ${local_setup}templates/default-ssl.conf.template /etc/apache2/sites-enabled/default-ssl.conf
-  sed -i -e "s/USERNAME/${username}/g" \
-         -e "s/REALM/${REALM}/g" \
-         -e "s/HTPASSWD/${HTPASSWD}/g" \
-         -e "s/PORT/${PORT}/g" /etc/apache2/sites-enabled/default-ssl.conf
+  sed -i "s/USERNAME/${username}/g" /etc/apache2/sites-enabled/default-ssl.conf
+  sed -i "s/\"REALM\"/\"${REALM}\"/g" /etc/apache2/sites-enabled/default-ssl.conf
+  sed -i "s/HTPASSWD/\/etc\/htpasswd/g" /etc/apache2/sites-enabled/default-ssl.conf
+  sed -i "s/PORT/${PORT}/g" /etc/apache2/sites-enabled/default-ssl.conf
   cp ${local_setup}templates/fileshare.conf.template /etc/apache2/sites-enabled/fileshare.conf
   sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
            -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
@@ -512,13 +501,13 @@ phpenmod -v 7.0 opcache >>"${OUTTO}" 2>&1
   sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.0/apache2/php.ini
 }
 
-# function to configure first user config (18)
+# function to configure first user config (25)
 function _rconf() {
   cp ${local_setup}templates/rtorrent.rc.template /home/${username}/.rtorrent.rc
   sed -i "s/USERNAME/${username}/g" /home/${username}/.rtorrent.rc
 }
 
-# function to install rutorrent plugins (19)
+# function to install rutorrent plugins (26)
 function _plugins() {
   cd "${local_rutorrent}plugins/"
   if [[ ${primaryroot} == "root" ]]; then
@@ -567,7 +556,7 @@ function _plugins() {
   find /srv/rutorrent/plugins/filemanager/scripts -type f -exec chmod 755 {} \;
 }
 
-# function autodl to install autodl irssi scripts (20)
+# function autodl to install autodl irssi scripts (27)
 function _autodl() {
   mkdir -p "/home/${username}/.irssi/scripts/autorun/" >>"${OUTTO}" 2>&1
   cd "/home/${username}/.irssi/scripts/"
@@ -589,14 +578,7 @@ ADC
   chown -R "${username}.${username}" "/home/${username}"
 }
 
-function _syscommands() {
-  mkdir -p /usr/local/bin/quickbox
-  cp -r ${local_packages}quickbox/. /usr/local/bin/quickbox
-  dos2unix $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
-  chmod +x $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
-}
-
-# function to make dirs for first user (21)
+# function to make dirs for first user (28)
 function _makedirs() {
   #mkdir /home/"${username}"/{torrents,.sessions,watch} >>"${OUTTO}" 2>&1
   cp -r /etc/skel/. /home/"${username}"
@@ -605,23 +587,12 @@ function _makedirs() {
   usermod -a -G "${username}" www-data >>"${OUTTO}" 2>&1
 }
 
-# function to make crontab .statup file (22)
+# function to make crontab .statup file (29)
 function _cronfile() {
   cp ${local_setup}templates/startup.template /home/${username}/.startup
 }
 
-# function to set permissions on first user (23)
-function _perms() {
-  chown -R ${username}.${username} /home/${username}/ >>"${OUTTO}" 2>&1
-  chown ${username}.${username} /home/${username}/.startup
-  sudo -u ${username} chmod 755 /home/${username}/ >>"${OUTTO}" 2>&1
-  chmod +x /etc/cron.daily/denypublic >/dev/null 2>&1
-  chmod 777 /home/${username}/.sessions >/dev/null 2>&1
-  chown ${username}.${username} /home/${username}/.startup >/dev/null 2>&1
-  chmod +x /home/${username}/.startup >/dev/null 2>&1
-}
-
-# function to configure first user config.php (24)
+# function to configure first user config.php (30)
 function _ruconf() {
   mkdir -p ${rutorrent}conf/users/${username}/
 
@@ -640,19 +611,13 @@ function _ruconf() {
          -e "s/IRRSI-PASS/\"${IRSSI_PASS}\"/g" /srv/rutorrent/conf/users/${username}/config.php
 }
 
-# seedbox boot for first user (26)
-function _boot() {
-        command1="*/1 * * * * /home/${username}/.startup"
-        cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
-}
-
-# function to install pure-ftpd (27)
+# function to install pure-ftpd (31)
 function _installftpd() {
   apt purge -q -y vsftpd pure-ftpd >>"${OUTTO}" 2>&1
   apt install -q -y vsftpd >>"${OUTTO}" 2>&1
 }
 
-# function to configure pure-ftpd (28)
+# function to configure pure-ftpd (32)
 function _ftpdconfig() {
   cp ${local_setup}templates/openssl.cnf.template /root/.openssl.cnf
 
@@ -660,11 +625,6 @@ function _ftpdconfig() {
 
   cp ${local_setup}templates/vsftpd.conf.template /etc/vsftpd.conf
   echo "" > /etc/vsftpd.chroot_list
-}
-
-# function to create ssl cert for pure-ftpd (31)
-function _pureftpcert() {
-  /bin/true
 }
 
 # The following function makes necessary changes to Network and TZ settings needed for
@@ -701,7 +661,55 @@ function _quickconsole() {
          -e "s/console-password/${password}/g" /home/${username}/.console/index.php
 }
 
-# function to show finished data (32)
+# seedbox boot for first user (35)
+function _boot() {
+        command1="*/1 * * * * /home/${username}/.startup"
+        cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
+}
+
+# function to set permissions on first user (36)
+function _perms() {
+  chown -R ${username}.${username} /home/${username}/ >>"${OUTTO}" 2>&1
+  chown ${username}.${username} /home/${username}/.startup
+  sudo -u ${username} chmod 755 /home/${username}/ >>"${OUTTO}" 2>&1
+  chmod +x /etc/cron.daily/denypublic >/dev/null 2>&1
+  chmod 777 /home/${username}/.sessions >/dev/null 2>&1
+  chown ${username}.${username} /home/${username}/.startup >/dev/null 2>&1
+  chmod +x /home/${username}/.startup >/dev/null 2>&1
+}
+
+
+################################################################################
+#   BEGIN UNUSED FUNCTIONS
+################################################################################
+# ask for bash or lshell function ()
+# Heads Up: lshell is disabled for the initial user on install as your first user
+# should not be limited in shell. Additional created users are automagically
+# added to a limited shell environment.
+function _askshell() {
+  #echo -ne "${yellow}Set user shell to lshell?${normal} (Default: ${red}N${normal}): "; read responce
+  #case $responce in
+  #  [yY] | [yY][Ee][Ss] ) theshell="/usr/bin/lshell" ;;
+  #  [nN] | [nN][Oo] | "" ) theshell="/bin/bash" ;;
+  #  *) theshell="yes" ;;
+  #esac
+  echo -ne "${bold}${yellow}Add user to /etc/sudoers${normal} [${green}y${normal}]es or [n]o: "; read answer
+  case $answer in
+    [yY] | [yY][Ee][Ss] | "" ) sudoers="yes" ;;
+    [nN] | [nN][Oo] ) sudoers="no" ;;
+    *) sudoers="yes" ;;
+  esac
+}
+
+# function to create ssl cert for pure-ftpd ()
+function _pureftpcert() {
+  /bin/true
+}
+################################################################################
+#   END UNUSED FUNCTIONS
+################################################################################
+
+# function to show finished data (37)
 function _finished() {
   ip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
   echo
