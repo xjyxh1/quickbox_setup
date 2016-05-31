@@ -464,7 +464,7 @@ function _rutorrent() {
 # function to install dashboard (23)
 function _dashboard() {
   cd && mkdir -p /srv/rutorrent/home
-  cp -R ${local_dashboard}home/. /srv/rutorrent/home
+  cp -R ${local_dashboard}/. /srv/rutorrent
 }
 
 # function to configure apache (24)
@@ -570,8 +570,8 @@ function _autodl() {
 
 cat >"/home/${username}/.autodl/autodl2.cfg"<<ADC
 [options]
-gui-server-port = ${IRSSI_PORT}
-gui-server-password = ${IRSSI_PASS}
+gui-server-port = ${IPORT}
+gui-server-password = ${IPASS}
 ADC
 
   chown -R "${username}.${username}" "/home/${username}/.irssi/"
@@ -607,8 +607,8 @@ function _ruconf() {
   sed -i -e "/quotaUser/c\$quotaUser = \"${username}\";" \
          -e "s/USERNAME/${username}/g" \
          -e "s/PORT/${PORT}/g" \
-         -e "s/IRRSI-PORT/${IRSSI_PORT}/g" \
-         -e "s/IRRSI-PASS/\"${IRSSI_PASS}\"/g" /srv/rutorrent/conf/users/${username}/config.php
+         -e "s/IPORT/${IPORT}/g" \
+         -e "s/IPASS/\"${IPASS}\"/g" /srv/rutorrent/conf/users/${username}/config.php
 }
 
 # function to install pure-ftpd (31)
@@ -631,13 +631,13 @@ function _ftpdconfig() {
 # the proper functionality of the QuickBox Dashboard.
 function _quickstats() {
   # Dynamically adjust to use the servers active network adapter
-  mkdir /srv/rutorrent/home/db/
-  echo -e "${IFACE}" > /srv/rutorrent/home/db/interface.db
-  echo -e "${username}" > /srv/rutorrent/home/db/master.db
-  sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/stat.php
-  sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/data.php
-  sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/config.php
-  sed -i -e "s/eth0/${IFACE}/g" /srv/rutorrent/home/inc/config.php
+  #mkdir /srv/rutorrent/home/db/
+  echo -e "${IFACE}" > /srv/rutorrent/home/db/interface.txt
+  echo -e "${username}" > /srv/rutorrent/home/db/master.txt
+  #sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/stat.php
+  #sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/data.php
+  #sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/config.php
+  #sed -i -e "s/eth0/${IFACE}/g" /srv/rutorrent/home/inc/config.php
   # Use server timezone
   cd /usr/share/zoneinfo
   find * -type f -exec sh -c "diff -q /etc/localtime '{}' > /dev/null && echo {}" \; > ~/tz.txt
@@ -676,6 +676,7 @@ function _perms() {
   chmod 777 /home/${username}/.sessions >/dev/null 2>&1
   chown ${username}.${username} /home/${username}/.startup >/dev/null 2>&1
   chmod +x /home/${username}/.startup >/dev/null 2>&1
+  chown -R ${username}.${username} /srv/rutorrent/home >/dev/null 2>&1
 }
 
 
@@ -789,6 +790,7 @@ local_setup=/root/quickbox_setup/
 local_rutorrent=/root/quickbox_rutorrent/
 local_packages=/root/quickbox_packages/
 local_dashboard=/root/quickbox_dashboard/
+
 Reth0=$(ifconfig | grep -m 1 "Link encap" | sed 's/[ \t].*//;/^\(lo\|\)$/d' | awk '{ print $1 '});
 IFACE=$(echo -n "${Reth0}");
 HOSTNAME1=$(hostname -s);
@@ -798,20 +800,16 @@ PACKAGEURL="/root/tmp/QuickBox/commands/system/packages/"
 PORT=$(shuf -i 2000-61000 -n 1)
 PORTEND=$((${PORT} + 1500))
 while [[ "$(netstat -ln | grep ':'"$PORT"'' | grep -c 'LISTEN')" -eq "1" ]]; do PORT="$(shuf -i 2000-61000 -n 1)"; done
-WEBPORT=$(shuf -i 8115-8145 -n 1)
 RPORT=$(shuf -i 2000-61000 -n 1)
-DPORT=$(shuf -i 2000-61000 -n 1)
-DELUGE_VERSION="1.3.12"
 while [[ "$(netstat -ln | grep ':'"$RPORT"'' | grep -c 'LISTEN')" -eq "1" ]]; do RPORT="$(shuf -i 2000-61000 -n 1)"; done
-while [[ "$(netstat -ln | grep ':'"$DPORT"'' | grep -c 'LISTEN')" -eq "1" ]]; do DPORT="$(shuf -i 2000-61000 -n 1)"; done
 S=$(date +%s)
 OK=$(echo -e "[ ${bold}${green}DONE${normal} ]")
 genpass=$(_string)
 HTPASSWD="/etc/htpasswd"
 rutorrent="/srv/rutorrent/"
 REALM="rutorrent"
-IRSSI_PASS=$(_string)
-IRSSI_PORT=$(shuf -i 2000-61000 -n 1)
+IPASS=$(_string)
+IPORT=$(shuf -i 2000-61000 -n 1)
 ip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 BTSYNCIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 export DEBIAN_FRONTEND=noninteractive
