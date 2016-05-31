@@ -173,7 +173,7 @@ function _updates() {
   fi
 
   # Create the service lock file directory
-  mkdir /install
+  if [[ -d /install ]]; then cd; else mkdir /install; fi
 
 }
 
@@ -254,7 +254,7 @@ function _depends() {
 }
 
 function _skel() {
-  rm -rf /etc/skel
+  if [[ -d /etc/skel ]]; then rm -r /etc/skel;fi
   mkdir /etc/skel
   cp -r ${local_setup}templates/skel/. /etc/skel
   tar xzf ${local_setup}sources/rarlinux-x64-5.3.0.tar.gz -C ./
@@ -360,7 +360,8 @@ function _askrtorrent() {
 
 # xmlrpc-c function (11)
 function _xmlrpc() {
-  cd /root/tmp
+  if [[ -d /root/tmp ]]; then rm -r tmp;fi
+  mkdir /root/tmp && cd /root/tmp
   if [[ -d /root/tmp/xmlrpc-c ]]; then rm -rf xmlrpc-c;fi
   cp -r ${local_setup}sources/xmlrpc-c_1-33-12/ .
   cd xmlrpc-c_1-33-12
@@ -373,7 +374,8 @@ function _xmlrpc() {
 
 # libtorent function (12)
 function _libtorrent() {
-  cd /root/tmp
+  if [[ -d /root/tmp ]]; then rm -r tmp;fi
+  mkdir /root/tmp && cd /root/tmp
   MAXCPUS=$(echo "$(nproc) / 2"|bc)
   rm -rf xmlrpc-c  >>"${OUTTO}" 2>&1
   if [[ -e /root/tmp/libtorrent-${LTORRENT}.tar.gz ]]; then rm -rf libtorrent-${LTORRENT}.tar.gz;fi
@@ -388,7 +390,8 @@ function _libtorrent() {
 
 # rtorrent function (10.1)
 function _rtorrent() {
-  cd /root/tmp
+  if [[ -d /root/tmp ]]; then rm -r tmp;fi
+  mkdir /root/tmp && cd /root/tmp
   MAXCPUS=$(echo "$(nproc) / 2"|bc)
   rm -rf libtorrent-${LTORRENT}* >>"${OUTTO}" 2>&1
   if [[ -e /root/tmp/libtorrent-${LTORRENT}.tar.gz ]]; then rm -rf libtorrent-${LTORRENT}.tar.gz;fi
@@ -479,17 +482,17 @@ function _apacheconf() {
   #a2dismod mpm_prefork >>"${OUTTO}" 2>&1
   #a2enmod mpm_worker >>"${OUTTO}" 2>&1
   cp ${local_setup}templates/aliases-seedbox.conf.template /etc/apache2/sites-enabled/aliases-seedbox.conf
-  sed -i "s/USERNAME/$username/g" /etc/apache2/sites-enabled/aliases-seedbox.conf
+  sed -i "s/USERNAME/${username}/g" /etc/apache2/sites-enabled/aliases-seedbox.conf
   a2enmod auth_digest >>"${OUTTO}" 2>&1
   a2enmod ssl >>"${OUTTO}" 2>&1
   a2enmod scgi >>"${OUTTO}" 2>&1
   a2enmod rewrite >>"${OUTTO}" 2>&1
   mv /etc/apache2/sites-enabled/000-default.conf /etc/apache2/ >>"${OUTTO}" 2>&1
   cp ${local_setup}templates/default-ssl.conf.template /etc/apache2/sites-enabled/default-ssl.conf
-  sed -i -e "s/USERNAME/$username/g" \
+  sed -i -e "s/USERNAME/${username}/g" \
          -e "s/REALM/${REALM}/g" \
          -e "s/HTPASSWD/${HTPASSWD}/g" \
-         -e "s/PORT/$PORT/g" /etc/apache2/sites-enabled/default-ssl.conf
+         -e "s/PORT/${PORT}/g" /etc/apache2/sites-enabled/default-ssl.conf
   cp ${local_setup}templates/fileshare.conf.template /etc/apache2/sites-enabled/fileshare.conf
   sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
            -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
@@ -525,7 +528,7 @@ function _plugins() {
   cd /srv/rutorrent/home/fileshare/
   rm -rf share.php
   ln -s ../../plugins/fileshare/share.php
-  cp ${local_rutorrent}templates/rutorrent/plugins/fileshare/conf.php.template /srv/rutorrent/plugins/fileshare/conf.php
+  cp ${local_setup}templates/rutorrent/plugins/fileshare/conf.php.template /srv/rutorrent/plugins/fileshare/conf.php
 
   sed -i 's/homeDirectory/topDirectory/g' /srv/rutorrent/plugins/filemanager/flm.class.php
   sed -i 's/homeDirectory/topDirectory/g' /srv/rutorrent/plugins/filemanager/settings.js.php
@@ -628,10 +631,10 @@ function _ruconf() {
     sed -i "/diskuser/c\$diskuser = \"\/home\";" /srv/rutorrent/conf/users/${username}/config.php
   fi
   sed -i -e "/quotaUser/c\$quotaUser = \"${username}\";" \
-         -e "/USERNAME/${username}" \
-         -e "/PORT/$PORT" \
-         -e "/IRRSI-PORT/${IRSSI_PORT}" \
-         -e "/IRRSI-PASS/\"${IRSSI_PASS}\"" /srv/rutorrent/conf/users/${username}/config.php
+         -e "s/USERNAME/${username}/g" \
+         -e "s/PORT/${PORT}/g" \
+         -e "s/IRRSI-PORT/${IRSSI_PORT}/g" \
+         -e "s/IRRSI-PASS/\"${IRSSI_PASS}\"/g" /srv/rutorrent/conf/users/${username}/config.php
 }
 
 # seedbox boot for first user (26)
@@ -665,10 +668,12 @@ function _pureftpcert() {
 # the proper functionality of the QuickBox Dashboard.
 function _quickstats() {
   # Dynamically adjust to use the servers active network adapter
-  sed -i "s/eth0/$IFACE/g" /srv/rutorrent/home/widgets/stat.php
-  sed -i "s/eth0/$IFACE/g" /srv/rutorrent/home/widgets/data.php
-  sed -i "s/eth0/$IFACE/g" /srv/rutorrent/home/widgets/config.php
-  sed -i -e "s/eth0/$IFACE/g" /srv/rutorrent/home/inc/config.php
+  mkdir /srv/rutorrent/home/db/
+  echo -e "${IFACE}" /srv/rutorrent/home/db/interface.db
+  sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/stat.php
+  sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/data.php
+  sed -i "s/eth0/${IFACE}/g" /srv/rutorrent/home/widgets/config.php
+  sed -i -e "s/eth0/${IFACE}/g" /srv/rutorrent/home/inc/config.php
   # Use server timezone
   cd /usr/share/zoneinfo
   find * -type f -exec sh -c "diff -q /etc/localtime '{}' > /dev/null && echo {}" \; > ~/tz.txt
@@ -842,7 +847,7 @@ echo -n "Installing autodl-irssi ... ";_autodl & spinner $!;echo
 echo -n "Making ${username} directory structure ... ";_makedirs & spinner $!;echo
 echo -n "Writing ${username} system crontab script ... ";_cronfile & spinner $!;echo
 echo -n "Writing ${username} rutorrent config.php file ... ";_ruconf & spinner $!;echo
-echo -n "Writing seedbox reload script ... ";_reloadscript & spinner $!;echo
+#echo -n "Writing seedbox reload script ... ";_reloadscript & spinner $!;echo
 echo -n "Installing vsftpd ... ";_installftpd & spinner $!;echo
 echo -n "Setting up vsftpd ... ";_ftpdconfig & spinner $!;echo
 _quickstats;_quickconsole
