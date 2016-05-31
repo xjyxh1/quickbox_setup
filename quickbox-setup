@@ -212,6 +212,7 @@ else
         echo "hostname ${input}">> /etc/rc.local
         echo "Hostname set to ${input}"
 fi
+echo
 }
 
 # package and repo addition (9) _install softwares and packages_
@@ -291,7 +292,7 @@ function _skel() {
 
 # ban public trackers [iptables option] (8)
 function _denyhosts() {
-  echo -ne "${bold}${yellow}Block Public Trackers?${normal}: [${green}y${normal}]es or [n]o"; read responce
+  echo -ne "${bold}${yellow}Block Public Trackers?${normal}: [${green}y${normal}]es or [n]o: "; read responce
   case $responce in
     [yY] | [yY][Ee][Ss] | "")
 
@@ -315,6 +316,7 @@ function _askffmpeg() {
     [nN] | [nN][Oo] ) ffmpeg=no ;;
     *) ffmpeg=yes ;;
   esac
+  echo
 }
 
 # build function for ffmpeg (9.1)
@@ -462,6 +464,7 @@ function _adduser() {
     echo "${username}:${passwd}" | chpasswd >>"${OUTTO}" 2>&1
     (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
   fi
+  echo
 }
 
 # function to enable sudo for www-data function (16)
