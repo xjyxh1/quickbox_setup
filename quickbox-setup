@@ -423,7 +423,6 @@ function _rutorrent() {
 # function to install dashboard (14)
 function _dashboard() {
   cd && mkdir -p /srv/rutorrent/home
-  if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent;fi
   cp -R ${local_dashboard}home/. /srv/rutorrent/home
 }
 
