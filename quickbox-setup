@@ -631,8 +631,8 @@ function _ftpdconfig() {
 # the proper functionality of the QuickBox Dashboard.
 function _quickstats() {
   # Dynamically adjust to use the servers active network adapter
-  echo -e "${IFACE}" > /srv/rutorrent/home/db/interface.txt
-  echo -e "${username}" > /srv/rutorrent/home/db/master.txt
+  printf "${IFACE}" > /srv/rutorrent/home/db/interface.txt
+  printf "${username}" > /srv/rutorrent/home/db/master.txt
   # Use server timezone
   cd /usr/share/zoneinfo
   find * -type f -exec sh -c "diff -q /etc/localtime '{}' > /dev/null && echo {}" \; > ~/tz.txt
