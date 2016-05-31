@@ -464,7 +464,7 @@ function _rutorrent() {
 # function to install dashboard (23)
 function _dashboard() {
   cd && mkdir -p /srv/rutorrent/home
-  cp -R ${local_dashboard}/. /srv/rutorrent
+  cp -R ${local_dashboard}/. /srv/rutorrent/home
 }
 
 # function to configure apache (24)
