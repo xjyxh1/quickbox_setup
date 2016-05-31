@@ -362,7 +362,7 @@ function _askrtorrent() {
 function _xmlrpc() {
   cd /root/tmp
   if [[ -d /root/tmp/xmlrpc-c ]]; then rm -rf xmlrpc-c;fi
-  cp -r sources/xmlrpc-c_1-33-12/ .
+  cp -r ${local_setup}sources/xmlrpc-c_1-33-12/ .
   cd xmlrpc-c_1-33-12
   chmod +x configure
   ./configure --prefix=/usr --disable-cplusplus >>"${OUTTO}" 2>&1
@@ -412,11 +412,11 @@ function _rtorrent() {
 function _rutorrent() {
   cd && mkdir /srv && cd /srv
   if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent;fi
-  cp -R ${local_rutorrent}. .
+  cp -R ${local_rutorrent}/. rutorrent
 }
 
 # function to install dashboard (14)
-function _rutorrent() {
+function _dashboard() {
   cd && mkdir -p /srv/rutorrent/home
   if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent;fi
   cp -R ${local_dashboard}home/. /srv/rutorrent/home
@@ -593,7 +593,7 @@ function _syscommands() {
 # function to make dirs for first user (21)
 function _makedirs() {
   #mkdir /home/"${username}"/{torrents,.sessions,watch} >>"${OUTTO}" 2>&1
-  cp -r /etc/skel/* /home/"${username}"
+  cp -r /etc/skel/. /home/"${username}"
   chown -r "${username}".www-data /home/"${username}" >>"${OUTTO}" 2>&1 #/{torrents,.sessions,watch,.rtorrent.rc} >>"${OUTTO}" 2>&1
   usermod -a -G www-data "${username}" >>"${OUTTO}" 2>&1
   usermod -a -G "${username}" www-data >>"${OUTTO}" 2>&1
@@ -834,6 +834,7 @@ echo -n "Installing xmlrpc-c-${green}1.33.12${normal} ... ";_xmlrpc & spinner $!
 echo -n "Installing libtorrent-${green}$LTORRENT${normal} ... ";_libtorrent & spinner $!;echo
 echo -n "Installing rtorrent-${green}$RTVERSION${normal} ... ";_rtorrent & spinner $!;echo
 echo -n "Installing rutorrent into /srv ... ";_rutorrent & spinner $!;echo
+echo -n "Installing quickbox dashboard ... ";_dashboard & spinner $!;echo
 echo -n "Setting up seedbox.conf for apache ... ";_apacheconf & spinner $!;echo
 echo -n "Installing .rtorrent.rc for ${username} ... ";_rconf & spinner $!;echo
 echo -n "Setting rutorrent plugins ... ";_plugins & spinner $!;echo
@@ -842,8 +843,8 @@ echo -n "Making ${username} directory structure ... ";_makedirs & spinner $!;ech
 echo -n "Writing ${username} system crontab script ... ";_cronfile & spinner $!;echo
 echo -n "Writing ${username} rutorrent config.php file ... ";_ruconf & spinner $!;echo
 echo -n "Writing seedbox reload script ... ";_reloadscript & spinner $!;echo
-echo -n "Installing VSFTPd ... ";_installftpd & spinner $!;echo
-echo -n "Setting up VSFTPd ... ";_ftpdconfig & spinner $!;echo
+echo -n "Installing vsftpd ... ";_installftpd & spinner $!;echo
+echo -n "Setting up vsftpd ... ";_ftpdconfig & spinner $!;echo
 _quickstats;_quickconsole
 echo -n "Setting irssi/rtorrent to start on boot ... ";_boot & spinner $!;echo;
 echo -n "Setting permissions on ${username} ... ";_perms & spinner $!;echo;
