@@ -570,8 +570,8 @@ function _autodl() {
 
 cat >"/home/${username}/.autodl/autodl2.cfg"<<ADC
 [options]
-gui-server-port = ${IPORT}
-gui-server-password = ${IPASS}
+gui-server-port = ${IRSSIPORT}
+gui-server-password = ${PASSIRSSI}
 ADC
 
   chown -R "${username}.${username}" "/home/${username}/.irssi/"
@@ -607,8 +607,8 @@ function _ruconf() {
   sed -i -e "/quotaUser/c\$quotaUser = \"${username}\";" \
          -e "s/USERNAME/${username}/g" \
          -e "s/PORT/${PORT}/g" \
-         -e "s/IPORT/${IPORT}/g" \
-         -e "s/IPASS/\"${IPASS}\"/g" /srv/rutorrent/conf/users/${username}/config.php
+         -e "s/IRSSIPORT/${IRSSIPORT}/g" \
+         -e "s/PASSIRSSI/\"${PASSIRSSI}\"/g" /srv/rutorrent/conf/users/${username}/config.php
 }
 
 # function to install pure-ftpd (31)
@@ -798,8 +798,8 @@ genpass=$(_string)
 HTPASSWD="/etc/htpasswd"
 rutorrent="/srv/rutorrent/"
 REALM="rutorrent"
-IPASS=$(_string)
-IPORT=$(shuf -i 2000-61000 -n 1)
+PASSIRSSI=$(_string)
+IRSSIPORT=$(shuf -i 2000-61000 -n 1)
 ip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 BTSYNCIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 export DEBIAN_FRONTEND=noninteractive

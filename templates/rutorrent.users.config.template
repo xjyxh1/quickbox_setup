@@ -22,7 +22,7 @@
   $localhosts = array("127.0.0.1", "localhost",);
   $profilePath = '../share';
   $profileMask = 0777;
-  $autodlPort = IPORT;
-  $autodlPassword = "IPASS";
+  $autodlPort = IRSSIPORT;
+  $autodlPassword = PASSIRSSI;
   $diskuser = "";
   $quotaUser = "";
