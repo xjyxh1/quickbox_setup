@@ -236,7 +236,7 @@ function _depends() {
                                        lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
   else
   apt-get -y update >>"${OUTTO}" 2>&1
-  apt-get -y install build-essential fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop git \
+  apt-get -y --allow-unauthenticated install build-essential fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop git \
                      dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
                      pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip \
