@@ -619,7 +619,7 @@ function _perms() {
 function _ruconf() {
   mkdir -p ${rutorrent}conf/users/${username}/
 
-  cp ${local_setup}templates/rutorrent.users.conf.template ${rutorrent}conf/users/${username}/config.php
+  cp ${local_setup}templates/rutorrent.users.config.template ${rutorrent}conf/users/${username}/config.php
 
   chown -R www-data.www-data "${rutorrent}conf/users/" >>"${OUTTO}" 2>&1
   if [[ ${primaryroot} == "root" ]]; then
