@@ -252,10 +252,12 @@ function _updates() {
   if [[ $DISTRO == Debian ]]; then
     cp ${local_setup}templates/apt.sources/debian.template /etc/apt/sources.list
     sed -i "s/RELEASE/${RELEASE}/g" /etc/apt/sources.list
+    apt-get --yes --force-yes install python-software-properties software-properties-common >>"${OUTTO}" 2>&1
     apt-get --yes --force-yes install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   else
     cp ${local_setup}templates/apt.sources/ubuntu.template /etc/apt/sources.list
     sed -i "s/RELEASE/${RELEASE}/g" /etc/apt/sources.list
+    apt-get -y -f install python-software-properties software-properties-common >>"${OUTTO}" 2>&1
     apt-get -y -f --allow-unauthenticated install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   fi
 
@@ -294,7 +296,7 @@ function _depends() {
                                        libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mbstring php7.0-zip php7.0-mysql \
                                        php7.0-curl php-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
                                        php7.0-xml php7.0-zip fontconfig comerr-dev ca-certificates libfontconfig1-dev \
-                                       libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 python-software-properties \
+                                       libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 \
                                        ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
                                        libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
                                        libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
@@ -310,7 +312,7 @@ function _depends() {
                                        libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mbstring php7.0-zip php7.0-mysql \
                                        php7.0-curl php-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
                                        php7.0-xml php7.0-zip fontconfig comerr-dev ca-certificates libfontconfig1-dev \
-                                       libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 python-software-properties \
+                                       libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 \
                                        ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
                                        libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
                                        libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
@@ -366,7 +368,7 @@ function _qmount() {
 
 function _lshell() {
 # Setup LShell configuration file
-  apt-get -y install lshell
+  apt-get -y install lshell >> /dev/null 2>&1
   cp ${local_setup}templates/lshell.conf.template /etc/lshell.conf
 }
 
