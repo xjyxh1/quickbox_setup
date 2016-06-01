@@ -326,6 +326,7 @@ function _syscommands() {
   cp -r ${local_packages}quickbox/. /usr/local/bin/quickbox
   dos2unix $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
   chmod +x $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
+  cp /usr/local/bin/quickbox/system/reload /usr/bin/reload
 }
 
 function _skel() {
