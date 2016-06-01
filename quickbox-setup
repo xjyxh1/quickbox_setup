@@ -609,9 +609,9 @@ function _ruconf() {
   fi
   sed -i "/quotaUser/c\$quotaUser = \"${username}\";" /srv/rutorrent/conf/users/${username}/config.php
   sed -i "s/USERNAME/${username}/g" /srv/rutorrent/conf/users/${username}/config.php
-  sed -i "s/PORT/${XXX}/g" /srv/rutorrent/conf/users/${username}/config.php
-  sed -i "s/AUTODLPORT/${YYY}/g" /srv/rutorrent/conf/users/${username}/config.php
-  sed -i "s/AUTODLPASSWORD/\"${ZZZ}\"/g" /srv/rutorrent/conf/users/${username}/config.php
+  sed -i "s/XXX/${PORT}/g" /srv/rutorrent/conf/users/${username}/config.php
+  sed -i "s/YYY/${AUTODLPORT}/g" /srv/rutorrent/conf/users/${username}/config.php
+  sed -i "s/ZZZ/\"${AUTODLPASSWORD}\"/g" /srv/rutorrent/conf/users/${username}/config.php
 }
 
 # function to install pure-ftpd (31)
