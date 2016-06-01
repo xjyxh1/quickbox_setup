@@ -505,6 +505,8 @@ phpenmod -v 7.0 opcache >>"${OUTTO}" 2>&1
 function _rconf() {
   cp ${local_setup}templates/rtorrent.rc.template /home/${username}/.rtorrent.rc
   sed -i "s/USERNAME/${username}/g" /home/${username}/.rtorrent.rc
+  sed -i "s/PORT/${PORT}/g" /home/${username}/.rtorrent.rc
+  sed -i "s/PORTEND/${PORTEND}/g" /home/${username}/.rtorrent.rc
 }
 
 # function to install rutorrent plugins (26)
@@ -607,8 +609,8 @@ function _ruconf() {
   sed -i -e "/quotaUser/c\$quotaUser = \"${username}\";" \
          -e "s/USERNAME/${username}/g" \
          -e "s/PORT/${PORT}/g" \
-         -e "s/SRCUCIP/${IRSSIPORT}/g" \
-         -e "s/PASSSRCUI/\"${PASSIRSSI}\"/g" /srv/rutorrent/conf/users/${username}/config.php
+         -e "s/IRSSIPORT/${SRCUCIP}/g" \
+         -e "s/PASSIRSSI/\"${PASSSRCUI}\"/g" /srv/rutorrent/conf/users/${username}/config.php
 }
 
 # function to install pure-ftpd (31)
