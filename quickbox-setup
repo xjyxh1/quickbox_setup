@@ -257,12 +257,12 @@ function _repos() {
 function _updates() {
   if [[ $DISTRO == Debian ]]; then
     cp ${local_setup}templates/apt.sources/debian.template /etc/apt/sources.list
-    sed -i "s/RELEASE/${RELEASE}/g" /etc/apt/sources.list
+    sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
     apt-get --yes --force-yes install python-software-properties software-properties-common >>"${OUTTO}" 2>&1
     apt-get --yes --force-yes install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   else
     cp ${local_setup}templates/apt.sources/ubuntu.template /etc/apt/sources.list
-    sed -i "s/RELEASE/${RELEASE}/g" /etc/apt/sources.list
+    sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
     apt-get -y -f install python-software-properties software-properties-common >>"${OUTTO}" 2>&1
     apt-get -y -f --allow-unauthenticated install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   fi
@@ -843,7 +843,7 @@ echo -n "Updating system ... ";_updates & spinner $!;echo
 echo -n "Installing all needed dependencies ... ";_depends & spinner $!;echo
 echo -n "Setting up system executables ... ";_syscommands & spinner $!;echo
 echo -n "Building required user directories ... ";_skel & spinner $!;echo
-echo -n "Setting up quotas for ${green}$primaryroot${nrmal} mount ... ";_qmount & spinner $!;echo
+echo -n "Setting up quotas for ${green}/($primaryroot)${normal} mount ... ";_qmount & spinner $!;echo
 echo -n "Setting up Limited Shell environment ... ";_lshell & spinner $!;echo
 if [[ ${ffmpeg} == "yes" ]]; then
     echo -n "Building ffmpeg from source for screenshots ... ";_ffmpeg & spinner $!;echo
