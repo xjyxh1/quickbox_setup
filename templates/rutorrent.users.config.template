@@ -15,14 +15,14 @@
   $overwriteUploadedTorrents = false;
   $topDirectory = '/home/USERNAME/';
   $forbidUserSettings = false;
-  $scgi_port = PORT;
+  $scgi_port = XXX;
   $scgi_host = "localhost";
   $XMLRPCMountPoint = "/RPC2";
   $pathToExternals = array("php" => '',"curl" => '',"gzip" => '',"id" => '',"stat" => '',);
   $localhosts = array("127.0.0.1", "localhost",);
   $profilePath = '../share';
   $profileMask = 0777;
-  $autodlPort = AUTODLPORT;
-  $autodlPassword = AUTODLPASSWORD;
+  $autodlPort = YYY;
+  $autodlPassword = ZZZ;
   $diskuser = "";
   $quotaUser = "";
