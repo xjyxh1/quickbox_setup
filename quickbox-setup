@@ -573,8 +573,8 @@ function _autodl() {
 
 cat >"/home/${username}/.autodl/autodl2.cfg"<<ADC
 [options]
-gui-server-port = ${SRCUCIP}
-gui-server-password = ${PASSSRCUI}
+gui-server-port = ${AUTODLPORT}
+gui-server-password = ${AUTODLPASSWORD}
 ADC
 
   chown -R "${username}.${username}" "/home/${username}/.irssi/"
@@ -607,11 +607,11 @@ function _ruconf() {
   else
     sed -i "/diskuser/c\$diskuser = \"\/home\";" /srv/rutorrent/conf/users/${username}/config.php
   fi
-  sed -i -e "/quotaUser/c\$quotaUser = \"${username}\";" \
-         -e "s/USERNAME/${username}/g" \
-         -e "s/PORT/${PORT}/g" \
-         -e "s/IRSSIPORT/${SRCUCIP}/g" \
-         -e "s/PASSIRSSI/\"${PASSSRCUI}\"/g" /srv/rutorrent/conf/users/${username}/config.php
+  sed -i "/quotaUser/c\$quotaUser = \"${username}\";" /srv/rutorrent/conf/users/${username}/config.php
+  sed -i "s/USERNAME/${username}/g" /srv/rutorrent/conf/users/${username}/config.php
+  sed -i "s/PORT/${PORT}/g" /srv/rutorrent/conf/users/${username}/config.php
+  sed -i "s/AUTODLPORT/${AUTODLPORT}/g" /srv/rutorrent/conf/users/${username}/config.php
+  sed -i "s/AUTODLPASSWORD/\"${AUTODLPASSWORD}\"/g" /srv/rutorrent/conf/users/${username}/config.php
 }
 
 # function to install pure-ftpd (31)
@@ -801,8 +801,8 @@ genpass=$(_string)
 HTPASSWD="/etc/htpasswd"
 rutorrent="/srv/rutorrent/"
 REALM="rutorrent"
-PASSSRCUI=$(_string)
-SRCUCIP=$(shuf -i 2000-61000 -n 1)
+AUTODLPASSWORD=$(_string)
+AUTODLPORT=$(shuf -i 2000-61000 -n 1)
 ip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 BTSYNCIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 export DEBIAN_FRONTEND=noninteractive
