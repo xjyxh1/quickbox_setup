@@ -42,7 +42,7 @@ function _intro() {
   echo "[${repo_title}QuickBox${normal}] ${title} QuickBox Seedbox Installation ${normal}  "
   echo "[QuickBox]  QuickBox Seedbox Installation   "
   echo
-  echo " ${message_title}         Heads Up!         ${normal} "
+  echo "     ${message_title}         Heads Up!         ${normal} "
   echo "QuickBox works with the following"
   echo "Ubuntu - 14.04 | 15.10 | 16.04"
   echo "Debian - 7 | 8"
