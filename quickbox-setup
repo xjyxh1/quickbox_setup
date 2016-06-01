@@ -306,7 +306,7 @@ function _depends() {
                      libnet-ssleay-perl php5-geoip openjdk-7-jre-headless openjdk-7-jre openjdk-7-jdk \
                      libhtml-parser-perl libxml-libxml-perl libjson-perl libjson-xs-perl libxml-libxslt-perl \
                      libapache2-mod-scgi lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
-  elif if [[ $CODENAME == jessie ]]; then
+  elif [[ $CODENAME == jessie ]]; then
     yes '' | apt-get install --force-yes fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop \
                      dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
                      pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
@@ -321,7 +321,7 @@ function _depends() {
                      libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
                      libjson-perl libjson-xs-perl libxml-libxslt-perl libapache2-mod-scgi \
                      vnstat vnstati openvpn >>"${OUTTO}" 2>&1
-  else
+  elif [[ $DISTRO == Ubuntu ]]; then
     apt-get -y -f --allow-unauthenticated install build-essential debian-archive-keyring fail2ban bc sudo \
                      screen zip irssi unzip nano bwm-ng htop iotop git \
                      dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
