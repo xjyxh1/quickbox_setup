@@ -827,7 +827,7 @@ _denyhosts
 echo
 echo ""
 echo "${bold}${magenta}QuickBox will now install, this may take between${normal}"
-echo "${bold}${magenta}10 and 30 minutes depending on your systems specs${normal}"
+echo "${bold}${magenta}10 and 45 minutes depending on your systems specs${normal}"
 echo ""
 echo -n "Pulling QuickBox Ecosystem ... ";_repos & spinner $!;echo
 echo -n "Updating system ... ";_updates & spinner $!;echo
