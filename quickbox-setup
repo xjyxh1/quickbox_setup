@@ -221,14 +221,14 @@ function _denyhosts() {
   case $responce in
     [yY] | [yY][Ee][Ss] | "")
 
-  echo "[ ${red}Blocking public trackers${normal} ]"
+  echo "[ ${red}-  Blocking public trackers  -${normal} ]"
   cp ${local_setup}templates/trackers.template /etc/trackers
   cp ${local_setup}templates/denypublic.template /etc/cron.daily/denypublic
   chmod +x /etc/cron.daily/denypublic
   cat ${local_setup}templates/hostsTrackers.template >> /etc/hosts
     ;;
 
-    [nN] | [nN][Oo] ) echo "[ ${green}Allowing${normal} ]"
+    [nN] | [nN][Oo] ) echo "[ ${green}+  Allowing public trackers  +${normal} ]"
     ;;
   esac
 }
@@ -258,12 +258,15 @@ function _updates() {
   if [[ $DISTRO == Debian ]]; then
     cp ${local_setup}templates/apt.sources/debian.template /etc/apt/sources.list
     sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
-    apt-get --yes --force-yes install python-software-properties software-properties-common >>"${OUTTO}" 2>&1
+    yes '' | apt-get install --force-yes build-essential debian-archive-keyring \
+                             python-software-properties software-properties-common >>"${OUTTO}" 2>&1
+    apt-get --yes --force-yes update >>"${OUTTO}" 2>&1
     apt-get --yes --force-yes install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   else
     cp ${local_setup}templates/apt.sources/ubuntu.template /etc/apt/sources.list
     sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
-    apt-get -y -f install python-software-properties software-properties-common >>"${OUTTO}" 2>&1
+    apt-get -y -f install build-essential debian-archive-keyring \
+                             python-software-properties software-properties-common >>"${OUTTO}" 2>&1
     apt-get -y -f --allow-unauthenticated install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   fi
 
@@ -293,9 +296,8 @@ function _updates() {
 # package and repo addition (14) _install softwares and packages_
 function _depends() {
   if [[ $CODENAME == wheezy ]]; then
-    apt-get --yes --force-yes update >>"${OUTTO}" 2>&1
-    yes '' | apt-get install --force-yes build-essential fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop \
-                     iotop git dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev \
+    yes '' | apt-get install --force-yes fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop \
+                     iotop dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev \
                      libssl-dev pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libxslt-dev libncurses5-dev yasm pcregrep apache2 \
                      php5 php5-cli php-net-socket libdbd-mysql-perl libdbi-perl fontconfig quota comerr-dev \
@@ -304,14 +306,29 @@ function _depends() {
                      libnet-ssleay-perl php5-geoip openjdk-7-jre-headless openjdk-7-jre openjdk-7-jdk \
                      libhtml-parser-perl libxml-libxml-perl libjson-perl libjson-xs-perl libxml-libxslt-perl \
                      libapache2-mod-scgi lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
-  else
-  apt-get -y update >>"${OUTTO}" 2>&1
-  apt-get -y -f --allow-unauthenticated install build-essential fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop git \
+  elif if [[ $CODENAME == jessie ]]; then
+    yes '' | apt-get install --force-yes fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop \
                      dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
                      pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip \
                      libxslt-dev libncurses5-dev yasm pcregrep apache2 php-net-socket \
-                     libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mbstring php7.0-zip php7.0-mysql \
+                     libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mysql \
+                     php7.0-curl php7.0-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
+                     php7.0-xml fontconfig comerr-dev ca-certificates libfontconfig1-dev \
+                     libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 \
+                     ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
+                     libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
+                     libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
+                     libjson-perl libjson-xs-perl libxml-libxslt-perl libapache2-mod-scgi \
+                     vnstat vnstati openvpn >>"${OUTTO}" 2>&1
+  else
+    apt-get -y -f --allow-unauthenticated install build-essential debian-archive-keyring fail2ban bc sudo \
+                     screen zip irssi unzip nano bwm-ng htop iotop git \
+                     dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
+                     pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
+                     apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip \
+                     libxslt-dev libncurses5-dev yasm pcregrep apache2 php-net-socket \
+                     libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mbstring php7.0-mysql \
                      php7.0-curl php-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
                      php7.0-xml php7.0-zip fontconfig comerr-dev ca-certificates libfontconfig1-dev \
                      libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 \
