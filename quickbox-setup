@@ -506,8 +506,8 @@ phpenmod -v 7.0 opcache >>"${OUTTO}" 2>&1
 function _rconf() {
   cp ${local_setup}templates/rtorrent.rc.template /home/${username}/.rtorrent.rc
   sed -i "s/USERNAME/${username}/g" /home/${username}/.rtorrent.rc
-  sed -i "s/PORT/${PORT}/g" /home/${username}/.rtorrent.rc
-  sed -i "s/PORTEND/${PORTEND}/g" /home/${username}/.rtorrent.rc
+  sed -i "s/XXX/${PORT}/g" /home/${username}/.rtorrent.rc
+  sed -i "s/YYY/${PORTEND}/g" /home/${username}/.rtorrent.rc
 }
 
 # function to install rutorrent plugins (26)
