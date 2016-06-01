@@ -503,10 +503,6 @@ function _dashboard() {
 
 # function to configure apache (24)
 function _apacheconf() {
-  a2enmod actions >>"${OUTTO}" 2>&1
-  a2enmod fastcgi >>"${OUTTO}" 2>&1
-  #a2dismod mpm_prefork >>"${OUTTO}" 2>&1
-  #a2enmod mpm_worker >>"${OUTTO}" 2>&1
   cp ${local_setup}templates/aliases-seedbox.conf.template /etc/apache2/sites-enabled/aliases-seedbox.conf
   sed -i "s/USERNAME/${username}/g" /etc/apache2/sites-enabled/aliases-seedbox.conf
   a2enmod auth_digest >>"${OUTTO}" 2>&1
@@ -530,7 +526,7 @@ function _apacheconf() {
                -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
                -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
                -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php5/apache2/php.ini
-    phpenmod opcache >>"${OUTTO}" 2>&1
+    a2enmod php5
   else
     sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
                -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
@@ -544,6 +540,10 @@ function _apacheconf() {
     # ensure opcache module is activated
     phpenmod -v 7.0 opcache >>"${OUTTO}" 2>&1
     #a2enmod proxy_fcgi >>"${OUTTO}" 2>&1
+    #a2dismod mpm_prefork >>"${OUTTO}" 2>&1
+    #a2enmod mpm_worker >>"${OUTTO}" 2>&1
+    a2enmod actions >>"${OUTTO}" 2>&1
+    a2enmod fastcgi >>"${OUTTO}" 2>&1
     sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.0/apache2/php.ini
   fi
 }
