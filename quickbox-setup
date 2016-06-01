@@ -41,10 +41,10 @@ function _intro() {
   echo
   echo "[${repo_title}QuickBox${normal}] ${title} QuickBox Seedbox Installation ${normal}  "
   echo
-  echo "${title}              Heads Up!              ${normal} "
-  echo "${message_title}  QuickBox works with the following  ${normal} "
-  echo "${message_title}  Ubuntu - 14.04 | 15.10 | 16.04     ${normal} "
-  echo "${message_title}  Debian - 7 | 8                     ${normal} "
+  echo "    ${title}              Heads Up!              ${normal} "
+  echo "    ${message_title}  QuickBox works with the following  ${normal} "
+  echo "    ${message_title}  Ubuntu - 14.04 | 15.10 | 16.04     ${normal} "
+  echo "    ${message_title}  Debian - 7 | 8                     ${normal} "
   echo
   echo
   echo "${green}Checking distribution ...${normal}"
