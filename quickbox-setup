@@ -241,8 +241,15 @@ function _repos() {
   fi
 
   if [[ $CODENAME == jessie ]]; then
-    echo "deb http://packages.dotdeb.org $(lsb_release -sc) all" > /etc/apt/sources.list.d/dotdeb-php-$(lsb_release -sc).list
-    echo "deb-src http://packages.dotdeb.org $(lsb_release -sc) all" >> /etc/apt/sources.list.d/dotdeb-php-$(lsb_release -sc).list
+    echo "deb http://packages.dotdeb.org $(lsb_release -sc) all" > /etc/apt/sources.list.d/dotdeb-php7-$(lsb_release -sc).list
+    echo "deb-src http://packages.dotdeb.org $(lsb_release -sc) all" >> /etc/apt/sources.list.d/dotdeb-php7-$(lsb_release -sc).list
+    wget -q https://www.dotdeb.org/dotdeb.gpg
+    sudo apt-key add dotdeb.gpg >> /dev/null 2>&1
+  fi
+
+  if [[ $CODENAME == wheezy ]]; then
+    echo "deb http://packages.dotdeb.org $(lsb_release -sc)-php55 all" > /etc/apt/sources.list.d/dotdeb-php55-$(lsb_release -sc).list
+    echo "deb-src http://packages.dotdeb.org $(lsb_release -sc)-php55 all" >> /etc/apt/sources.list.d/dotdeb-php55-$(lsb_release -sc).list
     wget -q https://www.dotdeb.org/dotdeb.gpg
     sudo apt-key add dotdeb.gpg >> /dev/null 2>&1
   fi
@@ -300,12 +307,12 @@ function _depends() {
                      iotop dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev \
                      libssl-dev pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libxslt-dev libncurses5-dev yasm pcregrep apache2 \
-                     php5 php5-cli php-net-socket libdbd-mysql-perl libdbi-perl fontconfig quota comerr-dev \
+                     php5 php-pear php5-dev php5-cli php-net-socket libdbd-mysql-perl libdbi-perl fontconfig \
                      ca-certificates libfontconfig1-dev libfontconfig1 rar unrar mediainfo php5-curl ifstat \
                      libapache2-mod-php5 ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
                      libnet-ssleay-perl php5-geoip openjdk-7-jre-headless openjdk-7-jre openjdk-7-jdk \
                      libhtml-parser-perl libxml-libxml-perl libjson-perl libjson-xs-perl libxml-libxslt-perl \
-                     libapache2-mod-scgi lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
+                     libapache2-mod-scgi comerr-dev lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
   elif [[ $CODENAME == jessie ]]; then
     yes '' | apt-get install --force-yes fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop \
                      dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
@@ -513,19 +520,32 @@ function _apacheconf() {
   sed -i "s/HTPASSWD/\/etc\/htpasswd/g" /etc/apache2/sites-enabled/default-ssl.conf
   sed -i "s/PORT/${PORT}/g" /etc/apache2/sites-enabled/default-ssl.conf
   cp ${local_setup}templates/fileshare.conf.template /etc/apache2/sites-enabled/fileshare.conf
-  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
-           -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
-           -e "s/expose_php = On/expose_php = Off/" \
-           -e "s/128M/768M/" \
-           -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
-           -e "s/;opcache.enable=0/opcache.enable=1/" \
-           -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
-           -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
-           -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.0/fpm/php.ini
-# ensure opcache module is activated
-phpenmod -v 7.0 opcache >>"${OUTTO}" 2>&1
-#a2enmod proxy_fcgi >>"${OUTTO}" 2>&1
-  sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.0/apache2/php.ini
+  if [[ $CODENAME == wheezy ]]; then
+    sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
+               -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
+               -e "s/expose_php = On/expose_php = Off/" \
+               -e "s/128M/768M/" \
+               -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
+               -e "s/;opcache.enable=0/opcache.enable=1/" \
+               -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
+               -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
+               -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php5/apache2/php.ini
+    phpenmod opcache >>"${OUTTO}" 2>&1
+  else
+    sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
+               -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
+               -e "s/expose_php = On/expose_php = Off/" \
+               -e "s/128M/768M/" \
+               -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
+               -e "s/;opcache.enable=0/opcache.enable=1/" \
+               -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
+               -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
+               -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.0/fpm/php.ini
+    # ensure opcache module is activated
+    phpenmod -v 7.0 opcache >>"${OUTTO}" 2>&1
+    #a2enmod proxy_fcgi >>"${OUTTO}" 2>&1
+    sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.0/apache2/php.ini
+  fi
 }
 
 # function to configure first user config (25)
