@@ -14,8 +14,6 @@
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
 #
-# find server hostname and repo location for quickbox configuration
-#################################################################################
 #################################################################################
 #Script Console Colors
 black=$(tput setaf 0); red=$(tput setaf 1); green=$(tput setaf 2); yellow=$(tput setaf 3);
@@ -24,18 +22,10 @@ on_red=$(tput setab 1); on_green=$(tput setab 2); on_yellow=$(tput setab 3); on_
 on_magenta=$(tput setab 5); on_cyan=$(tput setab 6); on_white=$(tput setab 7); bold=$(tput bold);
 dim=$(tput dim); underline=$(tput smul); reset_underline=$(tput rmul); standout=$(tput smso);
 reset_standout=$(tput rmso); normal=$(tput sgr0); alert=${white}${on_red}; title=${standout};
-sub_title=${bold}${yellow}; repo_title=${black}${on_green};
+sub_title=${bold}${yellow}; repo_title=${black}${on_green}; message_title=${white}${on_magenta}
 #################################################################################
-if [[ -f /usr/bin/lsb_release ]]; then
-    DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
-elif [ -f "/etc/redhat-release" ]; then
-    DISTRO=$(egrep -o 'Fedora|CentOS|Red.Hat' /etc/redhat-release)
-elif [ -f "/etc/debian_version" ]; then
-    DISTRO=='Debian'
-fi
-#################################################################################
-
 function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15 ; }
+#################################################################################
 
 function _bashrc() {
   cp ${local_setup}templates/bashrc.template ~/.bashrc
@@ -43,33 +33,39 @@ function _bashrc() {
 
 # intro function (1)
 function _intro() {
+  DISTRO=$(lsb_release -is)
+  RELEASE=$(lsb_release -rs)
+  CODENAME=$(lsb_release -cs)
+  SETNAME=$(lsb_release -rc)
   echo
   echo
   echo "[${repo_title}QuickBox${normal}] ${title} QuickBox Seedbox Installation ${normal}  "
   echo
+  echo "   ${title}              Heads Up!              ${normal} "
+  echo "   ${message_title}  QuickBox works with the following  ${normal} "
+  echo "   ${message_title}  Ubuntu - 14.04 | 15.10 | 16.04     ${normal} "
+  echo "   ${message_title}  Debian - 7 | 8                     ${normal} "
   echo
-
+  echo
   echo "${green}Checking distribution ...${normal}"
   if [ ! -x  /usr/bin/lsb_release ]; then
-    echo 'It looks like you are running $DISTRO, which is not supported by QuickBox.'
-    echo 'Exiting...'
+    echo "It looks like you are running $DISTRO, which is not supported by QuickBox."
+    echo "Exiting..."
     exit 1
   fi
   echo "$(lsb_release -a)"
   echo
-  dis="$(lsb_release -is)"
-  rel="$(lsb_release -rs)"
-  if [[ ! "${dis}" =~ ("Ubuntu"|"Debian") ]]; then
-    echo "${dis}: ${alert} It looks like you are running $DISTRO, which is not supported by QuickBox ${normal} "
+  if [[ ! "$DISTRO" =~ ("Ubuntu"|"Debian") ]]; then
+    echo "$DISTRO: ${alert} It looks like you are running $DISTRO, which is not supported by QuickBox ${normal} "
     echo 'Exiting...'
     exit 1
-  elif [[ ! "${rel}" =~ ("16.04"|"8") ]]; then
-    echo "${bold}${rel}:${normal} You do not appear to be running a supported $DISTRO release."
+  elif [[ ! "$CODENAME" =~ ("xenial"|"wily"|"jessie"|"wheezy") ]]; then
+    echo "Oh drats! You do not appear to be running a supported $DISTRO release."
+    echo "${bold}$SETNAME${normal}"
     echo 'Exiting...'
     exit 1
   fi
 }
-
 
 # check if root function (2)
 function _checkroot() {
@@ -225,37 +221,59 @@ function _denyhosts() {
   case $responce in
     [yY] | [yY][Ee][Ss] | "")
 
-  echo "[ ${red}Blocking public trackers${normal} ]"
+  echo "[ ${red}-  Blocking public trackers  -${normal} ]"
   cp ${local_setup}templates/trackers.template /etc/trackers
   cp ${local_setup}templates/denypublic.template /etc/cron.daily/denypublic
   chmod +x /etc/cron.daily/denypublic
   cat ${local_setup}templates/hostsTrackers.template >> /etc/hosts
     ;;
 
-    [nN] | [nN][Oo] ) echo "[ ${green}Allowing${normal} ]"
+    [nN] | [nN][Oo] ) echo "[ ${green}+  Allowing public trackers  +${normal} ]"
     ;;
   esac
 }
 
 # package and repo addition (silently add php7) _add respo sources_ (12)
 function _repos() {
-  LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1;
+  apt-get -y install lsb-release sudo >>"${OUTTO}" 2>&1
+  if [[ $DISTRO == Ubuntu ]]; then
+    LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1;
+  fi
+
+  if [[ $CODENAME == jessie ]]; then
+    echo "deb http://packages.dotdeb.org $(lsb_release -sc) all" > /etc/apt/sources.list.d/dotdeb-php7-$(lsb_release -sc).list
+    echo "deb-src http://packages.dotdeb.org $(lsb_release -sc) all" >> /etc/apt/sources.list.d/dotdeb-php7-$(lsb_release -sc).list
+    wget -q https://www.dotdeb.org/dotdeb.gpg
+    sudo apt-key add dotdeb.gpg >> /dev/null 2>&1
+  fi
+
+  if [[ $CODENAME == wheezy ]]; then
+    echo "deb http://packages.dotdeb.org $(lsb_release -sc)-php55 all" > /etc/apt/sources.list.d/dotdeb-php55-$(lsb_release -sc).list
+    echo "deb-src http://packages.dotdeb.org $(lsb_release -sc)-php55 all" >> /etc/apt/sources.list.d/dotdeb-php55-$(lsb_release -sc).list
+    wget -q https://www.dotdeb.org/dotdeb.gpg
+    sudo apt-key add dotdeb.gpg >> /dev/null 2>&1
+  fi
+
   git clone https://github.com/QuickBox/quickbox_rutorrent >> /dev/null 2>&1
   git clone https://github.com/QuickBox/quickbox_packages >> /dev/null 2>&1
   git clone https://github.com/QuickBox/quickbox_dashboard >> /dev/null 2>&1
+
 }
 
 # package and repo addition (13) _update and upgrade_
 function _updates() {
-  apt-get -y install lsb-release >>"${OUTTO}" 2>&1
-  RELEASE=$(lsb_release -sc)
   if [[ $DISTRO == Debian ]]; then
     cp ${local_setup}templates/apt.sources/debian.template /etc/apt/sources.list
-    sed -i "s/RELEASE/${RELEASE}/g" /etc/apt/sources.list
+    sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
+    yes '' | apt-get install --force-yes build-essential debian-archive-keyring \
+                             python-software-properties software-properties-common >>"${OUTTO}" 2>&1
+    apt-get --yes --force-yes update >>"${OUTTO}" 2>&1
     apt-get --yes --force-yes install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   else
     cp ${local_setup}templates/apt.sources/ubuntu.template /etc/apt/sources.list
-    sed -i "s/RELEASE/${RELEASE}/g" /etc/apt/sources.list
+    sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
+    apt-get -y -f install build-essential debian-archive-keyring \
+                             python-software-properties software-properties-common >>"${OUTTO}" 2>&1
     apt-get -y -f --allow-unauthenticated install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   fi
 
@@ -284,40 +302,48 @@ function _updates() {
 
 # package and repo addition (14) _install softwares and packages_
 function _depends() {
-  if [[ $DISTRO == Debian ]]; then
-  apt-get -y update >>"${OUTTO}" 2>&1
-  yes '' | apt-get install --force-yes build-essential fail2ban bc sudo screen zip irssi \
-                                       unzip nano bwm-ng htop iotop git dos2unix subversion \
-                                       dstat automake make mktorrent libtool libcppunit-dev \
-                                       libssl-dev pkg-config libxml2-dev libcurl3 \
-                                       libcurl4-openssl-dev libsigc++-2.0-dev apache2-utils autoconf \
-                                       cron curl libxslt-dev libncurses5-dev yasm pcregrep apache2 \
-                                       php5 php5-cli php-net-socket libdbd-mysql-perl libdbi-perl \
-                                       fontconfig quota comerr-dev ca-certificates libfontconfig1-dev \
-                                       libfontconfig1 rar unrar mediainfo php5-curl ifstat \
-                                       libapache2-mod-php5 ttf-mscorefonts-installer checkinstall dtach cfv \
-                                       libarchive-zip-perl libnet-ssleay-perl php5-geoip \
-                                       openjdk-7-jre-headless openjdk-7-jre openjdk-7-jdk \
-                                       libxslt1-dev libxslt1.1 libxml2 libffi-dev python-pip python-dev \
-                                       libhtml-parser-perl libxml-libxml-perl libjson-perl libjson-xs-perl \
-                                       libxml-libxslt-perl libapache2-mod-scgi python-software-properties \
-                                       lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
-  else
-  apt-get -y update >>"${OUTTO}" 2>&1
-  apt-get -y -f --allow-unauthenticated install build-essential fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop git \
+  if [[ $CODENAME == wheezy ]]; then
+    yes '' | apt-get install --force-yes fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop \
+                     iotop dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev \
+                     libssl-dev pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
+                     apache2-utils autoconf cron curl libxslt-dev libncurses5-dev yasm pcregrep apache2 \
+                     php5 php-pear php5-dev php5-cli php-net-socket libdbd-mysql-perl libdbi-perl fontconfig \
+                     ca-certificates libfontconfig1-dev libfontconfig1 rar unrar mediainfo php5-curl ifstat \
+                     libapache2-mod-php5 ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
+                     libnet-ssleay-perl php5-geoip openjdk-7-jre-headless openjdk-7-jre openjdk-7-jdk \
+                     libhtml-parser-perl libxml-libxml-perl libjson-perl libjson-xs-perl libxml-libxslt-perl \
+                     libapache2-mod-scgi comerr-dev lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
+  elif [[ $CODENAME == jessie ]]; then
+    yes '' | apt-get install --force-yes fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop \
                      dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
                      pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip \
                      libxslt-dev libncurses5-dev yasm pcregrep apache2 php-net-socket \
-                     libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mbstring php7.0-zip php7.0-mysql \
-                     php7.0-curl php-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
-                     php7.0-xml php7.0-zip fontconfig quota comerr-dev ca-certificates libfontconfig1-dev \
-                     libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 python-software-properties \
+                     libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mysql \
+                     php7.0-curl php7.0-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
+                     php7.0-xml fontconfig comerr-dev ca-certificates libfontconfig1-dev \
+                     libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 \
                      ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
                      libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
                      libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
                      libjson-perl libjson-xs-perl libxml-libxslt-perl libapache2-mod-scgi \
-                     lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
+                     vnstat vnstati openvpn >>"${OUTTO}" 2>&1
+  elif [[ $DISTRO == Ubuntu ]]; then
+    apt-get -y -f --allow-unauthenticated install build-essential debian-archive-keyring fail2ban bc sudo \
+                     screen zip irssi unzip nano bwm-ng htop iotop git \
+                     dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
+                     pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
+                     apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip \
+                     libxslt-dev libncurses5-dev yasm pcregrep apache2 php-net-socket \
+                     libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mbstring php7.0-mysql \
+                     php7.0-curl php-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
+                     php7.0-xml php7.0-zip fontconfig comerr-dev ca-certificates libfontconfig1-dev \
+                     libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 \
+                     ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
+                     libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
+                     libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
+                     libjson-perl libjson-xs-perl libxml-libxslt-perl libapache2-mod-scgi \
+                     vnstat vnstati openvpn >>"${OUTTO}" 2>&1
   fi
 }
 
@@ -345,23 +371,48 @@ function _skel() {
   mv GeoLiteCity.dat /usr/share/GeoIP/GeoIPCity.dat>>"${OUTTO}" 2>&1
   (echo y;echo o conf prerequisites_policy follow;echo o conf commit)>/dev/null 2>&1|cpan Digest::SHA1 >>"${OUTTO}" 2>&1
   (echo y;echo o conf prerequisites_policy follow;echo o conf commit)>/dev/null 2>&1|cpan Digest::SHA >>"${OUTTO}" 2>&1
+}
+
+function _qmount() {
   # Setup mount points for Quotas
-  if [[ ${primaryroot} == "root" ]]; then
-    sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
-    apt-get install -y linux-image-extra-virtual >>"${OUTTO}" 2>&1
-    mount -o remount / || mount -o remount /home >>"${OUTTO}" 2>&1
-    quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
-    quotaon -uv / >>"${OUTTO}" 2>&1
-    service quota start >>"${OUTTO}" 2>&1
-  else
-    sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
-    apt-get install -y linux-image-extra-virtual >>"${OUTTO}" 2>&1
-    mount -o remount /home >>"${OUTTO}" 2>&1
-    quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
-    quotaon -uv /home >>"${OUTTO}" 2>&1
-    service quota start >>"${OUTTO}" 2>&1
+  if [[ $DISTRO == Ubuntu ]]; then
+    if [[ ${primaryroot} == "root" ]]; then
+      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
+      apt-get install -y linux-image-extra-virtual quota >>"${OUTTO}" 2>&1
+      mount -o remount / || mount -o remount /home >>"${OUTTO}" 2>&1
+      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+      quotaon -uv / >>"${OUTTO}" 2>&1
+      service quota start >>"${OUTTO}" 2>&1
+    else
+      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
+      apt-get install -y linux-image-extra-virtual quota >>"${OUTTO}" 2>&1
+      mount -o remount /home >>"${OUTTO}" 2>&1
+      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+      quotaon -uv /home >>"${OUTTO}" 2>&1
+      service quota start >>"${OUTTO}" 2>&1
+    fi
+  elif [[ $DISTRO == Debian ]]; then
+    if [[ ${primaryroot} == "root" ]]; then
+      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
+      apt-get install -y quota >>"${OUTTO}" 2>&1
+      mount -o remount / || mount -o remount /home >>"${OUTTO}" 2>&1
+      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+      quotaon -uv / >>"${OUTTO}" 2>&1
+      service quota start >>"${OUTTO}" 2>&1
+    else
+      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
+      apt-get install -y quota >>"${OUTTO}" 2>&1
+      mount -o remount /home >>"${OUTTO}" 2>&1
+      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+      quotaon -uv /home >>"${OUTTO}" 2>&1
+      service quota start >>"${OUTTO}" 2>&1
+    fi
   fi
-  # Setup LShell configuration file
+}
+
+function _lshell() {
+# Setup LShell configuration file
+  apt-get -y install lshell >> /dev/null 2>&1
   cp ${local_setup}templates/lshell.conf.template /etc/lshell.conf
 }
 
@@ -470,10 +521,6 @@ function _dashboard() {
 
 # function to configure apache (24)
 function _apacheconf() {
-  a2enmod actions >>"${OUTTO}" 2>&1
-  a2enmod fastcgi >>"${OUTTO}" 2>&1
-  #a2dismod mpm_prefork >>"${OUTTO}" 2>&1
-  #a2enmod mpm_worker >>"${OUTTO}" 2>&1
   cp ${local_setup}templates/aliases-seedbox.conf.template /etc/apache2/sites-enabled/aliases-seedbox.conf
   sed -i "s/USERNAME/${username}/g" /etc/apache2/sites-enabled/aliases-seedbox.conf
   a2enmod auth_digest >>"${OUTTO}" 2>&1
@@ -487,19 +534,36 @@ function _apacheconf() {
   sed -i "s/HTPASSWD/\/etc\/htpasswd/g" /etc/apache2/sites-enabled/default-ssl.conf
   sed -i "s/PORT/${PORT}/g" /etc/apache2/sites-enabled/default-ssl.conf
   cp ${local_setup}templates/fileshare.conf.template /etc/apache2/sites-enabled/fileshare.conf
-  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
-           -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
-           -e "s/expose_php = On/expose_php = Off/" \
-           -e "s/128M/768M/" \
-           -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
-           -e "s/;opcache.enable=0/opcache.enable=1/" \
-           -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
-           -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
-           -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.0/fpm/php.ini
-# ensure opcache module is activated
-phpenmod -v 7.0 opcache >>"${OUTTO}" 2>&1
-#a2enmod proxy_fcgi >>"${OUTTO}" 2>&1
-  sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.0/apache2/php.ini
+  if [[ $CODENAME == wheezy ]]; then
+    sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
+               -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
+               -e "s/expose_php = On/expose_php = Off/" \
+               -e "s/128M/768M/" \
+               -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
+               -e "s/;opcache.enable=0/opcache.enable=1/" \
+               -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
+               -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
+               -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php5/apache2/php.ini
+    a2enmod php5
+  else
+    sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
+               -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
+               -e "s/expose_php = On/expose_php = Off/" \
+               -e "s/128M/768M/" \
+               -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
+               -e "s/;opcache.enable=0/opcache.enable=1/" \
+               -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
+               -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
+               -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.0/fpm/php.ini
+    # ensure opcache module is activated
+    phpenmod -v 7.0 opcache >>"${OUTTO}" 2>&1
+    #a2enmod proxy_fcgi >>"${OUTTO}" 2>&1
+    #a2dismod mpm_prefork >>"${OUTTO}" 2>&1
+    #a2enmod mpm_worker >>"${OUTTO}" 2>&1
+    a2enmod actions >>"${OUTTO}" 2>&1
+    a2enmod fastcgi >>"${OUTTO}" 2>&1
+    sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.0/apache2/php.ini
+  fi
 }
 
 # function to configure first user config (25)
@@ -735,10 +799,10 @@ function _finished() {
   echo "#   ${cyan}(Also works for FTP:5757/SSH:4747)${normal}"
   echo "#   If you need to restart rtorrent/irssi, you can type 'reload'"
   echo "#   https://${username}:${passwd}@${ip} (Also works for FTP:5757/SSH:4747)" > ${username}.info
-  if [[ "${rel}" = "16.04" ]]; then
-    echo "#   Reloading: ${green}sshd${normal}, ${green}apache${normal}, ${green}memcached${normal}, ${green}php7.0${normal}, ${green}vsftpd${normal}, ${green}fail2ban${normal} and ${green}quota${normal}"
-  else
+  if [[ $CODENAME = wheezy ]]; then
     echo "#   Reloading: ${green}sshd${normal}, ${green}apache${normal}, ${green}vsftpd${normal}, ${green}fail2ban${normal} and ${green}quota${normal}"
+  else
+    echo "#   Reloading: ${green}sshd${normal}, ${green}apache${normal}, ${green}memcached${normal}, ${green}php7.0${normal}, ${green}vsftpd${normal}, ${green}fail2ban${normal} and ${green}quota${normal}"
   fi
   echo '################################################################################################'
   echo
@@ -834,6 +898,8 @@ echo -n "Updating system ... ";_updates & spinner $!;echo
 echo -n "Installing all needed dependencies ... ";_depends & spinner $!;echo
 echo -n "Setting up system executables ... ";_syscommands & spinner $!;echo
 echo -n "Building required user directories ... ";_skel & spinner $!;echo
+echo -n "Setting up quotas for ${green}/($primaryroot)${normal} mount ... ";_qmount & spinner $!;echo
+echo -n "Setting up Limited Shell environment ... ";_lshell & spinner $!;echo
 if [[ ${ffmpeg} == "yes" ]]; then
     echo -n "Building ffmpeg from source for screenshots ... ";_ffmpeg & spinner $!;echo
 fi
