@@ -297,6 +297,7 @@ function _updates() {
 
   # Create the service lock file directory
   if [[ -d /install ]]; then cd; else mkdir /install; fi
+  if [[ -d /root/tmp ]]; then cd && rm -r tmp; fi
 
 }
 
