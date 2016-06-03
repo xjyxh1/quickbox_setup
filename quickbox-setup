@@ -757,7 +757,7 @@ function _perms() {
   chmod 777 /home/${username}/.sessions >/dev/null 2>&1
   chown ${username}.${username} /home/${username}/.startup >/dev/null 2>&1
   chmod +x /home/${username}/.startup >/dev/null 2>&1
-  chown -R ${username}.${username} /srv/rutorrent/home >/dev/null 2>&1
+  chown -R chown -R www-data:www-data /srv/rutorrent/home >/dev/null 2>&1
 }
 
 
