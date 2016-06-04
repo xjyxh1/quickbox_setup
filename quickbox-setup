@@ -605,9 +605,9 @@ function _rconf() {
   sed -i "s/YYY/${PORTEND}/g" /home/${username}/.rtorrent.rc
 }
 
-# function to install rutorrent plugins (26)
+# function to set proper diskspace plugin (26)
 function _plugins() {
-  cd "${local_rutorrent}plugins/"
+  cd "${rutorrent}plugins/"
   if [[ ${primaryroot} == "root" ]]; then
     rm -r ${rutorrent}plugins/diskspaceh
   else
