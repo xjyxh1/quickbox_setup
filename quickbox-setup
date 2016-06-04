@@ -367,7 +367,7 @@ function _depends() {
 
 function _syscommands() {
   mkdir -p /usr/local/bin/quickbox
-  cp -r ${local_packages}quickbox/. /usr/local/bin/quickbox
+  cp -r ${local_packages}/. /usr/local/bin/quickbox
   dos2unix $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
   chmod +x $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
   cp /usr/local/bin/quickbox/system/reload /usr/bin/reload
