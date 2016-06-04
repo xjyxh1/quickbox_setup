@@ -255,6 +255,7 @@ function _repos() {
   fi
 
   git clone https://github.com/QuickBox/quickbox_rutorrent >> /dev/null 2>&1
+  git clone https://github.com/QuickBox/quickbox_rutorrent-plugins quickbox_rutorrent-plugins >> /dev/null 2>&1
   git clone https://github.com/QuickBox/quickbox_packages >> /dev/null 2>&1
   git clone https://github.com/QuickBox/quickbox_dashboard >> /dev/null 2>&1
 
@@ -319,11 +320,11 @@ function _depends() {
                      dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
                      pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip \
-                     libxslt-dev libncurses5-dev yasm pcregrep apache2 php-net-socket \
-                     libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mysql \
+                     libxslt-dev libncurses5-dev yasm pcregrep apache2 php-net-socket libapache2-mod-php7.0 \
+                     php7.0-dev php-geoip libgeoip-dev php7.0 php7.0-fpm php7.0-mysql \
                      php7.0-curl php7.0-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
                      php7.0-xml fontconfig comerr-dev ca-certificates libfontconfig1-dev \
-                     libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 \
+                     libdbd-mysql-perl libdbi-perl libfontconfig1 rar unrar mediainfo ifstat \
                      ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
                      libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
                      libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
@@ -612,7 +613,7 @@ function _plugins() {
   chown -R www-data.www-data "${rutorrent}"
   cd /srv/rutorrent/plugins/theme/themes/
   git clone https://github.com/Swizards/club-Swizards club-Swizards >>"${OUTTO}" 2>&1
-  chown -R www-data: club-Swizards
+  chown -R www-data:www-data club-Swizards
   cd /srv/rutorrent/plugins
   perl -pi -e "s/\$defaultTheme \= \"\"\;/\$defaultTheme \= \"club-Swizards\"\;/g" /srv/rutorrent/plugins/theme/conf.php
   rm -rf /srv/rutorrent/plugins/tracklabels/labels/nlb.png
@@ -862,6 +863,7 @@ spinner() {
 
 local_setup=/root/quickbox_setup/
 local_rutorrent=/root/quickbox_rutorrent/
+local_rutorrent-plugins=/root/quickbox_rutorrent-plugins
 local_packages=/root/quickbox_packages/
 local_dashboard=/root/quickbox_dashboard/
 
