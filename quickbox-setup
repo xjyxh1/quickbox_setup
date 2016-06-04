@@ -321,7 +321,7 @@ function _depends() {
                      pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip \
                      libxslt-dev libncurses5-dev yasm pcregrep apache2 php-net-socket libapache2-mod-php7.0 \
-                     php7.0-dev php-geoip libgeoip-dev php7.0 php7.0-fpm php7.0-mysql \
+                     php7.0-dev php7.0-geoip libgeoip-dev php7.0 php7.0-fpm php7.0-mysql \
                      php7.0-curl php7.0-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
                      php7.0-xml fontconfig comerr-dev ca-certificates libfontconfig1-dev \
                      libdbd-mysql-perl libdbi-perl libfontconfig1 rar unrar mediainfo ifstat \
@@ -340,7 +340,7 @@ function _depends() {
                      libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mbstring php7.0-mysql \
                      php7.0-curl php-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
                      php7.0-xml php7.0-zip fontconfig comerr-dev ca-certificates libfontconfig1-dev \
-                     libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 \
+                     php7.0-geoip libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 \
                      ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
                      libnet-ssleay-perl openjdk-7-jre-headless openjdk-7-jre openjdk-7-jdk libxslt1-dev \
                      libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
@@ -356,7 +356,7 @@ function _depends() {
                      libdbd-mysql-perl libdbi-perl php7.0 php7.0-fpm php7.0-mbstring php7.0-mysql \
                      php7.0-curl php-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
                      php7.0-xml php7.0-zip fontconfig comerr-dev ca-certificates libfontconfig1-dev \
-                     libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 \
+                     php7.0-geoip libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.0 \
                      ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
                      libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
                      libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
