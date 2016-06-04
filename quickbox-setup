@@ -28,7 +28,7 @@ function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15
 #################################################################################
 
 function _bashrc() {
-  cp ${local_setup}templates/bashrc.template ~/.bashrc
+  cp ${local_setup}templates/bashrc.template /root/.bashrc
 }
 
 # intro function (1)
