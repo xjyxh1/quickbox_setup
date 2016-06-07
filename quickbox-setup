@@ -874,11 +874,11 @@ spinner() {
     echo -ne "${OK}"
 }
 
-local_setup=/root/quickbox_setup/
-local_rutorrent=/root/quickbox_rutorrent/
-local_rplugins=/root/quickbox_rutorrent-plugins/
-local_packages=/root/quickbox_packages/
-local_dashboard=/root/quickbox_dashboard/
+local_setup=/root/QuickBox/setup/
+local_packages=/root/QuickBox/packages/
+local_rutorrent=/root/QuickBox/rutorrent/
+local_rplugins=/root/QuickBox/rtplugins/
+local_dashboard=/root/QuickBox/dashboard/
 
 Reth0=$(ifconfig | grep -m 1 "Link encap" | sed 's/[ \t].*//;/^\(lo\|\)$/d' | awk '{ print $1 '});
 IFACE=$(echo -n "${Reth0}");
