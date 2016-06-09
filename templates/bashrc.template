@@ -166,6 +166,9 @@ RPORT=$(shuf -i 2000-61000 -n 1)
 while [[ "$(netstat -ln | grep ':'"$RPORT"'' | grep -c 'LISTEN')" -eq "1" ]]; do RPORT="$(shuf -i 2000-61000 -n 1)"; done
 ip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 # --END HERE --
+echo
+echo "!important! When creating a user, only use lowercase for the username"
+echo
 echo -n "Username: "; read username
   if grep -Fxq "$username" /etc/passwd; then
     echo "$username exists! cant proceed..."
