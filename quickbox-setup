@@ -29,6 +29,7 @@ function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15
 
 function _bashrc() {
   cp ${local_setup}templates/bashrc.template /root/.bashrc
+  apt-get install -y software-properties-common >>"${OUTTO}" 2>&1
 }
 
 # intro function (1)
@@ -262,14 +263,14 @@ function _updates() {
     cp ${local_setup}templates/apt.sources/debian.template /etc/apt/sources.list
     sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
     yes '' | apt-get install --force-yes build-essential debian-archive-keyring \
-                             python-software-properties software-properties-common >>"${OUTTO}" 2>&1
+                             python-software-properties >>"${OUTTO}" 2>&1
     apt-get --yes --force-yes update >>"${OUTTO}" 2>&1
     apt-get --yes --force-yes install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   else
     cp ${local_setup}templates/apt.sources/ubuntu.template /etc/apt/sources.list
     sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
     apt-get -y -f install build-essential debian-archive-keyring \
-                             python-software-properties software-properties-common >>"${OUTTO}" 2>&1
+                             python-software-properties >>"${OUTTO}" 2>&1
     #apt-get -y -f --allow-unauthenticated install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   fi
 
