@@ -1200,7 +1200,7 @@ echo $OK
 fi
 echo -n "Setting up autodl-irssi for $username ... "
 mkdir -p /home/$username/.autodl >/dev/null 2>&1
-touch /home/$username/.autodl/autodl.cfg >/dev/null 2>&1
+#touch /home/$username/.autodl/autodl.cfg >/dev/null 2>&1
 cat >/home/$username/.autodl/autodl.cfg<<ADC
 [options]
 gui-server-port = $IRSSI_PORT
