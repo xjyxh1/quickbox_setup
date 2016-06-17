@@ -22,6 +22,8 @@ QUICKBOX_VERSION=2.3.5
 export TERM=xterm;TERM=xterm
 export PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/home/quickbox/.bin/:/usr/local/bin/quickbox/:/usr/local/bin/quickbox/package/:/usr/local/bin/quickbox/package/install/:/usr/local/bin/quickbox/package/remove/:/usr/local/bin/quickbox/plugin/:/usr/local/bin/quickbox/plugin/install/:/usr/local/bin/quickbox/plugin/remove/:/usr/local/bin/quickbox/system/
 
+EDITOR=nano; export EDITOR=nano
+
 #-------------------------------------------------------------
 # Source global definitions (if any)
 #-------------------------------------------------------------
@@ -1297,3 +1299,6 @@ prompt_OFF
 # mode:shell-script
 # sh-shell:bash
 # End:
+
+export NVM_DIR="/root/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
