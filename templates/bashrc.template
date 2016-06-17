@@ -9,7 +9,7 @@
 #+ you'll have to do some other choices for readability.
 #
 #  In addition to the aliases and prompts to make your shell experience
-#+ with QuickBox and easy and enjoyable one, there are additional
+#+ with QuickBox an easy and enjoyable one, there are additional
 #+ functions towards the bottom of this file that are necessary
 #+ to the working order of your QuickBox install. It is advisable
 #+ that unless you know what you are doing, this file remain untouched.
