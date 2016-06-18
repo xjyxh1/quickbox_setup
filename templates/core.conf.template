@@ -97,5 +97,5 @@
   "cache_size": 512,
   "share_ratio_limit": 2.0,
   "random_port": true,
-  "listen_interface": "IP"
+  "listen_interface": "XX"
 }
