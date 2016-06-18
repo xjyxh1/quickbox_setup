@@ -538,7 +538,7 @@ function _deluge() {
   if [[ $DELUGE == REPO ]]; then
     apt-get -q -y update
     apt-get -q -y install deluged deluge-web
-  elif [[ $DELUGE == 1.0.9 ]]
+  elif [[ $DELUGE == 1.0.9 ]]; then
   apt-get -qy --force-yes update >/dev/null 2>&1
   LIST='build-essential checkinstall libboost-system-dev libboost-python-dev libssl-dev libgeoip-dev libboost-chrono-dev libboost-random-dev
   python python-twisted python-openssl python-setuptools intltool python-xdg python-chardet geoip-database python-notify python-pygame
@@ -559,7 +559,7 @@ function _deluge() {
   python setup.py build >>"${OUTTO}" 2>&1
   python setup.py install --install-layout=deb >>"${OUTTO}" 2>&1
   python setup.py install_data >>"${OUTTO}" 2>&1
-  elif [[ $DELUGE == 1.1.0 ]]
+elif [[ $DELUGE == 1.1.0 ]]; then
   apt-get -qy --force-yes update >/dev/null 2>&1
   LIST='build-essential checkinstall libboost-system-dev libboost-python-dev libssl-dev libgeoip-dev libboost-chrono-dev libboost-random-dev
   python python-twisted python-openssl python-setuptools intltool python-xdg python-chardet geoip-database python-notify python-pygame
