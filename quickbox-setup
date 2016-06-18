@@ -580,7 +580,6 @@ elif [[ $DELUGE == 1.1.0 ]]; then
   python setup.py build >>"${OUTTO}" 2>&1
   python setup.py install --install-layout=deb >>"${OUTTO}" 2>&1
   python setup.py install_data >>"${OUTTO}" 2>&1
-  elif [[ $DELUGE == NO ]]; then
 fi
   if [[ $DELUGE != NO ]]
   DPORT=$((RANDOM%59000+10024))
