@@ -569,6 +569,8 @@ fi
   if [[ $DELUGE != NO ]]; then
   n=$RANDOM
   DPORT=$((n%59000+10024))
+  DWSALT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+  DWP=$(python ${local_packages}/system/deluge.Userpass.py ${passwd} ${DWSALT})
   # -- Secondary awk command -- #
   #DPORT=$(awk -v min=59000 -v max=69024 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
   DWPORT=$(shuf -i 10001-11000 -n 1)
@@ -581,6 +583,9 @@ fi
   sed -i "s/DPORT/${DPORT}/g" /home/${username}/.config/deluge/core.conf
   sed -i "s/XX/${ip}/g" /home/${username}/.config/deluge/core.conf
   sed -i "s/DWPORT/${DWPORT}/g" /home/${username}/.config/deluge/web.conf
+  sed -i "s/DWSALT/${DWSALT}/g" /home/${username}/.config/deluge/web.conf
+  sed -i "s/DWP/${DWP}/g" /home/${username}/.config/deluge/web.conf
+
   echo "${username}:${passwd}:10" > /home/${username}/.config/deluge/auth
   chown -R ${username}.${username} /home/${username}/.config/
   mkdir /home/${username}/dwatch
