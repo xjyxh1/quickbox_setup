@@ -999,6 +999,7 @@ clear
 
 _hostname
 _askrtorrent
+_askdeluge
 _adduser
 _askffmpeg
 _denyhosts
@@ -1024,6 +1025,7 @@ echo -n "Installing libtorrent-${green}$LTORRENT${normal} ... ";_libtorrent & sp
 echo -n "Installing rtorrent-${green}$RTVERSION${normal} ... ";_rtorrent & spinner $!;echo
 echo -n "Installing rutorrent into /srv ... ";_rutorrent & spinner $!;echo
 echo -n "Installing rutorrent plugins ... ";_rutorrent-plugins & spinner $!;echo
+echo -n "Installing deluge ... ";_deluge & spinner $!;echo
 echo -n "Installing quickbox dashboard ... ";_dashboard & spinner $!;echo
 echo -n "Setting up seedbox.conf for apache ... ";_apacheconf & spinner $!;echo
 echo -n "Installing .rtorrent.rc for ${username} ... ";_rconf & spinner $!;echo
