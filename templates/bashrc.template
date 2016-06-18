@@ -1224,6 +1224,7 @@ dport=$((RANDOM%59000+10024))
 dwport=$(shuf -i 10001-11000 -n 1)
 DWSALT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 DWP=$(python /usr/local/bin/quickbox/system/deluge.Userpass.py ${passwd} ${DWSALT})
+DUDID=$(python /usr/local/bin/quickbox/system/deluge.addHost.py)
 sudo -H -u ${username} deluged
 dpidtemp=$( ps aux | grep deluged | head -n 1 | awk '{print $2}' )
 kill $dpidtemp
@@ -1360,6 +1361,21 @@ cat >/home/$username/.config/deluge/web.conf<<DW
 "sidebar_multiple_filters": true
 }
 DW
+cat >/home/$username/.config/deluge/hostlist.conf.1.2<<DWHOSTS
+{
+  "file": 1,
+  "format": 1
+}{
+  "hosts": [
+    [
+      "${DUDID}",
+      "127.0.0.1",
+      ${DPORT},
+      "${username}",
+      "${passwd}"
+    ]
+  ]
+}
 chown -R ${username}.${username} /home/${username}/.config/
 sed -i '/RTORRENT_CLIENT=yes/a DELUGEWEB_CLIENT=yes' /home/${username}/.startup
 sed -i '/RTORRENT_CLIENT=yes/a DELUGED_CLIENT=yes' /home/${username}/.startup
