@@ -19,7 +19,7 @@ fi
 
 if [ "$DELUGED_CLIENT" == "yes" ]; then
   DPID=/home/${USER}/.config/deluge/deluged.pid
-  if [[ ! -e $DPID ]]
+  if [[ ! -e $DPID ]]; then
   deluged
   fi
 fi
