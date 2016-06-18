@@ -578,7 +578,7 @@ fi
   cp ${local_setup}templates/core.conf.template /home/${username}/.config/deluge/core.conf
   cp ${local_setup}templates/web.conf.template /home/${username}/.config/deluge/web.conf
   sed -i "s/USERNAME/${username}/g" /home/${username}/.config/deluge/core.conf
-  sed -i "s/DPORT/${DPORT}/g"/home/${username}/.config/deluge/core.conf
+  sed -i "s/DPORT/${DPORT}/g" /home/${username}/.config/deluge/core.conf
   sed -i "s/XX/${ip}/g" /home/${username}/.config/deluge/core.conf
   sed -i "s/DWPORT/${DWPORT}/g" /home/${username}/.config/deluge/web.conf
   echo "${username}:${passwd}:10" > /home/${username}/.config/deluge/auth
