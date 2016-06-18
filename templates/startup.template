@@ -22,5 +22,7 @@ if [ "$DELUGED_CLIENT" == "yes" ]; then
   if [[ ! -e $DPID ]]
   deluged
   fi
-  (screen -ls|grep deluge-web >/dev/null || (screen -fa -dmS deluged deluged && false))
+fi
+if [ "$DELUGEWEB_CLIENT" == "yes" ]; then
+  (screen -ls|grep deluge-web >/dev/null || (screen -fa -dmS deluge-web deluge-web && false))
 fi
