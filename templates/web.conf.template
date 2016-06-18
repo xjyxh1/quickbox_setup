@@ -4,7 +4,7 @@
 }{
   "port": DWPORT,
   "enabled_plugins": [],
-  "pwd_sha1": "2ce1a410bcdcc53064129b6d950f2e9fee4edc1e",
+  "pwd_sha1": "DWP",
   "theme": "gray",
   "show_sidebar": true,
   "sidebar_show_zero": false,
@@ -12,7 +12,7 @@
   "https": false,
   "sessions": {},
   "base": "/",
-  "pwd_salt": "c26ab3bbd8b137f99cd83c2c1c0963bcc1a35cad",
+  "pwd_salt": "DWSALT",
   "show_session_speed": false,
   "first_login": true,
   "cert": "ssl/daemon.cert",
