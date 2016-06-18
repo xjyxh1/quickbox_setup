@@ -581,7 +581,7 @@ elif [[ $DELUGE == 1.1.0 ]]; then
   python setup.py install --install-layout=deb >>"${OUTTO}" 2>&1
   python setup.py install_data >>"${OUTTO}" 2>&1
 fi
-  if [[ $DELUGE != NO ]]
+  if [[ $DELUGE != NO ]]; then
   DPORT=$((RANDOM%59000+10024))
   DWPORT=$(shuf -i 10001-11000 -n 1)
   mkdir -p /home/${username}/.config/deluge/
