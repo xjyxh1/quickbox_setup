@@ -1063,7 +1063,8 @@ echo -n "Username: "; read username
       echo "${username}:${password}" | chpasswd >/dev/null 2>&1
       (echo -n "$username:$realm:" && echo -n "$username:$realm:$password" | md5sum | awk '{print $1}' ) >> $htpasswd
       echo "${username} : $password " >/root/${username}.info
-  fi
+    fi
+    printf "${username}:${passwd}" > /root/"$username".info.db
   echo "Quota size for user: (EX: 500GB): "
   read SIZE
   case $SIZE in

@@ -218,6 +218,7 @@ function _adduser() {
     echo "${username}:${passwd}" | chpasswd >>"${OUTTO}" 2>&1
     (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
   fi
+  printf "${username}:${passwd}" > /root/"$username".info.db
   echo
 }
 
@@ -582,7 +583,10 @@ elif [[ $DELUGE == 1.1.0 ]]; then
   python setup.py install_data >>"${OUTTO}" 2>&1
 fi
   if [[ $DELUGE != NO ]]; then
-  DPORT=$((RANDOM%59000+10024))
+  n=$RANDOM
+  DPORT=$((n%59000+10024))
+  # -- Secondary awk command -- #
+  #DPORT=$(awk -v min=59000 -v max=69024 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
   DWPORT=$(shuf -i 10001-11000 -n 1)
   mkdir -p /home/${username}/.config/deluge/
   chmod 755 /home/${username}/.config
