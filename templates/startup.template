@@ -21,7 +21,6 @@ if [ "$DELUGED_CLIENT" == "yes" ]; then
   DPID=/home/${USER}/.config/deluge/deluged.pid
   if [[ ! -e $DPID ]]
   deluged
-fi
-if [ "$DELUGE-WEB_CLIENT" == "yes" ]; then
+  fi
   (screen -ls|grep deluge-web >/dev/null || (screen -fa -dmS deluged deluged && false))
 fi
