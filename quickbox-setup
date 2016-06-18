@@ -598,6 +598,8 @@ fi
   chown -R ${username}.${username} /home/${username}/.config/
   mkdir /home/${username}/dwatch
   chown ${username}: /home/${username}/dwatch
+  mkdir -p /home/${username}/torrents/deluge
+  chown ${username}: /home/${username}/torrents/deluge
   touch /install/.deluge.lock
 fi
 }

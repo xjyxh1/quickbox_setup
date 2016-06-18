@@ -1208,6 +1208,152 @@ gui-server-password = $IRSSI_PASS
 ADC
 echo $OK
 
+if [[ -e /install/.deluge.lock ]]; then
+echo -n "Setting up Deluge for $username ... "
+ip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
+dport=$((RANDOM%59000+10024))
+dwport=$(shuf -i 10001-11000 -n 1)
+sudo -u ${username} deluged
+dpidtemp=$( ps aux | grep deluged | head -n 1 | awk '{print $2}' )
+kill $dpidtemp
+mkdir -p /home/${username}/.config/deluge/plugins
+chmod 755 /home/${username}/.config
+chmod 755 /home/${username}/.config/deluge
+wget -P /home/${username}/.config/deluge/plugins https://github.com/ratanakvlun/deluge-ltconfig/releases/download/v0.2.5.0/ltConfig-0.2.5.0-py2.7.egg  >>/dev/null 2>&1
+mkdir -p /home/${username}/dwatch
+cat >/home/$username/.config/deluge/core.conf<<DC
+{
+"file": 1,
+"format": 1
+}{
+"info_sent": 0.0,
+"lsd": true,
+"max_download_speed": -1.0,
+"send_info": false,
+"natpmp": true,
+"move_completed_path": "/home/${username}/Downloads",
+"peer_tos": "0x08",
+"enc_in_policy": 1,
+"queue_new_to_top": false,
+"ignore_limits_on_local_network": true,
+"rate_limit_ip_overhead": true,
+"daemon_port": ${dport},
+"torrentfiles_location": "/home/${username}/dwatch",
+"max_active_limit": -1,
+"geoip_db_location": "/usr/share/GeoIP/GeoIP.dat",
+"upnp": false,
+"utpex": true,
+"max_active_downloading": 3,
+"max_active_seeding": -1,
+"allow_remote": true,
+"outgoing_ports": [
+  0,
+  0
+],
+"enabled_plugins": [],
+"max_half_open_connections": 50,
+"download_location": "/home/${username}/torrents/deluge",
+"compact_allocation": true,
+"max_upload_speed": -1.0,
+"plugins_location": "/home/${username}/.config/deluge/plugins",
+"max_connections_global": -1,
+"enc_prefer_rc4": true,
+"cache_expiry": 60,
+"dht": true,
+"stop_seed_at_ratio": false,
+"stop_seed_ratio": 2.0,
+"max_download_speed_per_torrent": -1,
+"prioritize_first_last_pieces": true,
+"max_upload_speed_per_torrent": -1,
+"auto_managed": true,
+"enc_level": 2,
+"copy_torrent_file": false,
+"max_connections_per_second": 50,
+"listen_ports": [
+  6881,
+  6891
+],
+"max_connections_per_torrent": -1,
+"del_copy_torrent_file": false,
+"move_completed": false,
+"autoadd_enable": false,
+"proxies": {
+  "peer": {
+    "username": "",
+    "password": "",
+    "hostname": "",
+    "type": 0,
+    "port": 8080
+  },
+  "web_seed": {
+    "username": "",
+    "password": "",
+    "hostname": "",
+    "type": 0,
+    "port": 8080
+  },
+  "tracker": {
+    "username": "",
+    "password": "",
+    "hostname": "",
+    "type": 0,
+    "port": 8080
+  },
+  "dht": {
+    "username": "",
+    "password": "",
+    "hostname": "",
+    "type": 0,
+    "port": 8080
+  }
+},
+"dont_count_slow_torrents": true,
+"add_paused": false,
+"random_outgoing_ports": true,
+"max_upload_slots_per_torrent": -1,
+"new_release_check": false,
+"enc_out_policy": 1,
+"seed_time_ratio_limit": 7.0,
+"remove_seed_at_ratio": false,
+"autoadd_location": "/home/${username}/dwatch/",
+"max_upload_slots_global": -1,
+"seed_time_limit": 180,
+"cache_size": 512,
+"share_ratio_limit": 2.0,
+"random_port": true,
+"listen_interface": "${ip}"
+}
+DC
+echo "${username}:${passwd}:10" > /home/${username}/.config/deluge/auth
+cat >/home/$username/.config/deluge/web.conf<<DW
+{
+"file": 1,
+"format": 1
+}{
+"port": ${dwport},
+"enabled_plugins": [],
+"pwd_sha1": "2ce1a410bcdcc53064129b6d950f2e9fee4edc1e",
+"theme": "gray",
+"show_sidebar": true,
+"sidebar_show_zero": false,
+"pkey": "ssl/daemon.pkey",
+"https": false,
+"sessions": {},
+"base": "/",
+"pwd_salt": "c26ab3bbd8b137f99cd83c2c1c0963bcc1a35cad",
+"show_session_speed": false,
+"first_login": true,
+"cert": "ssl/daemon.cert",
+"session_timeout": 3600,
+"default_daemon": "",
+"sidebar_multiple_filters": true
+}
+DW
+chown -R ${username}.${username} /home/${username}/.config/
+sed -i '/RTORRENT_CLIENT/a DELUGE-WEB_CLIENT=yes' /home/${username}/.startup
+sed -i '/RTORRENT_CLIENT/a DELUGED_CLIENT=yes' /home/${username}/.startup
+fi
+
 sudo -u $username /home/$username/.startup >/dev/null 2>&1
 command1="*/1 * * * * /home/${username}/.startup"
 cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
