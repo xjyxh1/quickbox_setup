@@ -1055,14 +1055,16 @@ echo -n "Username: "; read username
     cp $htpasswd /root/rutorrent-htpasswd.`date +'%d.%m.%y-%S'`
     if [[ "$password" == "" ]]; then
       echo "setting password to $genpass"
-      echo "${username}:${genpass}" | chpasswd >/dev/null 2>&1
-      (echo -n "$username:$realm:" && echo -n "$username:$realm:$genpass" | md5sum | awk '{print $1}' ) >> $htpasswd
+      passwd=$genpass
+      echo "${username}:${passwd}" | chpasswd >/dev/null 2>&1
+      (echo -n "$username:$realm:" && echo -n "$username:$realm:$passwd" | md5sum | awk '{print $1}' ) >> $htpasswd
       echo "${username} : $genpass" >/root/${username}.info
     else
       echo "using $password"
-      echo "${username}:${password}" | chpasswd >/dev/null 2>&1
-      (echo -n "$username:$realm:" && echo -n "$username:$realm:$password" | md5sum | awk '{print $1}' ) >> $htpasswd
-      echo "${username} : $password " >/root/${username}.info
+      passwd=$password
+      echo "${username}:${passwd}" | chpasswd >/dev/null 2>&1
+      (echo -n "$username:$realm:" && echo -n "$username:$realm:$passwd" | md5sum | awk '{print $1}' ) >> $htpasswd
+      echo "${username} : $passwd " >/root/${username}.info
     fi
     printf "${username}:${passwd}" > /root/"$username".info.db
   echo "Quota size for user: (EX: 500GB): "
@@ -1401,7 +1403,7 @@ SCGIMount /${username} 127.0.0.1:$RPORT
 SC
 
 sed -i -e "s/console-username/${username}/g" \
-       -e "s/console-password/${password}/g" /home/${username}/.console/index.php
+       -e "s/console-password/${passwd}/g" /home/${username}/.console/index.php
 
 pkill -u "${username}" -f rtorrent >/dev/null 2>&1
 
