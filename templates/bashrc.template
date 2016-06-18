@@ -1148,6 +1148,15 @@ fi
 if [ "\$RTORRENT_CLIENT" == "yes" ]; then
   (screen -ls|grep rtorrent >/dev/null || (screen -dmS rtorrent rtorrent && false))
 fi
+if [ "$DELUGED_CLIENT" == "yes" ]; then
+  DPID=/home/${USER}/.config/deluge/deluged.pid
+  if [[ ! -e $DPID ]]; then
+  deluged
+  fi
+fi
+if [ "$DELUGEWEB_CLIENT" == "yes" ]; then
+  (screen -ls|grep deluge-web >/dev/null || (screen -fa -dmS deluge-web deluge-web && false))
+fi
 SU
   chown ${username}.${username} /home/${username}/.startup >/dev/null 2>&1
   chmod +x /home/${username}/.startup >/dev/null 2>&1
@@ -1214,14 +1223,14 @@ echo -n "Setting up Deluge for $username ... "
 ip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 dport=$((RANDOM%59000+10024))
 dwport=$(shuf -i 10001-11000 -n 1)
-sudo -u ${username} deluged
+sudo -H -u ${username} deluged
 dpidtemp=$( ps aux | grep deluged | head -n 1 | awk '{print $2}' )
 kill $dpidtemp
 mkdir -p /home/${username}/.config/deluge/plugins
 chmod 755 /home/${username}/.config
 chmod 755 /home/${username}/.config/deluge
-wget -P /home/${username}/.config/deluge/plugins https://github.com/ratanakvlun/deluge-ltconfig/releases/download/v0.2.5.0/ltConfig-0.2.5.0-py2.7.egg  >>/dev/null 2>&1
 mkdir -p /home/${username}/dwatch
+chown ${username}: /home/${username}/dwatch
 cat >/home/$username/.config/deluge/core.conf<<DC
 {
 "file": 1,
@@ -1351,8 +1360,8 @@ cat >/home/$username/.config/deluge/web.conf<<DW
 }
 DW
 chown -R ${username}.${username} /home/${username}/.config/
-sed -i '/RTORRENT_CLIENT/a DELUGE-WEB_CLIENT=yes' /home/${username}/.startup
-sed -i '/RTORRENT_CLIENT/a DELUGED_CLIENT=yes' /home/${username}/.startup
+sed -i '/RTORRENT_CLIENT=yes/a DELUGEWEB_CLIENT=yes' /home/${username}/.startup
+sed -i '/RTORRENT_CLIENT=yes/a DELUGED_CLIENT=yes' /home/${username}/.startup
 fi
 
 sudo -u $username /home/$username/.startup >/dev/null 2>&1
