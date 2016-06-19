@@ -17,7 +17,7 @@
 
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
-QUICKBOX_VERSION=2.3.5
+QUICKBOX_VERSION=2.3.6
 
 export TERM=xterm;TERM=xterm
 export PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/home/quickbox/.bin/:/usr/local/bin/quickbox/:/usr/local/bin/quickbox/package/:/usr/local/bin/quickbox/package/install/:/usr/local/bin/quickbox/package/remove/:/usr/local/bin/quickbox/plugin/:/usr/local/bin/quickbox/plugin/install/:/usr/local/bin/quickbox/plugin/remove/:/usr/local/bin/quickbox/system/
@@ -1055,15 +1055,18 @@ echo -n "Username: "; read username
     cp $htpasswd /root/rutorrent-htpasswd.`date +'%d.%m.%y-%S'`
     if [[ "$password" == "" ]]; then
       echo "setting password to $genpass"
-      echo "${username}:${genpass}" | chpasswd >/dev/null 2>&1
-      (echo -n "$username:$realm:" && echo -n "$username:$realm:$genpass" | md5sum | awk '{print $1}' ) >> $htpasswd
+      passwd=$genpass
+      echo "${username}:${passwd}" | chpasswd >/dev/null 2>&1
+      (echo -n "$username:$realm:" && echo -n "$username:$realm:$passwd" | md5sum | awk '{print $1}' ) >> $htpasswd
       echo "${username} : $genpass" >/root/${username}.info
     else
       echo "using $password"
-      echo "${username}:${password}" | chpasswd >/dev/null 2>&1
-      (echo -n "$username:$realm:" && echo -n "$username:$realm:$password" | md5sum | awk '{print $1}' ) >> $htpasswd
-      echo "${username} : $password " >/root/${username}.info
-  fi
+      passwd=$password
+      echo "${username}:${passwd}" | chpasswd >/dev/null 2>&1
+      (echo -n "$username:$realm:" && echo -n "$username:$realm:$passwd" | md5sum | awk '{print $1}' ) >> $htpasswd
+      echo "${username} : $passwd " >/root/${username}.info
+    fi
+    printf "${username}:${passwd}" > /root/"$username".info.db
   echo "Quota size for user: (EX: 500GB): "
   read SIZE
   case $SIZE in
@@ -1147,6 +1150,12 @@ fi
 if [ "\$RTORRENT_CLIENT" == "yes" ]; then
   (screen -ls|grep rtorrent >/dev/null || (screen -dmS rtorrent rtorrent && false))
 fi
+if [ "\$DELUGED_CLIENT" == "yes" ]; then
+  (screen -ls|grep deluged >/dev/null || (screen -fa -dmS deluged deluged && false))
+fi
+if [ "\$DELUGEWEB_CLIENT" == "yes" ]; then
+  (screen -ls|grep deluge-web >/dev/null || (screen -fa -dmS deluge-web deluge-web && false))
+fi
 SU
   chown ${username}.${username} /home/${username}/.startup >/dev/null 2>&1
   chmod +x /home/${username}/.startup >/dev/null 2>&1
@@ -1208,6 +1217,172 @@ gui-server-password = $IRSSI_PASS
 ADC
 echo $OK
 
+if [[ -e /install/.deluge.lock ]]; then
+echo -n "Setting up Deluge for $username ... "
+ip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
+dport=$((RANDOM%59000+10024))
+dwport=$(shuf -i 10001-11000 -n 1)
+DWSALT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+DWP=$(python /usr/local/bin/quickbox/system/deluge.Userpass.py ${passwd} ${DWSALT})
+DUDID=$(python /usr/local/bin/quickbox/system/deluge.addHost.py)
+sudo -H -u ${username} deluged
+dpidtemp=$( ps aux | grep deluged | head -n 1 | awk '{print $2}' )
+kill $dpidtemp
+mkdir -p /home/${username}/.config/deluge/plugins
+chmod 755 /home/${username}/.config
+chmod 755 /home/${username}/.config/deluge
+mkdir -p /home/${username}/dwatch
+chown ${username}: /home/${username}/dwatch
+cat >/home/$username/.config/deluge/core.conf<<DC
+{
+"file": 1,
+"format": 1
+}{
+"info_sent": 0.0,
+"lsd": true,
+"max_download_speed": -1.0,
+"send_info": false,
+"natpmp": true,
+"move_completed_path": "/home/${username}/Downloads",
+"peer_tos": "0x08",
+"enc_in_policy": 1,
+"queue_new_to_top": false,
+"ignore_limits_on_local_network": true,
+"rate_limit_ip_overhead": true,
+"daemon_port": ${dport},
+"torrentfiles_location": "/home/${username}/dwatch",
+"max_active_limit": -1,
+"geoip_db_location": "/usr/share/GeoIP/GeoIP.dat",
+"upnp": false,
+"utpex": true,
+"max_active_downloading": 3,
+"max_active_seeding": -1,
+"allow_remote": true,
+"outgoing_ports": [
+  0,
+  0
+],
+"enabled_plugins": [],
+"max_half_open_connections": 50,
+"download_location": "/home/${username}/torrents/deluge",
+"compact_allocation": true,
+"max_upload_speed": -1.0,
+"plugins_location": "/home/${username}/.config/deluge/plugins",
+"max_connections_global": -1,
+"enc_prefer_rc4": true,
+"cache_expiry": 60,
+"dht": true,
+"stop_seed_at_ratio": false,
+"stop_seed_ratio": 2.0,
+"max_download_speed_per_torrent": -1,
+"prioritize_first_last_pieces": true,
+"max_upload_speed_per_torrent": -1,
+"auto_managed": true,
+"enc_level": 2,
+"copy_torrent_file": false,
+"max_connections_per_second": 50,
+"listen_ports": [
+  6881,
+  6891
+],
+"max_connections_per_torrent": -1,
+"del_copy_torrent_file": false,
+"move_completed": false,
+"autoadd_enable": false,
+"proxies": {
+  "peer": {
+    "username": "",
+    "password": "",
+    "hostname": "",
+    "type": 0,
+    "port": 8080
+  },
+  "web_seed": {
+    "username": "",
+    "password": "",
+    "hostname": "",
+    "type": 0,
+    "port": 8080
+  },
+  "tracker": {
+    "username": "",
+    "password": "",
+    "hostname": "",
+    "type": 0,
+    "port": 8080
+  },
+  "dht": {
+    "username": "",
+    "password": "",
+    "hostname": "",
+    "type": 0,
+    "port": 8080
+  }
+},
+"dont_count_slow_torrents": true,
+"add_paused": false,
+"random_outgoing_ports": true,
+"max_upload_slots_per_torrent": -1,
+"new_release_check": false,
+"enc_out_policy": 1,
+"seed_time_ratio_limit": 7.0,
+"remove_seed_at_ratio": false,
+"autoadd_location": "/home/${username}/dwatch/",
+"max_upload_slots_global": -1,
+"seed_time_limit": 180,
+"cache_size": 512,
+"share_ratio_limit": 2.0,
+"random_port": true,
+"listen_interface": "${ip}"
+}
+DC
+echo "${username}:${passwd}:10" > /home/${username}/.config/deluge/auth
+cat >/home/$username/.config/deluge/web.conf<<DW
+{
+"file": 1,
+"format": 1
+}{
+"port": ${dwport},
+"enabled_plugins": [],
+"pwd_sha1": "${DWP}",
+"theme": "gray",
+"show_sidebar": true,
+"sidebar_show_zero": false,
+"pkey": "ssl/daemon.pkey",
+"https": false,
+"sessions": {},
+"base": "/",
+"pwd_salt": "${DWSALT}",
+"show_session_speed": false,
+"first_login": false,
+"cert": "ssl/daemon.cert",
+"session_timeout": 3600,
+"default_daemon": "",
+"sidebar_multiple_filters": true
+}
+DW
+cat >/home/$username/.config/deluge/hostlist.conf.1.2<<DWHOSTS
+{
+  "file": 1,
+  "format": 1
+}{
+  "hosts": [
+    [
+      "${DUDID}",
+      "127.0.0.1",
+      ${dport},
+      "${username}",
+      "${passwd}"
+    ]
+  ]
+}
+DWHOSTS
+chown -R ${username}.${username} /home/${username}/.config/
+sed -i '/RTORRENT_CLIENT=yes/a DELUGEWEB_CLIENT=yes' /home/${username}/.startup
+sed -i '/RTORRENT_CLIENT=yes/a DELUGED_CLIENT=yes' /home/${username}/.startup
+fi
+echo $OK
+
 sudo -u $username /home/$username/.startup >/dev/null 2>&1
 command1="*/1 * * * * /home/${username}/.startup"
 cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
@@ -1245,7 +1420,7 @@ SCGIMount /${username} 127.0.0.1:$RPORT
 SC
 
 sed -i -e "s/console-username/${username}/g" \
-       -e "s/console-password/${password}/g" /home/${username}/.console/index.php
+       -e "s/console-password/${passwd}/g" /home/${username}/.console/index.php
 
 pkill -u "${username}" -f rtorrent >/dev/null 2>&1
 
@@ -1264,6 +1439,7 @@ if [[ -z ${username} ]]
   then echo "you want me to delete nothing? next time enter a username";exit
 fi
 echo -n "Deleting ${username} /home and rutorrent data ... "
+killall -u ${username}
 userdel -rf ${username} >/dev/null 2>&1
 groupdel ${username} >/dev/null 2>&1
 sed -i '/^$username/d' ${htpasswd}

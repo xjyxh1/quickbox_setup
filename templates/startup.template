@@ -16,3 +16,17 @@ fi
 if [ "$RTORRENT_CLIENT" == "yes" ]; then
   (screen -ls|grep rtorrent >/dev/null || (screen -fa -dmS rtorrent rtorrent && false))
 fi
+
+if [ "$DELUGED_CLIENT" == "yes" ]; then
+  (screen -ls|grep deluged >/dev/null || (screen -fa -dmS deluged deluged && false))
+fi
+
+if [ "$DELUGEWEB_CLIENT" == "yes" ]; then
+  (screen -ls|grep deluge-web >/dev/null || (screen -fa -dmS deluge-web deluge-web && false))
+fi
+
+if [ "$BTSYNC" == "yes" ]; then
+  (ps aux|grep btsync >/dev/null && (sudo service btsync start && false))
+else
+  (ps aux|grep btsync >/dev/null && (sudo service btsync stop && false))
+fi
