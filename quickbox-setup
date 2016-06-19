@@ -565,6 +565,8 @@ function _deluge() {
   python setup.py build >>"${OUTTO}" 2>&1
   python setup.py install --install-layout=deb >>"${OUTTO}" 2>&1
   python setup.py install_data >>"${OUTTO}" 2>&1
+  cd ..
+  rm -r {deluge,libtorrent}
 fi
   if [[ $DELUGE != NO ]]; then
   n=$RANDOM
