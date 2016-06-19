@@ -1370,16 +1370,18 @@ cat >/home/$username/.config/deluge/hostlist.conf.1.2<<DWHOSTS
     [
       "${DUDID}",
       "127.0.0.1",
-      ${DPORT},
+      ${dport},
       "${username}",
       "${passwd}"
     ]
   ]
 }
+DWHOSTS
 chown -R ${username}.${username} /home/${username}/.config/
 sed -i '/RTORRENT_CLIENT=yes/a DELUGEWEB_CLIENT=yes' /home/${username}/.startup
 sed -i '/RTORRENT_CLIENT=yes/a DELUGED_CLIENT=yes' /home/${username}/.startup
 fi
+echo $OK
 
 sudo -u $username /home/$username/.startup >/dev/null 2>&1
 command1="*/1 * * * * /home/${username}/.startup"
