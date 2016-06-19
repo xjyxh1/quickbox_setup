@@ -38,14 +38,12 @@ if [ $TotalBytes -lt 1024 ]; then
 else if [ $TotalBytes -lt 1048576 ]; then
 	   TotalSize=$(echo -e "scale=1 \n$TotalBytes/1024 \nquit" | bc)
 	   suffix="kb"
-	else if [ $TotalBytes -lt 1073741824 ]; then
+else if [ $TotalBytes -lt 1073741824 ]; then
 	   TotalSize=$(echo -e "scale=1 \n$TotalBytes/1048576 \nquit" | bc)
 	   suffix="Mb"
 else
 	   TotalSize=$(echo -e "scale=1 \n$TotalBytes/1073741824 \nquit" | bc)
 	   suffix="Gb"
-fi
-fi
 fi
 echo $TotalSize$suffix
 EOF
