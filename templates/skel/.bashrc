@@ -17,35 +17,25 @@ DFSCRIPT="${HOME}/.du.sh"
 if [ ! -e $DFSCRIPT ]; then
 cat >"$DFSCRIPT"<< 'EOF'
 #!/bin/bash
-#ALERT=${BWhite}${On_Red};RED='\e[0;31m';YELLOW='\e[1;33m'
-#GREEN='\e[0;32m';RESET="\e[00m";BWhite='\e[1;37m';On_Red='\e[41m'
-#NCPU=$(grep -c 'processor' /proc/cpuinfo)
-#SLOAD=$(( 100*${NCPU} ));MLOAD=$(( 200*${NCPU} ));XLOAD=$(( 400*${NCPU} ))
-#function load() { SYSLOAD=$(cut -d " " -f1 /proc/loadavg | tr -d '.'); echo -n $((10#$SYSLOAD)); }
-#SYSLOAD=$(load)
-#if [ ${SYSLOAD} -gt ${XLOAD} ]; then echo -en ${ALERT}
-#elif [ ${SYSLOAD} -gt ${MLOAD} ]; then echo -en ${RED}
-#elif [ ${SYSLOAD} -gt ${SLOAD} ]; then echo -en ${YELLOW}
-#else echo -en ${GREEN} ;fi
 let TotalBytes=0
 for Bytes in $(ls -l | grep "^-" | awk '{ print $5 }')
 do
-   let TotalBytes=$TotalBytes+$Bytes
+    let TotalBytes=$TotalBytes+$Bytes
 done
 if [ $TotalBytes -lt 1024 ]; then
-	   TotalSize=$(echo -e "scale=1 \n$TotalBytes \nquit" | bc)
-	   suffix="b"
-else if [ $TotalBytes -lt 1048576 ]; then
-	   TotalSize=$(echo -e "scale=1 \n$TotalBytes/1024 \nquit" | bc)
-	   suffix="kb"
-else if [ $TotalBytes -lt 1073741824 ]; then
-	   TotalSize=$(echo -e "scale=1 \n$TotalBytes/1048576 \nquit" | bc)
-	   suffix="Mb"
+           TotalSize=$(echo -e "scale=1 \n$TotalBytes \nquit$(tput sgr0)" | bc)
+           suffix="b"
+	elif [ $TotalBytes -lt 1048576 ]; then
+           TotalSize=$(echo -e "scale=1 \n$TotalBytes/1024 \nquit$(tput sgr0)" | bc)
+           suffix="kb"
+        elif [ $TotalBytes -lt 1073741824 ]; then
+           TotalSize=$(echo -e "scale=1 \n$TotalBytes/1048576 \nquit$(tput sgr0)" | bc)
+           suffix="Mb"
 else
-	   TotalSize=$(echo -e "scale=1 \n$TotalBytes/1073741824 \nquit" | bc)
-	   suffix="Gb"
+           TotalSize=$(echo -e "scale=1 \n$TotalBytes/1073741824 \nquit$(tput sgr0)" | bc)
+           suffix="Gb"
 fi
-echo $TotalSize$suffix
+echo -en "${TotalSize}${suffix}"
 EOF
 chmod u+x $DFSCRIPT
 fi
@@ -61,14 +51,12 @@ alias la='ls -A'
 alias l='ls -CF'
 
 function normal {
-if [ `id -u` == 0 ] ; then
+if [ $(id -u) == 0 ] ; then
 	DG="$(tput bold ; tput setaf 1)";LG="$(tput bold;tput setaf 4)";NC="$(tput sgr0)"
 	export PS1='[\[$LG\]\u\[$NC\]@\[$LG\]\h\[$NC\]]:(\[$LG\]\[$BN\]$($DFSCRIPT)\[$NC\])\w\$ '
 else
-	DG="$(tput bold;tput setaf 0)"
-	LG="$(tput setaf 4)"
-	NC="$(tput sgr0)"
-	export PS1='[\[$LG\]\u\[$NC\]@\[$LG\]\h\[$NC\]]:(\[$LG\]\[$BN\]$($DFSCRIPT)\[$NC\])\w\$ '
+	DG="$(tput bold;tput setaf 0)";LG="$(tput setaf 4)";DS="$(tput setaf 2)";NC="$(tput sgr0)"
+	export PS1='[\[$LG\]\u\[$NC\]@\[$LG\]\h\[$NC\]]:(\[$LG\]\[$BN\]\[$DS\]$($DFSCRIPT)\[$NC\])\w\$ '
 fi
 }
 
