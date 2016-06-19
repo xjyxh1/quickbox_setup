@@ -1439,6 +1439,7 @@ if [[ -z ${username} ]]
   then echo "you want me to delete nothing? next time enter a username";exit
 fi
 echo -n "Deleting ${username} /home and rutorrent data ... "
+killall -u ${usename} -m .
 userdel -rf ${username} >/dev/null 2>&1
 groupdel ${username} >/dev/null 2>&1
 sed -i '/^$username/d' ${htpasswd}
