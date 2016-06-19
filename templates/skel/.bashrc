@@ -17,20 +17,20 @@ DFSCRIPT="${HOME}/.du.sh"
 if [ ! -e $DFSCRIPT ]; then
 cat >"$DFSCRIPT"<< 'EOF'
 #!/bin/bash
-ALERT=${BWhite}${On_Red};RED='\e[0;31m';YELLOW='\e[1;33m'
-GREEN='\e[0;32m';RESET="\e[00m";BWhite='\e[1;37m';On_Red='\e[41m'
-NCPU=$(grep -c 'processor' /proc/cpuinfo)
-SLOAD=$(( 100*${NCPU} ));MLOAD=$(( 200*${NCPU} ));XLOAD=$(( 400*${NCPU} ))
-function load() { SYSLOAD=$(cut -d " " -f1 /proc/loadavg | tr -d '.'); echo -n $((10#$SYSLOAD)); }
-SYSLOAD=$(load)
-if [ ${SYSLOAD} -gt ${XLOAD} ]; then echo -en ${ALERT}
-elif [ ${SYSLOAD} -gt ${MLOAD} ]; then echo -en ${RED}
-elif [ ${SYSLOAD} -gt ${SLOAD} ]; then echo -en ${YELLOW}
-else echo -en ${GREEN} ;fi
-let TotalBytes=0 
-for Bytes in $(ls -l | grep "^-" | awk '{ print $5 }') 
-do 
-   let TotalBytes=$TotalBytes+$Bytes 
+#ALERT=${BWhite}${On_Red};RED='\e[0;31m';YELLOW='\e[1;33m'
+#GREEN='\e[0;32m';RESET="\e[00m";BWhite='\e[1;37m';On_Red='\e[41m'
+#NCPU=$(grep -c 'processor' /proc/cpuinfo)
+#SLOAD=$(( 100*${NCPU} ));MLOAD=$(( 200*${NCPU} ));XLOAD=$(( 400*${NCPU} ))
+#function load() { SYSLOAD=$(cut -d " " -f1 /proc/loadavg | tr -d '.'); echo -n $((10#$SYSLOAD)); }
+#SYSLOAD=$(load)
+#if [ ${SYSLOAD} -gt ${XLOAD} ]; then echo -en ${ALERT}
+#elif [ ${SYSLOAD} -gt ${MLOAD} ]; then echo -en ${RED}
+#elif [ ${SYSLOAD} -gt ${SLOAD} ]; then echo -en ${YELLOW}
+#else echo -en ${GREEN} ;fi
+let TotalBytes=0
+for Bytes in $(ls -l | grep "^-" | awk '{ print $5 }')
+do
+   let TotalBytes=$TotalBytes+$Bytes
 done
 if [ $TotalBytes -lt 1024 ]; then
 	   TotalSize=$(echo -e "scale=1 \n$TotalBytes \nquit" | bc)
@@ -62,7 +62,7 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-function normal { 
+function normal {
 if [ `id -u` == 0 ] ; then
 	DG="$(tput bold ; tput setaf 1)";LG="$(tput bold;tput setaf 4)";NC="$(tput sgr0)"
 	export PS1='[\[$LG\]\u\[$NC\]@\[$LG\]\h\[$NC\]]:(\[$LG\]\[$BN\]$($DFSCRIPT)\[$NC\])\w\$ '
@@ -93,7 +93,7 @@ function disktest() { dd if=/dev/zero of=test bs=64k count=16k conv=fdatasync;rm
 function newpass() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15 ; }
 function fixhome() { chmod -R u=rwX,g=rwX,o= "$HOME" ;}
 
-function swap() { 
+function swap() {
 local TMPFILE=tmp.$$
     [ $# -ne 2 ] && echo "swap: 2 arguments needed" && return 1
     [ ! -e $1 ] && echo "swap: $1 does not exist" && return 1
@@ -103,5 +103,3 @@ local TMPFILE=tmp.$$
 
 if [ -e /etc/bash_completion ] ; then source /etc/bash_completion; fi
 if [ -e ~/.custom ]; then source ~/.custom; fi
-
-
