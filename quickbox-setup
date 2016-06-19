@@ -771,8 +771,8 @@ function _makedirs() {
 function _cronfile() {
   cp ${local_setup}templates/startup.template /home/${username}/.startup
   if [[ $DELUGE != NO ]]; then
-  sed -i '/RTORRENT_CLIENT=yes/a DELUGEWEB_CLIENT=yes' /home/${username}/.startup
-  sed -i '/RTORRENT_CLIENT=yes/a DELUGED_CLIENT=yes' /home/${username}/.startup
+  sed -i 's/DELUGEWEB_CLIENT=no/DELUGEWEB_CLIENT=yes/g' /home/${username}/.startup
+  sed -i 's/DELUGED_CLIENT=no/DELUGED_CLIENT=yes/g' /home/${username}/.startup
 fi
 }
 

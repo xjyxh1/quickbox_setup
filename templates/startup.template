@@ -2,6 +2,9 @@
 export USER=`id -un`
 IRSSI_CLIENT=yes
 RTORRENT_CLIENT=yes
+DELUGED_CLIENT=no
+DELUGEWEB_CLIENT=no
+BTSYNC=no
 WIPEDEAD=yes
 ADDRESS=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 
