@@ -14,7 +14,7 @@
   "base": "/",
   "pwd_salt": "DWSALT",
   "show_session_speed": false,
-  "first_login": true,
+  "first_login": false,
   "cert": "ssl/daemon.cert",
   "session_timeout": 3600,
   "default_daemon": "",
