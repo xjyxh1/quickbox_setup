@@ -624,6 +624,7 @@ function _rutorrent-plugins() {
 function _dashboard() {
   cd && mkdir -p /srv/rutorrent/home
   cp -R ${local_dashboard}/. /srv/rutorrent/home
+  touch /srv/rutorrent/home/db/output.log
 }
 
 # function to configure apache (24)
@@ -826,7 +827,7 @@ function _quickstats() {
   echo "?>" >> /srv/rutorrent/home/widgets/config.php
   if [[ ${primaryroot} == "home" ]]; then
     cd /srv/rutorrent/home/widgets && rm disk_data.php
-    mv ${local_dashboard}home/widgets/disk_datah.php disk_data.php
+    mv disk_datah.php disk_data.php
     chown -R www-data:www-data /srv/rutorrent/home/widgets
   else
     rm /srv/rutorrent/home/widgets/disk_datah.php
