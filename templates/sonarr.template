@@ -24,10 +24,10 @@ PID_FILE=/var/run/nzbdrone/nzbdrone.pid
 PID_PATH=$(dirname $PID_FILE)
 
 # script name
-NAME=nzbdrone
+NAME=sonarr
 
 # app name
-DESC=NzbDrone
+DESC=Sonarr-NzbDrone
 
 # startup args
 EXENAME="NzbDrone.exe"
@@ -68,7 +68,7 @@ rm -rf $PID_PATH || return 1
 install -d --mode=0755 -o $RUN_AS $PID_PATH || return 1
 start-stop-daemon -d $APP_PATH -c $RUN_AS --start --background --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
 else
-echo "NzbDrone already running."
+echo "Sonarr-NzbDrone already running."
 fi
 ;;
 stop)
