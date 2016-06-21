@@ -5,6 +5,7 @@ RTORRENT_CLIENT=yes
 DELUGED_CLIENT=no
 DELUGEWEB_CLIENT=no
 BTSYNC=no
+SONARR=no
 WIPEDEAD=yes
 ADDRESS=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 
@@ -32,4 +33,10 @@ if [ "$BTSYNC" == "yes" ]; then
   (ps aux|grep btsync >/dev/null && (sudo service btsync start && false))
 else
   (ps aux|grep btsync >/dev/null && (sudo service btsync stop && false))
+fi
+
+if [ "$SONARR" == "yes" ]; then
+  (ps aux|grep mono >/dev/null && (sudo service sonarr start && false))
+else
+  (ps aux|grep mono >/dev/null && (sudo service sonarr stop && false))
 fi
