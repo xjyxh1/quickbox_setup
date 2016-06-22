@@ -843,7 +843,7 @@ function _quickconsole() {
 
 # seedbox boot for first user (35)
 function _boot() {
-  command1="*/1 * * * * /home/${username}/.startup"
+  command1="*/1 * * * * /home/${username}/.startup >/dev/null 2>&1"
   cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
 
   echo "*/1 * * * * root bash /usr/local/bin/quickbox/system/set_interface" > /etc/cron.d/set_interface
