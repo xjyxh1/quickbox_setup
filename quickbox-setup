@@ -319,7 +319,7 @@ function _updates() {
 # package and repo addition (14) _install softwares and packages_
 function _depends() {
   if [[ $CODENAME == wheezy ]]; then
-    yes '' | apt-get install --force-yes fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop \
+    yes '' | apt-get install --force-yes fail2ban bc ed sudo screen zip irssi unzip nano bwm-ng htop \
                      iotop dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev \
                      libssl-dev pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libxslt-dev libncurses5-dev yasm pcregrep apache2 \
@@ -330,7 +330,7 @@ function _depends() {
                      libhtml-parser-perl libxml-libxml-perl libjson-perl libjson-xs-perl libxml-libxslt-perl \
                      libapache2-mod-scgi comerr-dev lshell vnstat vnstati openvpn >>"${OUTTO}" 2>&1
   elif [[ $CODENAME == jessie ]]; then
-    yes '' | apt-get install --force-yes fail2ban bc sudo screen zip irssi unzip nano bwm-ng htop iotop \
+    yes '' | apt-get install --force-yes fail2ban bc ed sudo screen zip irssi unzip nano bwm-ng htop iotop \
                      dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
                      pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip \
@@ -771,6 +771,7 @@ function _makedirs() {
 # function to make crontab .statup file (29)
 function _cronfile() {
   cp ${local_setup}templates/startup.template /home/${username}/.startup
+  chmod 775 /home/${username}/.startup
   if [[ $DELUGE != NO ]]; then
   sed -i 's/DELUGEWEB_CLIENT=no/DELUGEWEB_CLIENT=yes/g' /home/${username}/.startup
   sed -i 's/DELUGED_CLIENT=no/DELUGED_CLIENT=yes/g' /home/${username}/.startup
@@ -859,6 +860,7 @@ function _perms() {
   chown ${username}.${username} /home/${username}/.startup >/dev/null 2>&1
   chmod +x /home/${username}/.startup >/dev/null 2>&1
   chown -R chown -R www-data:www-data /srv/rutorrent/home >/dev/null 2>&1
+  chmod 775 /home/${username}/.startup
 }
 
 

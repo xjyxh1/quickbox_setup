@@ -1167,7 +1167,7 @@ echo -n "enabling $username cron script ... "
   cp /srv/rutorrent/plugins/fileupload/conf.php /srv/rutorrent/conf/users/"${username}"/plugins/fileupload/conf.php
   chown -R www-data: /srv/rutorrent/conf/users/"${username}" >/dev/null 2>&1
   chown $username.$username /home/$username/.startup >/dev/null 2>&1
-  sudo -u $username chmod +x /home/$username/.startup  >/dev/null 2>&1
+  sudo -u $username chmod 775 /home/${username}/.startup >/dev/null 2>&1
   sudo -u $username chmod 750 /home/$username/ >/dev/null 2>&1
   chown -R $username.www-data /home/${username} >/dev/null 2>&1
 echo $OK
