@@ -206,7 +206,7 @@ function _adduser() {
   echo -n "Username: "; read user
   username=$(echo "$user"|sed 's/.*/\L&/')
   useradd "${username}" -m -G www-data -s "${theshell}"
-  echo -n "Password: (hit enter to generate a password) "; read password
+  echo -n "Password: (hit enter to generate a password) "; read 'password'
   if [[ ! -z "${password}" ]]; then
     echo "setting password to ${password}"
     passwd=${password}
@@ -838,7 +838,7 @@ function _quickconsole() {
   CONSOLEIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 
   sed -i -e "s/console-username/${username}/g" \
-         -e "s/console-password/${password}/g" /home/${username}/.console/index.php
+         -e "s/console-password/${passwd}/g" /home/${username}/.console/index.php
 }
 
 # seedbox boot for first user (35)

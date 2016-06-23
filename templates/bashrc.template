@@ -1008,7 +1008,7 @@ echo -n "Username: "; read user
     echo "Username ${username} wasnt found in ${HTPASSWD} .. please try again"
     exit
   fi
-        echo -n "Password: (hit enter to generate a password) "; read password
+        echo -n "Password: (hit enter to generate a password) "; read 'password'
         if [[ ! -z "${password}" ]]; then
                 echo "setting password to ${password}"
                 passwd=${password}
@@ -1050,7 +1050,7 @@ echo -n "Username: "; read username
     exit
   else
     useradd -m -k /etc/skel/ $username -s /usr/bin/lshell
-    echo -n "Password: (hit enter to generate a password) ";read password
+    echo -n "Password: (hit enter to generate a password) ";read 'password'
     chown $username.www-data /home/$username >/dev/null 2>&1
     cp $htpasswd /root/rutorrent-htpasswd.`date +'%d.%m.%y-%S'`
     if [[ "$password" == "" ]]; then
