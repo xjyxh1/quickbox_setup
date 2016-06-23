@@ -771,6 +771,7 @@ function _makedirs() {
 # function to make crontab .statup file (29)
 function _cronfile() {
   cp ${local_setup}templates/startup.template /home/${username}/.startup
+  chmod 775 /home/${username}/.startup
   if [[ $DELUGE != NO ]]; then
   sed -i 's/DELUGEWEB_CLIENT=no/DELUGEWEB_CLIENT=yes/g' /home/${username}/.startup
   sed -i 's/DELUGED_CLIENT=no/DELUGED_CLIENT=yes/g' /home/${username}/.startup
