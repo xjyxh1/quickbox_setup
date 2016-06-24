@@ -1209,12 +1209,13 @@ echo $OK
 fi
 echo -n "Setting up autodl-irssi for $username ... "
 mkdir -p /home/$username/.autodl >/dev/null 2>&1
-#touch /home/$username/.autodl/autodl.cfg >/dev/null 2>&1
-cat >/home/$username/.autodl/autodl.cfg<<ADC
+touch /home/$username/.autodl/autodl.cfg >/dev/null 2>&1
+cat >/home/$username/.autodl/autodl2.cfg<<ADC
 [options]
 gui-server-port = $IRSSI_PORT
 gui-server-password = $IRSSI_PASS
 ADC
+chown -R $username: /home/$username/.autodl
 echo $OK
 
 if [[ -e /install/.deluge.lock ]]; then
