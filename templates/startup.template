@@ -22,7 +22,7 @@ if [ "$RTORRENT_CLIENT" == "yes" ]; then
 fi
 
 if [ "$DELUGED_CLIENT" == "yes" ]; then
-  (screen -ls|grep deluged >/dev/null || (screen -fa -dmS deluged deluged && false))
+  (screen -ls|grep deluged >/dev/null || (screen -fa -dmS deluged deluged -d && false))
 fi
 
 if [ "$DELUGEWEB_CLIENT" == "yes" ]; then
