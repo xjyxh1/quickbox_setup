@@ -1151,7 +1151,7 @@ if [ "\$RTORRENT_CLIENT" == "yes" ]; then
   (screen -ls|grep rtorrent >/dev/null || (screen -dmS rtorrent rtorrent && false))
 fi
 if [ "\$DELUGED_CLIENT" == "yes" ]; then
-  (screen -ls|grep deluged >/dev/null || (screen -fa -dmS deluged deluged && false))
+  (screen -ls|grep deluged >/dev/null || (screen -fa -dmS deluged deluged -d && false))
 fi
 if [ "\$DELUGEWEB_CLIENT" == "yes" ]; then
   (screen -ls|grep deluge-web >/dev/null || (screen -fa -dmS deluge-web deluge-web && false))
@@ -1209,12 +1209,13 @@ echo $OK
 fi
 echo -n "Setting up autodl-irssi for $username ... "
 mkdir -p /home/$username/.autodl >/dev/null 2>&1
-#touch /home/$username/.autodl/autodl.cfg >/dev/null 2>&1
-cat >/home/$username/.autodl/autodl.cfg<<ADC
+touch /home/$username/.autodl/autodl.cfg >/dev/null 2>&1
+cat >/home/$username/.autodl/autodl2.cfg<<ADC
 [options]
 gui-server-port = $IRSSI_PORT
 gui-server-password = $IRSSI_PASS
 ADC
+chown -R $username: /home/$username/.autodl
 echo $OK
 
 if [[ -e /install/.deluge.lock ]]; then
@@ -1225,9 +1226,6 @@ dwport=$(shuf -i 10001-11000 -n 1)
 DWSALT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 DWP=$(python /usr/local/bin/quickbox/system/deluge.Userpass.py ${passwd} ${DWSALT})
 DUDID=$(python /usr/local/bin/quickbox/system/deluge.addHost.py)
-sudo -H -u ${username} deluged
-dpidtemp=$( ps aux | grep deluged | head -n 1 | awk '{print $2}' )
-kill $dpidtemp
 mkdir -p /home/${username}/.config/deluge/plugins
 chmod 755 /home/${username}/.config
 chmod 755 /home/${username}/.config/deluge
