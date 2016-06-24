@@ -1022,6 +1022,18 @@ echo -n "Username: "; read user
                 echo "${username}:${passwd}" | chpasswd >/dev/null 2>&1
                 (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
         fi
+
+        if [[ -e /install/.deluge.lock ]]; then
+        pkill -u $username deluged
+        pkill -u $username deluge-web
+        DWSALT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+        DWP=$(python /usr/local/bin/quickbox/system/deluge.Userpass.py ${passwd} ${DWSALT})
+        echo "${username}:${passwd}:10" > /home/${username}/.config/deluge/auth
+        sed -i "s/.*pwd_salt.*/  \"pwd_salt\": \"${DWSALT}\",/" /home/$username/.config/deluge/web.conf
+        sed -i "s/.*pwd_sha1.*/  \"pwd_sha1\": \"${DWP}\",/" /home/$username/.config/deluge/web.conf
+        fi
+
+
   echo "$username : $passwd" >>/root/${username}.txt
 }
 
