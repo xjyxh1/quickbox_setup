@@ -1079,6 +1079,7 @@ echo -n "Username: "; read username
       echo "${username} : $passwd " >/root/${username}.info
     fi
     printf "${username}:${passwd}" > /root/"$username".info.db
+  if [[ -f /install/.quota/lock ]]; then
   echo "Quota size for user: (EX: 500GB): "
   read SIZE
   case $SIZE in
@@ -1098,7 +1099,7 @@ echo -n "Username: "; read username
       echo "Disk Space MUST be in GB/TB, Example: 711GB OR 2.5TB, Exiting script, type bash $0 and try again";exit 0
     ;;
   esac
-
+fi
 echo -n "writing $username to vsftpd.chroot_list..."
 echo "$username" >> /etc/vsftpd.chroot_list
 echo $OK
