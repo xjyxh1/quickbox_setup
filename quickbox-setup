@@ -94,6 +94,7 @@ function _logcheck() {
 
 # primary partition question (4)
 function _askpartition() {
+  if [[ $quota == yes ]]; then
   echo
   echo "##################################################################################"
   echo "#${bold} By default the QuickBox script will initiate a build using ${green}/${normal} ${bold}as the${normal}"
@@ -121,6 +122,7 @@ function _askpartition() {
     *) primaryroot=root ;;
   esac
   echo "Using ${green}$primaryroot mount${normal} for quotas"
+fi
 }
 
 function _askcontinue() {
@@ -164,6 +166,15 @@ else
         echo "Hostname set to ${input}"
 fi
 echo
+}
+
+function _askquota() {
+  echo -ne "${bold}${yellow}Do you wish to use user quotas?${normal} (Default: ${green}${bold}Y${normal}) "; read input
+    case $input in
+      [yY] | [yY][Ee][Ss] | "" ) quota="yes";echo "${bold}Quotas will be installed${normal}" ;;
+      [nN] | [nN][Oo] ) quota="no";echo "${cyan}Quotas will not be installed${normal}" ;;
+    *) quota="yes";echo "${bold}Quotas will be installed${normal}" ;;
+    esac
 }
 
 # ask what rtorrent version (8)
@@ -407,38 +418,41 @@ function _skel() {
 
 function _qmount() {
   # Setup mount points for Quotas
-  if [[ $DISTRO == Ubuntu ]]; then
-    if [[ ${primaryroot} == "root" ]]; then
-      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
-      apt-get install -y linux-image-extra-virtual quota >>"${OUTTO}" 2>&1
-      mount -o remount / || mount -o remount /home >>"${OUTTO}" 2>&1
-      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
-      quotaon -uv / >>"${OUTTO}" 2>&1
-      service quota start >>"${OUTTO}" 2>&1
-    else
-      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
-      apt-get install -y linux-image-extra-virtual quota >>"${OUTTO}" 2>&1
-      mount -o remount /home >>"${OUTTO}" 2>&1
-      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
-      quotaon -uv /home >>"${OUTTO}" 2>&1
-      service quota start >>"${OUTTO}" 2>&1
+  if [[ $quota == yes ]]; then
+    if [[ $DISTRO == Ubuntu ]]; then
+      if [[ ${primaryroot} == "root" ]]; then
+        sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
+        apt-get install -y linux-image-extra-virtual quota >>"${OUTTO}" 2>&1
+        mount -o remount / || mount -o remount /home >>"${OUTTO}" 2>&1
+        quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+        quotaon -uv / >>"${OUTTO}" 2>&1
+        service quota start >>"${OUTTO}" 2>&1
+      else
+        sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
+        apt-get install -y linux-image-extra-virtual quota >>"${OUTTO}" 2>&1
+        mount -o remount /home >>"${OUTTO}" 2>&1
+        quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+        quotaon -uv /home >>"${OUTTO}" 2>&1
+        service quota start >>"${OUTTO}" 2>&1
+      fi
+    elif [[ $DISTRO == Debian ]]; then
+      if [[ ${primaryroot} == "root" ]]; then
+        sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
+        apt-get install -y quota >>"${OUTTO}" 2>&1
+        mount -o remount / || mount -o remount /home >>"${OUTTO}" 2>&1
+        quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+        quotaon -uv / >>"${OUTTO}" 2>&1
+        service quota start >>"${OUTTO}" 2>&1
+      else
+        sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
+        apt-get install -y quota >>"${OUTTO}" 2>&1
+        mount -o remount /home >>"${OUTTO}" 2>&1
+        quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+        quotaon -uv /home >>"${OUTTO}" 2>&1
+        service quota start >>"${OUTTO}" 2>&1
+      fi
     fi
-  elif [[ $DISTRO == Debian ]]; then
-    if [[ ${primaryroot} == "root" ]]; then
-      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
-      apt-get install -y quota >>"${OUTTO}" 2>&1
-      mount -o remount / || mount -o remount /home >>"${OUTTO}" 2>&1
-      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
-      quotaon -uv / >>"${OUTTO}" 2>&1
-      service quota start >>"${OUTTO}" 2>&1
-    else
-      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
-      apt-get install -y quota >>"${OUTTO}" 2>&1
-      mount -o remount /home >>"${OUTTO}" 2>&1
-      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
-      quotaon -uv /home >>"${OUTTO}" 2>&1
-      service quota start >>"${OUTTO}" 2>&1
-    fi
+    touch /install/.quota.lock
   fi
 }
 
@@ -1002,6 +1016,8 @@ _ssdpblock
 clear
 
 _hostname
+_askquota
+_askpartition
 _askrtorrent
 _askdeluge
 _adduser
