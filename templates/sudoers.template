@@ -20,7 +20,7 @@ Cmnd_Alias   CLEANMEM = /proc/sys/vm/drop_caches
 Cmnd_Alias   SYSCMNDS = /usr/local/bin/quickbox/system/changeUserpass, /usr/local/bin/quickbox/system/clean_log, /usr/local/bin/quickbox/system/clean_mem, /usr/local/bin/quickbox/system/set_interface, /usr/local/bin/quickbox/system/setdisk, /usr/local/bin/quickbox/system/showspace, /usr/local/bin/quickbox/system/updateQuickBox, /usr/local/bin/quickbox/system/reload, /usr/bin/reload
 Cmnd_Alias   PLUGINCMNDS = /usr/local/bin/quickbox/plugin/install/installplugin-*, /usr/local/bin/quickbox/plugin/remove/removeplugin-*
 Cmnd_Alias   PACKAGECMNDS = /usr/local/bin/quickbox/package/install/installpackage-*, /usr/local/bin/quickbox/package/remove/removepackage-*
-Cmnd_Alias   GENERALCMNDS = /usr/bin/ifstat, /usr/bin/vnstat, /usr/sbin/repquota, /bin/grep, /usr/bin/awk, /etc/init.d/apache2 restart, /usr/bin/pkill, /usr/bin/killall
+Cmnd_Alias   GENERALCMNDS = /usr/bin/ifstat, /usr/bin/vnstat, /usr/sbin/repquota, /bin/grep, /usr/bin/awk, /etc/init.d/apache2 restart, /usr/bin/pkill, /usr/bin/killall, /usr/bin/systemctl start,/usr/bin/systemctl stop,/usr/bin/systemctl enable, /usr/bin/systemctl disable
 
 # User privilege specification
 root	ALL=(ALL:ALL) ALL
