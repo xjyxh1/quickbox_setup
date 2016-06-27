@@ -1474,6 +1474,12 @@ function upgradePlex() {
   service plexmediaserver restart
 }
 
+function upgradeDeluge() {
+  add-apt-repository 'deb http://ppa.launchpad.net/deluge-team/ppa/ubuntu precise main'
+  apt-get -y update
+  apt-get install -y -f --only-upgrade deluged deluge-common deluge-web
+}
+
 
 
 commandprompt_on
