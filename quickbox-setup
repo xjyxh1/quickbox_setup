@@ -696,6 +696,15 @@ function _apacheconf() {
                -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
                -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
                -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.0/fpm/php.ini
+    sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
+               -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
+               -e "s/expose_php = On/expose_php = Off/" \
+               -e "s/128M/768M/" \
+               -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
+               -e "s/;opcache.enable=0/opcache.enable=1/" \
+               -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
+               -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
+               -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.0/apache2/php.ini
 
     # ensure opcache module is activated
     phpenmod -v 7.0 opcache >>"${OUTTO}" 2>&1
