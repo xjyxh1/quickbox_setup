@@ -7,7 +7,7 @@ Type=forking
 GuessMainPID=no
 User=%I
 Group=%I
-ExecStart=/usr/bin/python /opt/sickrage/SickBeard.py -q --daemon --nolaunch --datadir=/opt/sickrage
+ExecStart=/usr/bin/python /home/%I/.sickrage/SickBeard.py -q --daemon --nolaunch --datadir=/opt/sickrage
 ExecStop=-/bin/kill -HUP
 
 
