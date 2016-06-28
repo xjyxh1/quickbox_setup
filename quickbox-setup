@@ -1055,6 +1055,7 @@ clear
 
 _hostname
 _askquota
+_askservices
 _askpartition
 _askrtorrent
 _askdeluge
