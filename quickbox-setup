@@ -893,7 +893,7 @@ function _boot() {
     cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
   elif [[ $cron == no ]]; then
     cp ${local_setup}templates/system/rtorrent.template /etc/systemd/system/rtorrent@.service
-    cp ${local_setup}templates/system/irssi.template /etc/systemd/system/irssi@.service
+    cp ${local_setup}templates/system/autodl-irssi.template /etc/systemd/system/irssi@.service
     cp ${local_setup}templates/system/deluged.template /etc/systemd/system/deluged@.service
     cp ${local_setup}templates/system/deluge-web.template /etc/systemd/system/deluge-web@.service
     systemctl enable {rtorrent,irssi,deluged,deluge-web}@${username}
