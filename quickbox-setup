@@ -184,7 +184,7 @@ function _askservices() {
   SETNAME=$(lsb_release -rc)
   echo "You are running $DISTRO $CODENAME"
   if [[ "$CODENAME" =~ ("xenial"|"wily"|"jessie") ]]; then
-    echo "This distribution has support for systemd services. Would you like to enable? (recommended)"
+    echo "This distribution has support for systemd services. Would you like to enable? (recommended)"; read input
     case $input in
       [yY] | [yY][Ee][Ss] | "" ) cron="no";echo "${bold}Using systemd for process management${normal}" ;;
       [nN] | [nN][Oo] ) cron="yes";echo "${cyan}Cron will manage your processes${normal}" ;;
