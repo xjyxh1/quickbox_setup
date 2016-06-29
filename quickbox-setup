@@ -737,6 +737,8 @@ function _apacheconf() {
 # function to configure first user config (25)
 function _rconf() {
   cp ${local_setup}templates/rtorrent.rc.template /home/${username}/.rtorrent.rc
+  mkdir -p /home/${username}/torrents/rtorrent
+  chown -R ${username}: /home/${username}/torrents
   sed -i "s/USERNAME/${username}/g" /home/${username}/.rtorrent.rc
   sed -i "s/XXX/${PORT}/g" /home/${username}/.rtorrent.rc
   sed -i "s/YYY/${PORTEND}/g" /home/${username}/.rtorrent.rc
