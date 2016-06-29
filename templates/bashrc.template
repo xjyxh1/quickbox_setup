@@ -1115,7 +1115,7 @@ max_peers_seed = -1
 max_uploads = 100
 download_rate = 0
 upload_rate = 0
-directory = /home/${username}/torrents/
+directory = /home/${username}/torrents/rtorrent
 session = /home/${username}/.sessions/
 schedule = watch_directory,5,5,load_start=/home/${username}/rwatch/*.torrent
 schedule = filter_active,5,5,"view_filter = active,d.get_up_rate="
@@ -1136,6 +1136,8 @@ echo -n "setting permissions ... "
   chown $username.www-data /home/$username/{torrents,.sessions,watch,.rtorrent.rc} >/dev/null 2>&1
   usermod -a -G www-data $username >/dev/null 2>&1
   usermod -a -G $username www-data >/dev/null 2>&1
+  mkdir -p /home/${username}/torrents/rtorrent
+  chown -R ${username}: /home/${username}/torrents
   chmod 777 /home/${username}/.sessions >/dev/null 2>&1
   usermod -a -G ${username} plex >/dev/null 2>&1
   chown ${username}:plex /home/${username} >/dev/null 2>&1
