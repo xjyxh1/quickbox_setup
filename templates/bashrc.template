@@ -1396,9 +1396,11 @@ sed -i '/RTORRENT_CLIENT=yes/a DELUGED_CLIENT=yes' /home/${username}/.startup
 fi
 echo $OK
 
+if [[ -f /install/.cron.lock ]]; then
 sudo -u $username /home/$username/.startup >/dev/null 2>&1
 command1="*/1 * * * * /home/${username}/.startup"
 cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
+fi
 
 cat >/etc/apache2/sites-enabled/alias.${username}.download.conf<<AS
 Alias /${username}.downloads "/home/${username}/torrents/"
