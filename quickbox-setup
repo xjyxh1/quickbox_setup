@@ -639,6 +639,7 @@ fi
   sed -i "s/USERNAME/${username}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
   sed -i "s/PASSWD/${passwd}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
   echo "${username}:${passwd}:10" > /home/${username}/.config/deluge/auth
+  chmod 600 /home/${username}/.config/deluge/auth
   chown -R ${username}.${username} /home/${username}/.config/
   mkdir /home/${username}/dwatch
   chown ${username}: /home/${username}/dwatch

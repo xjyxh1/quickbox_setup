@@ -1350,6 +1350,7 @@ cat >/home/$username/.config/deluge/core.conf<<DC
 }
 DC
 echo "${username}:${passwd}:10" > /home/${username}/.config/deluge/auth
+chmod 600 /home/${username}/.config/deluge/auth
 cat >/home/$username/.config/deluge/web.conf<<DW
 {
 "file": 1,
