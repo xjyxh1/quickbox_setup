@@ -1245,7 +1245,9 @@ mkdir -p /home/${username}/.config/deluge/plugins
 chmod 755 /home/${username}/.config
 chmod 755 /home/${username}/.config/deluge
 mkdir -p /home/${username}/dwatch
+mkdir -p /home/${username}/torrents/deluge
 chown ${username}: /home/${username}/dwatch
+chown ${username}: /home/${username}/torrents/deluge
 cat >/home/$username/.config/deluge/core.conf<<DC
 {
 "file": 1,
