@@ -1401,6 +1401,17 @@ if [[ -f /install/.cron.lock ]]; then
 sudo -u $username /home/$username/.startup >/dev/null 2>&1
 command1="*/1 * * * * /home/${username}/.startup"
 cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
+else
+  systemctl enable rtorrent@${username}
+  systemctl start rtorrent@${username}
+  systemctl enable irssi@${username}
+  systemctl start irssi@${username}
+  if [[ -f /install/.deluge.lock ]]; then
+    systemctl enable deluged@${username}
+    systemctl enable deluge-web@${username}
+    systemctl start deluged@${username}
+    systemctl start deluge-web@${username}
+  fi
 fi
 
 cat >/etc/apache2/sites-enabled/alias.${username}.download.conf<<AS
@@ -1470,6 +1481,18 @@ if [[ -z ${username} ]]
   then echo "you want me to delete nothing? next time enter a username";exit
 fi
 echo -n "Deleting ${username} /home and rutorrent data ... "
+if [[ ! -f /install/.cron.lock ]]; then
+  systemctl stop rtorrent@${username}
+  systemctl stop irssi@${username}
+  systemctl disable rtorrent@${username}
+  systemctl disable irssi@${username}
+  if [[ -f /install/.deluge.lock ]]; then
+    systemctl stop deluged@${username}
+    systemctl stop deluge-web@${username}
+    systemctl disable deluged@${username}
+    systemctl disable deluge-web@${username}
+  fi
+fi
 killall -u ${username}
 userdel -rf ${username} >/dev/null 2>&1
 groupdel ${username} >/dev/null 2>&1
