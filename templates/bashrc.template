@@ -1404,9 +1404,20 @@ cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/nul
 fi
 
 cat >/etc/apache2/sites-enabled/alias.${username}.download.conf<<AS
-Alias /${username}.downloads "/home/${username}/torrents/"
-  <Directory "/home/${username}/torrents/">
+Alias /${username}.rtorrent.downloads "/home/${username}/torrents/rtorrent"
+  <Directory "/home/${username}/torrents/rtorrent">
    Options Indexes FollowSymLinks MultiViews
+    AllowOverride None
+          AuthType Digest
+          AuthName "rutorrent"
+          AuthUserFile '/etc/htpasswd'
+          Require valid-user
+    Order allow,deny
+    Allow from all
+  </Directory>
+Alias /${username}.deluge.downloads "/home/${username}/torrents/deluge"
+  <Directory "/home/${username}/torrents/deluge">
+    Options Indexes FollowSymLinks MultiViews
     AllowOverride None
           AuthType Digest
           AuthName "rutorrent"
