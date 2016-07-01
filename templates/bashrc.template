@@ -1462,8 +1462,8 @@ echo -n "Deleting ${username} /home and rutorrent data ... "
 killall -u ${username}
 userdel -rf ${username} >/dev/null 2>&1
 groupdel ${username} >/dev/null 2>&1
-sed -i '/^$username/d' ${htpasswd}
-sed -i '/^$username/d' /etc/apache2/sites-enabled/scgimount.conf
+sed -i "/${username}/d" /etc/apache2/sites-enabled/scgimount.conf
+sed -i "/${username}/d" ${htpasswd}
 rm -rf /etc/apache2/sites-enabled/alias.${username}.download.conf  >/dev/null 2>&1
 rm -rf ${rutorrent}/conf/users/${username} >/dev/null 2>&1
 rm -rf ${rutorrent}/share/users/${username} >/dev/null 2>&1
