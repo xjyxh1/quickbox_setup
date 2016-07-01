@@ -1417,28 +1417,30 @@ Alias /${username}.downloads "/home/${username}/torrents/"
   </Directory>
 AS
 
-cat >/etc/apache2/sites-enabled/alias.${username}.console.conf<<CS
-Alias /${username}.console "/home/${username}/.console/"
-<Directory "/home/${username}/.console/">
-  Options Indexes FollowSymLinks MultiViews
-  AuthType Digest
-  AuthName "rutorrent"
-  AuthUserFile '/etc/htpasswd'
-  Require valid-user
-  AllowOverride None
-  Order allow,deny
-  allow from all
-</Directory>
-CS
-
 cat >>/etc/apache2/sites-enabled/scgimount.conf<<SC
 SCGIMount /${username} 127.0.0.1:$RPORT
 SC
 
+################################################################################
 # Web-Console is not for additional users at this time
+################################################################################
 #sed -i -e "s/console-username/${username}/g" \
 #       -e "s/console-password/${passwd}/g" /home/${username}/.console/index.php
 #
+#cat >/etc/apache2/sites-enabled/alias.${username}.console.conf<<CS
+#Alias /${username}.console "/home/${username}/.console/"
+#<Directory "/home/${username}/.console/">
+#  Options Indexes FollowSymLinks MultiViews
+#  AuthType Digest
+#  AuthName "rutorrent"
+#  AuthUserFile '/etc/htpasswd'
+#  Require valid-user
+#  AllowOverride None
+#  Order allow,deny
+#  allow from all
+#</Directory>
+#CS
+################################################################################
 
 pkill -u "${username}" -f rtorrent >/dev/null 2>&1
 
