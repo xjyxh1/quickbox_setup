@@ -1404,15 +1404,15 @@ sudo -u $username /home/$username/.startup >/dev/null 2>&1
 command1="*/1 * * * * /home/${username}/.startup"
 cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
 else
-  systemctl enable rtorrent@${username}
   systemctl start rtorrent@${username}
-  systemctl enable irssi@${username}
+  systemctl enable rtorrent@${username}
   systemctl start irssi@${username}
+  systemctl enable irssi@${username}
   if [[ -f /install/.deluge.lock ]]; then
-    systemctl enable deluged@${username}
-    systemctl enable deluge-web@${username}
     systemctl start deluged@${username}
     systemctl start deluge-web@${username}
+    systemctl enable deluged@${username}
+    systemctl enable deluge-web@${username}
   fi
 fi
 
