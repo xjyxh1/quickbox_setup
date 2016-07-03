@@ -87,5 +87,5 @@ local TMPFILE=tmp.$$
     mv "$1" $TMPFILE; mv "$2" "$1"; mv $TMPFILE "$2"
 }
 
-if [ -e /etc/bash_completion ] ; then source /etc/bash_completion; fi
+if [ -e /etc/bash_completion ] && ! shopt -oq posix; then source /etc/bash_completion; fi
 if [ -e ~/.custom ]; then source ~/.custom; fi
