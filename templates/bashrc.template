@@ -1466,8 +1466,6 @@ SC
 #CS
 ################################################################################
 
-pkill -u "${username}" -f rtorrent >/dev/null 2>&1
-
 service apache2 reload >/dev/null 2>&1
 
 }
