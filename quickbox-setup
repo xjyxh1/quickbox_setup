@@ -2,8 +2,8 @@
 #
 # [QuickBox Installation Script]
 #
-# GitHub:   https://github.com/Swizards/QuickBox
-# Author:   Swizards.net https://swizards.net
+# GitHub:   https://lab.quickbox.io/QuickBox/QuickBox
+# Author:   QuickBox.IO
 # URL:      https://plaza.quickbox.io
 #
 # QuickBox Copyright (C) 2016 QuickBox.io
@@ -162,7 +162,6 @@ if [[ -z $input ]]; then
 else
         hostname ${input}
         echo "${input}">/etc/hostname
-        echo "hostname ${input}">> /etc/rc.local
         echo "Hostname set to ${input}"
 fi
 echo
@@ -656,7 +655,7 @@ function _rutorrent() {
   cd /srv
   if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent;fi
   mkdir rutorrent
-  cp -R ${local_rutorrent}/. rutorrent
+  cp -r ${local_rutorrent}/. rutorrent
 }
 
 function _rutorrent-plugins() {
@@ -669,7 +668,7 @@ function _rutorrent-plugins() {
 # function to install dashboard (23)
 function _dashboard() {
   cd && mkdir -p /srv/rutorrent/home
-  cp -R ${local_dashboard}/. /srv/rutorrent/home
+  cp -r ${local_dashboard}/. /srv/rutorrent/home
   touch /srv/rutorrent/home/db/output.log
 }
 
@@ -907,12 +906,12 @@ function _boot() {
     command1="*/1 * * * * /home/${username}/.startup >/dev/null 2>&1"
     cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
   elif [[ $cron == no ]]; then
-    cp ${local_setup}templates/sysd/rtorrent.template /etc/systemd/system/rtorrent@.service
-    cp ${local_setup}templates/sysd/autodl-irssi.template /etc/systemd/system/irssi@.service
-    cp ${local_setup}templates/sysd/deluged.template /etc/systemd/system/deluged@.service
-    cp ${local_setup}templates/sysd/deluge-web.template /etc/systemd/system/deluge-web@.service
-    systemctl enable {rtorrent,irssi,deluged,deluge-web}@${username}
-    systemctl start {rtorrent,irssi,deluged,deluge-web}@${username}
+    cp ${local_setup}templates/sysd/rtorrent.template /etc/systemd/system/rtorrent@.service >/dev/null 2>&1
+    cp ${local_setup}templates/sysd/autodlirssi.template /etc/systemd/system/irssi@.service >/dev/null 2>&1
+    cp ${local_setup}templates/sysd/deluged.template /etc/systemd/system/deluged@.service >/dev/null 2>&1
+    cp ${local_setup}templates/sysd/deluge-web.template /etc/systemd/system/deluge-web@.service >/dev/null 2>&1
+    systemctl enable {rtorrent,irssi,deluged,deluge-web}@${username} >/dev/null 2>&1
+    systemctl start {rtorrent,irssi,deluged,deluge-web}@${username} >/dev/null 2>&1
   fi
 
   echo "*/1 * * * * root bash /usr/local/bin/quickbox/system/set_interface" > /etc/cron.d/set_interface
