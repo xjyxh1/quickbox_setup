@@ -6,7 +6,7 @@ Type=forking
 KillMode=control-group
 User=%I
 Group=%I
-ExecStart=/home/%I/.couchpotato/CouchPotato.py --daemon
+ExecStart=/usr/bin/python /home/%I/.couchpotato/CouchPotato.py --daemon
 GuessMainPID=no
 ExecStop=-/bin/kill -HUP
 

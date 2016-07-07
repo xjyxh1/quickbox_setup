@@ -92,39 +92,6 @@ function _logcheck() {
   fi
 }
 
-# primary partition question (4)
-function _askpartition() {
-  if [[ $quota == yes ]]; then
-  echo
-  echo "##################################################################################"
-  echo "#${bold} By default the QuickBox script will initiate a build using ${green}/${normal} ${bold}as the${normal}"
-  echo "#${bold} primary partition for mounting quotas.${normal}"
-  echo "#"
-  echo "#${bold} Some providers, such as OVH and SYS force ${green}/home${normal} ${bold}as the primary mount ${normal}"
-  echo "#${bold} on their server setups. So if you have an OVH or SYS server and have not"
-  echo "#${bold} modified your partitions, it is safe to choose option ${yellow}2)${normal} ${bold}below.${normal}"
-  echo "#"
-  echo "#${bold} If you are not sure:${normal}"
-  echo "#${bold} I have listed out your current partitions below. Your mountpoint will be"
-  echo "#${bold} listed as ${green}/home${normal} ${bold}or ${green}/${normal}${bold}. ${normal}"
-  echo "#"
-  echo "#${bold} Typically, the partition with the most space assigned is your default.${normal}"
-  echo "##################################################################################"
-  echo
-  lsblk
-  echo
-  echo -e "${bold}${yellow}1)${normal} / - ${green}root mount${normal}"
-  echo -e "${bold}${yellow}2)${normal} /home - ${green}home mount${normal}"
-  echo -ne "${bold}${yellow}What is your mount point for user quotas?${normal} (Default ${green}1${normal}): "; read version
-  case $version in
-    1 | "") primaryroot=root  ;;
-    2) primaryroot=home  ;;
-    *) primaryroot=root ;;
-  esac
-  echo "Using ${green}$primaryroot mount${normal} for quotas"
-fi
-}
-
 function _askcontinue() {
   echo
   echo "Press ${standout}${green}ENTER${normal} when you're ready to begin or ${standout}${red}Ctrl+Z${normal} to cancel" ;read input
@@ -183,7 +150,8 @@ function _askservices() {
   SETNAME=$(lsb_release -rc)
   echo "You are running $DISTRO $CODENAME"
   if [[ "$CODENAME" =~ ("xenial"|"wily"|"jessie") ]]; then
-    echo "This distribution has support for systemd services. Would you like to enable? (recommended) (Default: ${green}${bold}Y${normal})"; read input
+    echo "This distribution has support for systemd services. "
+    echo "Would you like to enable? (recommended) (Default: ${green}${bold}Y${normal})"; read input
     case $input in
       [yY] | [yY][Ee][Ss] | "" ) cron="no";echo "${bold}Using systemd for process management${normal}" ;;
       [nN] | [nN][Oo] ) cron="yes";echo "${cyan}Cron will manage your processes${normal}" ;;
@@ -193,6 +161,39 @@ function _askservices() {
     cron="yes"
     echo "This distribution only supports sysv. Defaulting to cron process management."
   fi
+}
+
+# primary partition question
+function _askpartition() {
+  if [[ $quota == yes ]]; then
+  echo
+  echo "##################################################################################"
+  echo "#${bold} By default the QuickBox script will initiate a build using ${green}/${normal} ${bold}as the${normal}"
+  echo "#${bold} primary partition for mounting quotas.${normal}"
+  echo "#"
+  echo "#${bold} Some providers, such as OVH and SYS force ${green}/home${normal} ${bold}as the primary mount ${normal}"
+  echo "#${bold} on their server setups. So if you have an OVH or SYS server and have not"
+  echo "#${bold} modified your partitions, it is safe to choose option ${yellow}2)${normal} ${bold}below.${normal}"
+  echo "#"
+  echo "#${bold} If you are not sure:${normal}"
+  echo "#${bold} I have listed out your current partitions below. Your mountpoint will be"
+  echo "#${bold} listed as ${green}/home${normal} ${bold}or ${green}/${normal}${bold}. ${normal}"
+  echo "#"
+  echo "#${bold} Typically, the partition with the most space assigned is your default.${normal}"
+  echo "##################################################################################"
+  echo
+  lsblk
+  echo
+  echo -e "${bold}${yellow}1)${normal} / - ${green}root mount${normal}"
+  echo -e "${bold}${yellow}2)${normal} /home - ${green}home mount${normal}"
+  echo -ne "${bold}${yellow}What is your mount point for user quotas?${normal} (Default ${green}1${normal}): "; read version
+  case $version in
+    1 | "") primaryroot=root  ;;
+    2) primaryroot=home  ;;
+    *) primaryroot=root ;;
+  esac
+  echo "Using ${green}$primaryroot mount${normal} for quotas"
+fi
 }
 
 # ask what rtorrent version (8)
@@ -1062,7 +1063,6 @@ _bashrc
 _intro
 _checkroot
 _logcheck
-_askpartition
 _askcontinue
 _ssdpblock
 clear
