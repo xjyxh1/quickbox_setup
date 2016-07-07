@@ -683,7 +683,6 @@ function _apacheconf() {
     a2enmod fastcgi >>"${OUTTO}" 2>&1
 
     #sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.0/apache2/php.ini
-  fi
 }
 
 # function to configure first user config (25)
