@@ -2,11 +2,11 @@
 #
 # [QuickBox Installation Script]
 #
-# GitHub:   https://github.com/Swizards/QuickBox
-# Author:   Swizards.net https://swizards.net
+# GitHub:   https://lab.quickbox.io/QuickBox/QuickBox
+# Author:   QuickBox.IO
 # URL:      https://plaza.quickbox.io
 #
-# QuickBox Copyright (C) 2016 Swizards.net
+# QuickBox Copyright (C) 2016 QuickBox.io
 # Licensed under GNU General Public License v3.0 GPL-3 (in short)
 #
 #   You may copy, distribute and modify the software as long as you track
@@ -92,37 +92,6 @@ function _logcheck() {
   fi
 }
 
-# primary partition question (4)
-function _askpartition() {
-  echo
-  echo "##################################################################################"
-  echo "#${bold} By default the QuickBox script will initiate a build using ${green}/${normal} ${bold}as the${normal}"
-  echo "#${bold} primary partition for mounting quotas.${normal}"
-  echo "#"
-  echo "#${bold} Some providers, such as OVH and SYS force ${green}/home${normal} ${bold}as the primary mount ${normal}"
-  echo "#${bold} on their server setups. So if you have an OVH or SYS server and have not"
-  echo "#${bold} modified your partitions, it is safe to choose option ${yellow}2)${normal} ${bold}below.${normal}"
-  echo "#"
-  echo "#${bold} If you are not sure:${normal}"
-  echo "#${bold} I have listed out your current partitions below. Your mountpoint will be"
-  echo "#${bold} listed as ${green}/home${normal} ${bold}or ${green}/${normal}${bold}. ${normal}"
-  echo "#"
-  echo "#${bold} Typically, the partition with the most space assigned is your default.${normal}"
-  echo "##################################################################################"
-  echo
-  lsblk
-  echo
-  echo -e "${bold}${yellow}1)${normal} / - ${green}root mount${normal}"
-  echo -e "${bold}${yellow}2)${normal} /home - ${green}home mount${normal}"
-  echo -ne "${bold}${yellow}What is your mount point for user quotas?${normal} (Default ${green}1${normal}): "; read version
-  case $version in
-    1 | "") primaryroot=root  ;;
-    2) primaryroot=home  ;;
-    *) primaryroot=root ;;
-  esac
-  echo "Using ${green}$primaryroot mount${normal} for quotas"
-}
-
 function _askcontinue() {
   echo
   echo "Press ${standout}${green}ENTER${normal} when you're ready to begin or ${standout}${red}Ctrl+Z${normal} to cancel" ;read input
@@ -160,10 +129,71 @@ if [[ -z $input ]]; then
 else
         hostname ${input}
         echo "${input}">/etc/hostname
-        echo "hostname ${input}">> /etc/rc.local
         echo "Hostname set to ${input}"
 fi
 echo
+}
+
+function _askquota() {
+  echo -ne "${bold}${yellow}Do you wish to use user quotas?${normal} (Default: ${green}${bold}Y${normal}) "; read input
+    case $input in
+      [yY] | [yY][Ee][Ss] | "" ) quota="yes";echo "${bold}Quotas will be installed${normal}" ;;
+      [nN] | [nN][Oo] ) quota="no";echo "${cyan}Quotas will not be installed${normal}" ;;
+    *) quota="yes";echo "${bold}Quotas will be installed${normal}" ;;
+    esac
+}
+
+function _askservices() {
+  DISTRO=$(lsb_release -is)
+  RELEASE=$(lsb_release -rs)
+  CODENAME=$(lsb_release -cs)
+  SETNAME=$(lsb_release -rc)
+  echo "You are running $DISTRO $CODENAME"
+  if [[ "$CODENAME" =~ ("xenial"|"wily"|"jessie") ]]; then
+    echo "This distribution has support for systemd services. "
+    echo "Would you like to enable? (recommended) (Default: ${green}${bold}Y${normal})"; read input
+    case $input in
+      [yY] | [yY][Ee][Ss] | "" ) cron="no";echo "${bold}Using systemd for process management${normal}" ;;
+      [nN] | [nN][Oo] ) cron="yes";echo "${cyan}Cron will manage your processes${normal}" ;;
+    *) cron="no";echo "${bold}Using systemd for process management${normal}" ;;
+    esac
+  elif [[ "$CODENAME" =~ ("trusty"|"wheezy") ]]; then
+    cron="yes"
+    echo "This distribution only supports sysv. Defaulting to cron process management."
+  fi
+}
+
+# primary partition question
+function _askpartition() {
+  if [[ $quota == yes ]]; then
+  echo
+  echo "##################################################################################"
+  echo "#${bold} By default the QuickBox script will initiate a build using ${green}/${normal} ${bold}as the${normal}"
+  echo "#${bold} primary partition for mounting quotas.${normal}"
+  echo "#"
+  echo "#${bold} Some providers, such as OVH and SYS force ${green}/home${normal} ${bold}as the primary mount ${normal}"
+  echo "#${bold} on their server setups. So if you have an OVH or SYS server and have not"
+  echo "#${bold} modified your partitions, it is safe to choose option ${yellow}2)${normal} ${bold}below.${normal}"
+  echo "#"
+  echo "#${bold} If you are not sure:${normal}"
+  echo "#${bold} I have listed out your current partitions below. Your mountpoint will be"
+  echo "#${bold} listed as ${green}/home${normal} ${bold}or ${green}/${normal}${bold}. ${normal}"
+  echo "#"
+  echo "#${bold} Typically, the partition with the most space assigned is your default.${normal}"
+  echo "##################################################################################"
+  echo
+  lsblk
+  echo
+  echo -e "${bold}${yellow}1)${normal} / - ${green}root mount${normal}"
+  echo -e "${bold}${yellow}2)${normal} /home - ${green}home mount${normal}"
+  echo -ne "${bold}${yellow}What is your mount point for user quotas?${normal} (Default ${green}1${normal}): "; read version
+  case $version in
+    1 | "") primaryroot=root  ;;
+    2) primaryroot=home  ;;
+    *) primaryroot=root ;;
+  esac
+  echo "Using ${green}$primaryroot mount${normal} for quotas"
+fi
 }
 
 # ask what rtorrent version (8)
@@ -407,38 +437,41 @@ function _skel() {
 
 function _qmount() {
   # Setup mount points for Quotas
-  if [[ $DISTRO == Ubuntu ]]; then
-    if [[ ${primaryroot} == "root" ]]; then
-      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
-      apt-get install -y linux-image-extra-virtual quota >>"${OUTTO}" 2>&1
-      mount -o remount / || mount -o remount /home >>"${OUTTO}" 2>&1
-      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
-      quotaon -uv / >>"${OUTTO}" 2>&1
-      service quota start >>"${OUTTO}" 2>&1
-    else
-      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
-      apt-get install -y linux-image-extra-virtual quota >>"${OUTTO}" 2>&1
-      mount -o remount /home >>"${OUTTO}" 2>&1
-      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
-      quotaon -uv /home >>"${OUTTO}" 2>&1
-      service quota start >>"${OUTTO}" 2>&1
+  if [[ $quota == yes ]]; then
+    if [[ $DISTRO == Ubuntu ]]; then
+      if [[ ${primaryroot} == "root" ]]; then
+        sed -i 's/errors=remount-ro/usrjquota=aquota.user,jqfmt=vfsv1,errors=remount-ro/g' /etc/fstab
+        apt-get install -y linux-image-extra-virtual quota >>"${OUTTO}" 2>&1
+        mount -o remount / || mount -o remount /home >>"${OUTTO}" 2>&1
+        quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+        quotaon -uv / >>"${OUTTO}" 2>&1
+        service quota start >>"${OUTTO}" 2>&1
+      else
+        sed -i 's/errors=remount-ro/usrjquota=aquota.user,jqfmt=vfsv1,errors=remount-ro/g' /etc/fstab
+        apt-get install -y linux-image-extra-virtual quota >>"${OUTTO}" 2>&1
+        mount -o remount /home >>"${OUTTO}" 2>&1
+        quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+        quotaon -uv /home >>"${OUTTO}" 2>&1
+        service quota start >>"${OUTTO}" 2>&1
+      fi
+    elif [[ $DISTRO == Debian ]]; then
+      if [[ ${primaryroot} == "root" ]]; then
+        sed -i 's/errors=remount-ro/usrjquota=aquota.user,jqfmt=vfsv1,errors=remount-ro/g' /etc/fstab
+        apt-get install -y quota >>"${OUTTO}" 2>&1
+        mount -o remount / || mount -o remount /home >>"${OUTTO}" 2>&1
+        quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+        quotaon -uv / >>"${OUTTO}" 2>&1
+        service quota start >>"${OUTTO}" 2>&1
+      else
+        sed -i 's/errors=remount-ro/usrjquota=aquota.user,jqfmt=vfsv1,errors=remount-ro/g' /etc/fstab
+        apt-get install -y quota >>"${OUTTO}" 2>&1
+        mount -o remount /home >>"${OUTTO}" 2>&1
+        quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
+        quotaon -uv /home >>"${OUTTO}" 2>&1
+        service quota start >>"${OUTTO}" 2>&1
+      fi
     fi
-  elif [[ $DISTRO == Debian ]]; then
-    if [[ ${primaryroot} == "root" ]]; then
-      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
-      apt-get install -y quota >>"${OUTTO}" 2>&1
-      mount -o remount / || mount -o remount /home >>"${OUTTO}" 2>&1
-      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
-      quotaon -uv / >>"${OUTTO}" 2>&1
-      service quota start >>"${OUTTO}" 2>&1
-    else
-      sed -i 's/errors=remount-ro/usrquota,errors=remount-ro/g' /etc/fstab
-      apt-get install -y quota >>"${OUTTO}" 2>&1
-      mount -o remount /home >>"${OUTTO}" 2>&1
-      quotacheck -auMF vfsv1 >>"${OUTTO}" 2>&1
-      quotaon -uv /home >>"${OUTTO}" 2>&1
-      service quota start >>"${OUTTO}" 2>&1
-    fi
+    touch /install/.quota.lock
   fi
 }
 
@@ -459,12 +492,24 @@ function _ffmpeg() {
     #git clone git://source.ffmpeg.org/ffmpeg.git ffmpeg >>"${OUTTO}" 2>&1
     ####---- New source ----####
     git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg >>"${OUTTO}" 2>&1
+    git clone git://github.com/yasm/yasm.git ffmpeg/yasm >>"${OUTTO}" 2>&1
+    git clone git://git.videolan.org/x264.git ffmpeg/x264 >>"${OUTTO}" 2>&1
     ####---- Github Mirror source ----####
     #git clone git://github.com/FFmpeg/FFmpeg.git ffmpeg >>"${OUTTO}" 2>&1
-    cd ffmpeg
+    cd ffmpeg/yasm
+    ./autogen.sh >>"${OUTTO}" 2>&1
+    ./configure >>"${OUTTO}" 2>&1
+    make >>"${OUTTO}" 2>&1
+    make install >>"${OUTTO}" 2>&1
+    cd ../x264
+    ./configure --enable-static --enable-shared >>"${OUTTO}" 2>&1
+    make >>"${OUTTO}" 2>&1
+    make install >>"${OUTTO}" 2>&1
+    ldconfig >>"${OUTTO}" 2>&1
+    cd ..
     export FC_CONFIG_DIR=/etc/fonts
     export FC_CONFIG_FILE=/etc/fonts/fonts.conf
-    ./configure --enable-libfreetype --enable-filter=drawtext --enable-fontconfig >>"${OUTTO}" 2>&1
+    ./configure --enable-libfreetype --enable-filter=drawtext --enable-fontconfig --disable-asm --enable-libx264 --enable-gpl >>"${OUTTO}" 2>&1
     make -j${MAXCPUS} >>"${OUTTO}" 2>&1
     make install >>"${OUTTO}" 2>&1
     cp /usr/local/bin/ffmpeg /usr/bin >>"${OUTTO}" 2>&1
@@ -594,6 +639,7 @@ fi
   sed -i "s/USERNAME/${username}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
   sed -i "s/PASSWD/${passwd}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
   echo "${username}:${passwd}:10" > /home/${username}/.config/deluge/auth
+  chmod 600 /home/${username}/.config/deluge/auth
   chown -R ${username}.${username} /home/${username}/.config/
   mkdir /home/${username}/dwatch
   chown ${username}: /home/${username}/dwatch
@@ -610,7 +656,7 @@ function _rutorrent() {
   cd /srv
   if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent;fi
   mkdir rutorrent
-  cp -R ${local_rutorrent}/. rutorrent
+  cp -r ${local_rutorrent}/. rutorrent
 }
 
 function _rutorrent-plugins() {
@@ -623,7 +669,7 @@ function _rutorrent-plugins() {
 # function to install dashboard (23)
 function _dashboard() {
   cd && mkdir -p /srv/rutorrent/home
-  cp -R ${local_dashboard}/. /srv/rutorrent/home
+  cp -r ${local_dashboard}/. /srv/rutorrent/home
   touch /srv/rutorrent/home/db/output.log
 }
 
@@ -663,6 +709,15 @@ function _apacheconf() {
                -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
                -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
                -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.0/fpm/php.ini
+    sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
+               -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
+               -e "s/expose_php = On/expose_php = Off/" \
+               -e "s/memory_limit = 128M/memory_limit = 768M/" \
+               -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
+               -e "s/;opcache.enable=0/opcache.enable=1/" \
+               -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
+               -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
+               -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.0/apache2/php.ini
 
     # ensure opcache module is activated
     phpenmod -v 7.0 opcache >>"${OUTTO}" 2>&1
@@ -676,13 +731,15 @@ function _apacheconf() {
     a2enmod actions >>"${OUTTO}" 2>&1
     a2enmod fastcgi >>"${OUTTO}" 2>&1
 
-    sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.0/apache2/php.ini
+    #sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.0/apache2/php.ini
   fi
 }
 
 # function to configure first user config (25)
 function _rconf() {
   cp ${local_setup}templates/rtorrent.rc.template /home/${username}/.rtorrent.rc
+  mkdir -p /home/${username}/torrents/rtorrent
+  chown -R ${username}: /home/${username}/torrents
   sed -i "s/USERNAME/${username}/g" /home/${username}/.rtorrent.rc
   sed -i "s/XXX/${PORT}/g" /home/${username}/.rtorrent.rc
   sed -i "s/YYY/${PORTEND}/g" /home/${username}/.rtorrent.rc
@@ -845,8 +902,18 @@ function _quickconsole() {
 
 # seedbox boot for first user (35)
 function _boot() {
-  command1="*/1 * * * * /home/${username}/.startup >/dev/null 2>&1"
-  cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
+  if [[ $cron == yes ]]; then
+    touch /install/.cron.lock
+    command1="*/1 * * * * /home/${username}/.startup >/dev/null 2>&1"
+    cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
+  elif [[ $cron == no ]]; then
+    cp ${local_setup}templates/sysd/rtorrent.template /etc/systemd/system/rtorrent@.service >/dev/null 2>&1
+    cp ${local_setup}templates/sysd/autodlirssi.template /etc/systemd/system/irssi@.service >/dev/null 2>&1
+    cp ${local_setup}templates/sysd/deluged.template /etc/systemd/system/deluged@.service >/dev/null 2>&1
+    cp ${local_setup}templates/sysd/deluge-web.template /etc/systemd/system/deluge-web@.service >/dev/null 2>&1
+    systemctl enable {rtorrent,irssi,deluged,deluge-web}@${username} >/dev/null 2>&1
+    systemctl start {rtorrent,irssi,deluged,deluge-web}@${username} >/dev/null 2>&1
+  fi
 
   echo "*/1 * * * * root bash /usr/local/bin/quickbox/system/set_interface" > /etc/cron.d/set_interface
 }
@@ -996,12 +1063,14 @@ _bashrc
 _intro
 _checkroot
 _logcheck
-_askpartition
 _askcontinue
 _ssdpblock
 clear
 
 _hostname
+_askquota
+_askservices
+_askpartition
 _askrtorrent
 _askdeluge
 _adduser

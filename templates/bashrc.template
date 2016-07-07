@@ -17,7 +17,7 @@
 
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
-QUICKBOX_VERSION=2.3.7
+QUICKBOX_VERSION=2.4.0-beta
 
 export TERM=xterm;TERM=xterm
 export PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/home/quickbox/.bin/:/usr/local/bin/quickbox/:/usr/local/bin/quickbox/package/:/usr/local/bin/quickbox/package/install/:/usr/local/bin/quickbox/package/remove/:/usr/local/bin/quickbox/plugin/:/usr/local/bin/quickbox/plugin/install/:/usr/local/bin/quickbox/plugin/remove/:/usr/local/bin/quickbox/system/
@@ -1080,6 +1080,7 @@ echo -n "Username: "; read username
       echo "${username} : $passwd " >/root/${username}.info
     fi
     printf "${username}:${passwd}" > /root/"$username".info.db
+  if [[ -f /install/.quota.lock ]]; then
   echo "Quota size for user: (EX: 500GB): "
   read SIZE
   case $SIZE in
@@ -1099,7 +1100,7 @@ echo -n "Username: "; read username
       echo "Disk Space MUST be in GB/TB, Example: 711GB OR 2.5TB, Exiting script, type bash $0 and try again";exit 0
     ;;
   esac
-
+fi
 echo -n "writing $username to vsftpd.chroot_list..."
 echo "$username" >> /etc/vsftpd.chroot_list
 echo $OK
@@ -1115,7 +1116,7 @@ max_peers_seed = -1
 max_uploads = 100
 download_rate = 0
 upload_rate = 0
-directory = /home/${username}/torrents/
+directory = /home/${username}/torrents/rtorrent
 session = /home/${username}/.sessions/
 schedule = watch_directory,5,5,load_start=/home/${username}/rwatch/*.torrent
 schedule = filter_active,5,5,"view_filter = active,d.get_up_rate="
@@ -1136,6 +1137,8 @@ echo -n "setting permissions ... "
   chown $username.www-data /home/$username/{torrents,.sessions,watch,.rtorrent.rc} >/dev/null 2>&1
   usermod -a -G www-data $username >/dev/null 2>&1
   usermod -a -G $username www-data >/dev/null 2>&1
+  mkdir -p /home/${username}/torrents/rtorrent
+  chown -R ${username}: /home/${username}/torrents
   chmod 777 /home/${username}/.sessions >/dev/null 2>&1
   usermod -a -G ${username} plex >/dev/null 2>&1
   chown ${username}:plex /home/${username} >/dev/null 2>&1
@@ -1243,7 +1246,9 @@ mkdir -p /home/${username}/.config/deluge/plugins
 chmod 755 /home/${username}/.config
 chmod 755 /home/${username}/.config/deluge
 mkdir -p /home/${username}/dwatch
+mkdir -p /home/${username}/torrents/deluge
 chown ${username}: /home/${username}/dwatch
+chown ${username}: /home/${username}/torrents/deluge
 cat >/home/$username/.config/deluge/core.conf<<DC
 {
 "file": 1,
@@ -1348,6 +1353,7 @@ cat >/home/$username/.config/deluge/core.conf<<DC
 }
 DC
 echo "${username}:${passwd}:10" > /home/${username}/.config/deluge/auth
+chmod 600 /home/${username}/.config/deluge/auth
 cat >/home/$username/.config/deluge/web.conf<<DW
 {
 "file": 1,
@@ -1394,14 +1400,38 @@ sed -i '/RTORRENT_CLIENT=yes/a DELUGED_CLIENT=yes' /home/${username}/.startup
 fi
 echo $OK
 
+if [[ -f /install/.cron.lock ]]; then
 sudo -u $username /home/$username/.startup >/dev/null 2>&1
 command1="*/1 * * * * /home/${username}/.startup"
 cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
+else
+  systemctl start rtorrent@${username}
+  systemctl enable rtorrent@${username}
+  systemctl start irssi@${username}
+  systemctl enable irssi@${username}
+  if [[ -f /install/.deluge.lock ]]; then
+    systemctl start deluged@${username}
+    systemctl start deluge-web@${username}
+    systemctl enable deluged@${username}
+    systemctl enable deluge-web@${username}
+  fi
+fi
 
 cat >/etc/apache2/sites-enabled/alias.${username}.download.conf<<AS
-Alias /${username}.downloads "/home/${username}/torrents/"
-  <Directory "/home/${username}/torrents/">
+Alias /${username}.rtorrent.downloads "/home/${username}/torrents/rtorrent"
+  <Directory "/home/${username}/torrents/rtorrent">
    Options Indexes FollowSymLinks MultiViews
+    AllowOverride None
+          AuthType Digest
+          AuthName "rutorrent"
+          AuthUserFile '/etc/htpasswd'
+          Require valid-user
+    Order allow,deny
+    Allow from all
+  </Directory>
+Alias /${username}.deluge.downloads "/home/${username}/torrents/deluge"
+  <Directory "/home/${username}/torrents/deluge">
+    Options Indexes FollowSymLinks MultiViews
     AllowOverride None
           AuthType Digest
           AuthName "rutorrent"
@@ -1412,28 +1442,30 @@ Alias /${username}.downloads "/home/${username}/torrents/"
   </Directory>
 AS
 
-cat >/etc/apache2/sites-enabled/alias.${username}.console.conf<<CS
-Alias /${username}.console "/home/${username}/.console/"
-<Directory "/home/${username}/.console/">
-  Options Indexes FollowSymLinks MultiViews
-  AuthType Digest
-  AuthName "rutorrent"
-  AuthUserFile '/etc/htpasswd'
-  Require valid-user
-  AllowOverride None
-  Order allow,deny
-  allow from all
-</Directory>
-CS
-
 cat >>/etc/apache2/sites-enabled/scgimount.conf<<SC
 SCGIMount /${username} 127.0.0.1:$RPORT
 SC
 
-sed -i -e "s/console-username/${username}/g" \
-       -e "s/console-password/${passwd}/g" /home/${username}/.console/index.php
-
-pkill -u "${username}" -f rtorrent >/dev/null 2>&1
+################################################################################
+# Web-Console is not for additional users at this time
+################################################################################
+#sed -i -e "s/console-username/${username}/g" \
+#       -e "s/console-password/${passwd}/g" /home/${username}/.console/index.php
+#
+#cat >/etc/apache2/sites-enabled/alias.${username}.console.conf<<CS
+#Alias /${username}.console "/home/${username}/.console/"
+#<Directory "/home/${username}/.console/">
+#  Options Indexes FollowSymLinks MultiViews
+#  AuthType Digest
+#  AuthName "rutorrent"
+#  AuthUserFile '/etc/htpasswd'
+#  Require valid-user
+#  AllowOverride None
+#  Order allow,deny
+#  allow from all
+#</Directory>
+#CS
+################################################################################
 
 service apache2 reload >/dev/null 2>&1
 
@@ -1450,16 +1482,29 @@ if [[ -z ${username} ]]
   then echo "you want me to delete nothing? next time enter a username";exit
 fi
 echo -n "Deleting ${username} /home and rutorrent data ... "
+if [[ ! -f /install/.cron.lock ]]; then
+  systemctl stop rtorrent@${username}
+  systemctl stop irssi@${username}
+  systemctl disable rtorrent@${username}
+  systemctl disable irssi@${username}
+  if [[ -f /install/.deluge.lock ]]; then
+    systemctl stop deluged@${username}
+    systemctl stop deluge-web@${username}
+    systemctl disable deluged@${username}
+    systemctl disable deluge-web@${username}
+  fi
+fi
 killall -u ${username}
 userdel -rf ${username} >/dev/null 2>&1
 groupdel ${username} >/dev/null 2>&1
-sed -i '/^$username/d' ${htpasswd}
+sed -i "/${username}/d" /etc/apache2/sites-enabled/scgimount.conf
+sed -i "/${username}/d" ${htpasswd}
 rm -rf /etc/apache2/sites-enabled/alias.${username}.download.conf  >/dev/null 2>&1
 rm -rf ${rutorrent}/conf/users/${username} >/dev/null 2>&1
 rm -rf ${rutorrent}/share/users/${username} >/dev/null 2>&1
 rm -rf /var/spool/cron/crontabs/${username} >/dev/null 2>&1
 rm -rf /home/${username} >/dev/null 2>&1
-rm -rf /var/run/screens/S-${username} >/dev/null 2>&1
+rm -rf /var/run/screen/S-${username} >/dev/null 2>&1
 rm -rf /etc/openvpn/server-${username}.conf >/dev/null 2>&1
 service apache2 reload
 echo ${OK}

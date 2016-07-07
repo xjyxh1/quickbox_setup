@@ -6,7 +6,7 @@ max_peers_seed = -1
 max_uploads = 100
 download_rate = 0
 upload_rate = 0
-directory = /home/USERNAME/torrents/
+directory = /home/USERNAME/torrents/rtorrent
 session = /home/USERNAME/.sessions/
 schedule = watch_directory,5,5,load_start=/home/USERNAME/rwatch/*.torrent
 schedule = filter_active,5,5,"view_filter = active,d.get_up_rate="

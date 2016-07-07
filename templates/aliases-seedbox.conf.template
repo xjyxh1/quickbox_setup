@@ -9,8 +9,8 @@ Alias /rutorrent "/srv/rutorrent"
   Order allow,deny
   allow from all
 </Directory>
-Alias /USERNAME.downloads "/home/USERNAME/torrents/"
-<Directory "/home/USERNAME/torrents/">
+Alias /USERNAME.rtorrent.downloads "/home/USERNAME/torrents/rtorrent/"
+<Directory "/home/USERNAME/torrents/rtorrent/">
   Options Indexes FollowSymLinks MultiViews
   AuthType Digest
   AuthName "rutorrent"
