@@ -43,8 +43,7 @@ function _intro() {
   echo
   echo "   ${title}              Heads Up!              ${normal} "
   echo "   ${message_title}  QuickBox works with the following  ${normal} "
-  echo "   ${message_title}  15.10 | 16.04     ${normal} "
-  echo "   ${message_title}  8                     ${normal} "
+  echo "   ${message_title}  Ubuntu 15.10 | 16.04 & Debian 8    ${normal} "
   echo
   echo
   echo "${green}Checking distribution ...${normal}"
@@ -92,35 +91,6 @@ function _logcheck() {
   fi
 }
 
-function _askcontinue() {
-  echo
-  echo "Press ${standout}${green}ENTER${normal} when you're ready to begin or ${standout}${red}Ctrl+Z${normal} to cancel" ;read input
-  echo
-}
-
-# This function blocks an insecure port 1900 that may lead to
-# DDoS masked attacks. Only remove this function if you absolutely
-# need port 1900. In most cases, this is a junk port.
-function _ssdpblock() {
-  iptables -I INPUT 1 -p udp -m udp --dport 1900 -j DROP
-}
-
-# setting locale function (6)
-function _locale() {
-echo 'LANGUAGE="en_US.UTF-8"' >> /etc/default/locale
-echo 'LC_ALL="en_US.UTF-8"' >> /etc/default/locale
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-  if [[ -e /usr/sbin/locale-gen ]]; then locale-gen >>"${OUTTO}" 2>&1
-  else
-    apt-get -y update >>"${OUTTO}" 2>&1
-    apt-get install locales -y >>"${OUTTO}" 2>&1
-    locale-gen >>"${OUTTO}" 2>&1
-    export LANG="en_US.UTF-8"
-    export LC_ALL="en_US.UTF-8"
-    export LANGUAGE="en_US.UTF-8"
-  fi
-}
-
 # setting system hostname function (7)
 function _hostname() {
 echo -ne "Please enter a hostname for this server (${bold}Hit ${standout}${green}ENTER${normal} to make no changes${normal}): " ; read input
@@ -141,22 +111,6 @@ function _askquota() {
       [nN] | [nN][Oo] ) quota="no";echo "${cyan}Quotas will not be installed${normal}" ;;
     *) quota="yes";echo "${bold}Quotas will be installed${normal}" ;;
     esac
-}
-
-function _askservices() {
-  DISTRO=$(lsb_release -is)
-  RELEASE=$(lsb_release -rs)
-  CODENAME=$(lsb_release -cs)
-  SETNAME=$(lsb_release -rc)
-  echo "You are running $DISTRO $CODENAME"
-  echo "This distribution has support for systemd services. "
-  echo "Would you like to enable? (recommended) (Default: ${green}${bold}Y${normal})"; read input
-    case $input in
-      [yY] | [yY][Ee][Ss] | "" ) cron="no";echo "${bold}Using systemd for process management${normal}" ;;
-      [nN] | [nN][Oo] ) cron="yes";echo "${cyan}Cron will manage your processes${normal}" ;;
-    *) cron="no";echo "${bold}Using systemd for process management${normal}" ;;
-    esac
-  echo
 }
 
 # primary partition question
@@ -191,6 +145,51 @@ function _askpartition() {
   echo "Using ${green}$primaryroot mount${normal} for quotas"
   echo
 fi
+}
+
+function _askcontinue() {
+  echo
+  echo "Press ${standout}${green}ENTER${normal} when you're ready to begin or ${standout}${red}Ctrl+Z${normal} to cancel" ;read input
+  echo
+}
+
+# This function blocks an insecure port 1900 that may lead to
+# DDoS masked attacks. Only remove this function if you absolutely
+# need port 1900. In most cases, this is a junk port.
+function _ssdpblock() {
+  iptables -I INPUT 1 -p udp -m udp --dport 1900 -j DROP
+}
+
+# setting locale function (6)
+function _locale() {
+echo 'LANGUAGE="en_US.UTF-8"' >> /etc/default/locale
+echo 'LC_ALL="en_US.UTF-8"' >> /etc/default/locale
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+  if [[ -e /usr/sbin/locale-gen ]]; then locale-gen >>"${OUTTO}" 2>&1
+  else
+    apt-get -y update >>"${OUTTO}" 2>&1
+    apt-get install locales -y >>"${OUTTO}" 2>&1
+    locale-gen >>"${OUTTO}" 2>&1
+    export LANG="en_US.UTF-8"
+    export LC_ALL="en_US.UTF-8"
+    export LANGUAGE="en_US.UTF-8"
+  fi
+}
+
+function _askservices() {
+  DISTRO=$(lsb_release -is)
+  RELEASE=$(lsb_release -rs)
+  CODENAME=$(lsb_release -cs)
+  SETNAME=$(lsb_release -rc)
+  echo "You are running $DISTRO $CODENAME"
+  echo "This distribution has support for systemd services. "
+  echo "Would you like to enable? (recommended) (Default: ${green}${bold}Y${normal})"; read input
+    case $input in
+      [yY] | [yY][Ee][Ss] | "" ) cron="no";echo "${bold}Using systemd for process management${normal}" ;;
+      [nN] | [nN][Oo] ) cron="yes";echo "${cyan}Cron will manage your processes${normal}" ;;
+    *) cron="no";echo "${bold}Using systemd for process management${normal}" ;;
+    esac
+  echo
 }
 
 # ask what rtorrent version (8)
@@ -852,18 +851,18 @@ function _quickconsole() {
 
 # seedbox boot for first user (35)
 function _boot() {
-  if [[ $cron == yes ]]; then
-    touch /install/.cron.lock
-    command1="*/1 * * * * /home/${username}/.startup >/dev/null 2>&1"
-    cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
-  elif [[ $cron == no ]]; then
+  #if [[ $cron == yes ]]; then
+  #  touch /install/.cron.lock
+  #  command1="*/1 * * * * /home/${username}/.startup >/dev/null 2>&1"
+  #  cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
+  #elif [[ $cron == no ]]; then
     cp ${local_setup}templates/sysd/rtorrent.template /etc/systemd/system/rtorrent@.service >/dev/null 2>&1
     cp ${local_setup}templates/sysd/autodlirssi.template /etc/systemd/system/irssi@.service >/dev/null 2>&1
     cp ${local_setup}templates/sysd/deluged.template /etc/systemd/system/deluged@.service >/dev/null 2>&1
     cp ${local_setup}templates/sysd/deluge-web.template /etc/systemd/system/deluge-web@.service >/dev/null 2>&1
     systemctl enable {rtorrent,irssi,deluged,deluge-web}@${username} >/dev/null 2>&1
     systemctl start {rtorrent,irssi,deluged,deluge-web}@${username} >/dev/null 2>&1
-  fi
+  #fi
 
   echo "*/1 * * * * root bash /usr/local/bin/quickbox/system/set_interface" > /etc/cron.d/set_interface
 }
@@ -1009,13 +1008,13 @@ _bashrc
 _intro
 _checkroot
 _logcheck
+_hostname
+_askquota
 _askcontinue
 _ssdpblock
 clear
 
-_hostname
-_askquota
-_askservices
+#_askservices
 _askpartition
 _askrtorrent
 _askdeluge
