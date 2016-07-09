@@ -17,7 +17,7 @@
 
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
-QUICKBOX_VERSION=2.4.0
+QUICKBOX_VERSION=2.4.1
 
 export TERM=xterm;TERM=xterm
 export PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/home/quickbox/.bin/:/usr/local/bin/quickbox/:/usr/local/bin/quickbox/package/:/usr/local/bin/quickbox/package/install/:/usr/local/bin/quickbox/package/remove/:/usr/local/bin/quickbox/plugin/:/usr/local/bin/quickbox/plugin/install/:/usr/local/bin/quickbox/plugin/remove/:/usr/local/bin/quickbox/system/
@@ -1002,6 +1002,7 @@ if [ -e ~/.custom ]; then source ~/.custom; fi
 function changeUserpass() {
 REALM=rutorrent
 HTPASSWD=/etc/htpasswd
+master=$(cat /srv/rutorrent/home/db/master.txt)
 genpass=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)
 echo -n "Username: "; read user
         username=$(echo "$user"|sed 's/.*/\L&/')
@@ -1014,28 +1015,29 @@ echo -n "Username: "; read user
                 echo "setting password to ${password}"
                 passwd=${password}
                 echo "${username}:${passwd}" | chpasswd >/dev/null 2>&1
-                sed -i "/${username}/ d" ${HTPASSWD}
+                sed -i "/${username}/d" ${HTPASSWD}
                 (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
         else
                 echo "setting password to ${genpass}"
                 passwd=${genpass}
-                sed -i "/${username}/ d" ${HTPASSWD}
+                sed -i "/${username}/d" ${HTPASSWD}
                 echo "${username}:${passwd}" | chpasswd >/dev/null 2>&1
                 (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
         fi
-
-        if [[ -e /install/.deluge.lock ]]; then
-        pkill -u $username deluged
-        pkill -u $username deluge-web
+        echo "$username : $passwd" >/root/${username}.info
+        if [[ $username == $master ]]; then
+        if [[ -e /install/.deluge.lock ]]; then sed -i "s/.*PASSWORD = .*/\$PASSWORD = \'$passwd\';/" /home/$username/.console/index.php; fi
+        systemctl stop deluged@${username}
+        systemctl stop deluge-web@${username}
         DWSALT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
         DWP=$(python /usr/local/bin/quickbox/system/deluge.Userpass.py ${passwd} ${DWSALT})
         sed -i "s/.*$username.*/${username}:${passwd}:10/" /home/$username/.config/deluge/auth
         sed -i "s/.*pwd_salt.*/  \"pwd_salt\": \"${DWSALT}\",/" /home/$username/.config/deluge/web.conf
         sed -i "s/.*pwd_sha1.*/  \"pwd_sha1\": \"${DWP}\",/" /home/$username/.config/deluge/web.conf
+        sed -i "/$username/{n;s/.*/      \"${passwd}\"/}" /home/${username}/.config/deluge/hostlist.conf.1.2
+        systemctl start deluged@${username}
+        systemctl start deluge-web@${username}
         fi
-
-
-  echo "$username : $passwd" >>/root/${username}.txt
 }
 
 function createSeedboxUser() {
