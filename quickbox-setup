@@ -936,7 +936,7 @@ function _finished() {
   echo "#   ${cyan}(Also works for FTP:5757/SSH:4747)${normal}"
   echo "#   If you need to restart rtorrent/irssi, you can type 'reload'"
   echo "#   https://${username}:${passwd}@${ip} (Also works for FTP:5757/SSH:4747)" > ${username}.info
-  echo "#   Reloading: ${green}sshd${normal}, ${green}apache${normal}, ${green}memcached${normal}, ${green}php7.0${normal}, ${green}vsftpd${normal}, ${green}fail2ban${normal} and ${green}quota${normal}"
+  echo "#   Reloading: ${green}sshd${normal}, ${green}apache${normal}, ${green}memcached${normal}, ${green}php7.0${normal}, ${green}vsftpd${normal} and ${green}fail2ban${normal}"
   echo '################################################################################################'
   echo
 
@@ -945,7 +945,6 @@ cat >/root/information.info<<EOF
   If you need to restart rtorrent/irssi, you can type 'reload'
   https://${username}:${passwd}@${ip} (Also works for FTP:5757/SSH:4747)
 EOF
-
   rm -rf "$0" >>"${OUTTO}" 2>&1
     for i in ssh apache2 php7.0-fpm vsftpd fail2ban quota memcached cron; do
       service $i restart >>"${OUTTO}" 2>&1
@@ -1032,7 +1031,9 @@ echo -n "Updating system ... ";_updates & spinner $!;echo
 echo -n "Installing all needed dependencies ... ";_depends & spinner $!;echo
 echo -n "Setting up system executables ... ";_syscommands & spinner $!;echo
 echo -n "Building required user directories ... ";_skel & spinner $!;echo
+if [[ ${quota} == "yes" ]]; then
 echo -n "Setting up quotas for ${green}/($primaryroot)${normal} mount ... ";_qmount & spinner $!;echo
+fi
 echo -n "Setting up Limited Shell environment ... ";_lshell & spinner $!;echo
 if [[ ${ffmpeg} == "yes" ]]; then
     echo -n "Building ffmpeg from source for screenshots ... ";_ffmpeg & spinner $!;echo
