@@ -845,7 +845,7 @@ function _quickstats() {
 function _quickconsole() {
   CONSOLEIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 
-cat >/etc/profile<<EOF
+cat >>/etc/profile<<EOF
 Welcome Back ${username} !
 * Dashboard:  ${CONSOLEIP}
 * Support:    https://plaza.quickbox.io
