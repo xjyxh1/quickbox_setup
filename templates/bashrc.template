@@ -17,7 +17,7 @@
 
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
-QUICKBOX_VERSION=2.4.1
+QUICKBOX_VERSION=2.4.2
 
 export TERM=xterm;TERM=xterm
 export PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/home/quickbox/.bin/:/usr/local/bin/quickbox/:/usr/local/bin/quickbox/package/:/usr/local/bin/quickbox/package/install/:/usr/local/bin/quickbox/package/remove/:/usr/local/bin/quickbox/plugin/:/usr/local/bin/quickbox/plugin/install/:/usr/local/bin/quickbox/plugin/remove/:/usr/local/bin/quickbox/system/
@@ -1443,6 +1443,12 @@ Alias /${username}.deluge.downloads "/home/${username}/torrents/deluge"
     Allow from all
   </Directory>
 AS
+
+local_setup=/root/QuickBox/setup/
+PUBLICIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
+cp ${local_setup}templates/web-console.conf.template /etc/apache2/sites-enabled/${username}.console.conf
+sed -i "s/PUBLICIP/${PUBLICIP}/g" /etc/apache2/sites-enabled/${username}.console.conf
+sed -i "s/USER/${username}/g" /etc/apache2/sites-enabled/${username}.console.conf
 
 cat >>/etc/apache2/sites-enabled/scgimount.conf<<SC
 SCGIMount /${username} 127.0.0.1:$RPORT

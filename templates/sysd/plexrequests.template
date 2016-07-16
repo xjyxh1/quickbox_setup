@@ -1,0 +1,13 @@
+Description=Systemd script to run PlexRequests as a service
+After=network-online.target
+
+[Service]
+User=USER
+Group=USER
+Type=forking
+ExecStart=/usr/bin/screen -f -a -d -m -S plexrequests mono /opt/plexrequests/PlexRequests.exe -p 3000
+ExecStop=-/bin/kill -HUP
+WorkingDirectory=/home/USER/
+
+[Install]
+WantedBy=multi-user.target
