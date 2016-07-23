@@ -26,7 +26,9 @@
     0,
     0
   ],
-  "enabled_plugins": [],
+  "enabled_plugins": [
+    "ltConfig"
+  ],
   "max_half_open_connections": 50,
   "download_location": "/home/USERNAME/torrents/deluge",
   "compact_allocation": true,

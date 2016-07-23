@@ -15,7 +15,7 @@ Alias /USERNAME.rtorrent.downloads "/home/USERNAME/torrents/rtorrent/"
   AuthType Digest
   AuthName "rutorrent"
   AuthUserFile '/etc/htpasswd'
-  Require valid-user
+  Require user USERNAME
   AllowOverride None
   Order allow,deny
   allow from all
@@ -26,7 +26,7 @@ Alias /USERNAME.deluge.downloads "/home/USERNAME/torrents/deluge/"
   AuthType Digest
   AuthName "rutorrent"
   AuthUserFile '/etc/htpasswd'
-  Require valid-user
+  Require user USERNAME
   AllowOverride None
   Order allow,deny
   allow from all
@@ -37,8 +37,14 @@ Alias /USERNAME.console "/home/USERNAME/.console/"
   AuthType Digest
   AuthName "rutorrent"
   AuthUserFile '/etc/htpasswd'
-  Require valid-user
+  Require user USERNAME
   AllowOverride None
   Order allow,deny
   allow from all
 </Directory>
+<Location "/USERNAME">
+    AuthType Digest
+    AuthName "rutorrent"
+    AuthUserFile "/etc/htpasswd"
+    Require user USERNAME
+</Location>

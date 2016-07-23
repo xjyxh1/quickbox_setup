@@ -17,10 +17,10 @@
 
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
-QUICKBOX_VERSION=2.4.2
+QUICKBOX_VERSION=2.4.3
 
 export TERM=xterm;TERM=xterm
-export PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/home/quickbox/.bin/:/usr/local/bin/quickbox/:/usr/local/bin/quickbox/package/:/usr/local/bin/quickbox/package/install/:/usr/local/bin/quickbox/package/remove/:/usr/local/bin/quickbox/plugin/:/usr/local/bin/quickbox/plugin/install/:/usr/local/bin/quickbox/plugin/remove/:/usr/local/bin/quickbox/system/
+export PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/home/quickbox/.bin/:/usr/local/bin/quickbox/:/usr/local/bin/quickbox/package/:/usr/local/bin/quickbox/package/install/:/usr/local/bin/quickbox/package/remove/:/usr/local/bin/quickbox/plugin/:/usr/local/bin/quickbox/plugin/install/:/usr/local/bin/quickbox/plugin/remove/:/usr/local/bin/quickbox/system/:/usr/local/bin/quickbox/system/lang/
 
 EDITOR=nano; export EDITOR=nano
 
@@ -1146,46 +1146,10 @@ echo -n "setting permissions ... "
   chown ${username}:plex /home/${username} >/dev/null 2>&1
   chmod 750 /home/${username} >/dev/null 2>&1
   setfacl -m g:${username}:rwx /home/${username} >/dev/null 2>&1
-echo $OK
-
-echo -n "writing $username rtorrent/irssi cron script ... "
-cat >/home/${username}/.startup<<SU
-#!/bin/bash
-export USER=\$(id -un)
-IRSSI_CLIENT=yes
-RTORRENT_CLIENT=yes
-WIPEDEAD=yes
-
-# NO NEED TO EDIT PAST HERE!
-if [ "\$WIPEDEAD" == "yes" ]; then
-  screen -wipe >/dev/null 2>&1;
-fi
-
-if [ "\$IRSSI_CLIENT" == "yes" ]; then
-  (screen -ls|grep irssi >/dev/null || (screen -fa -dmS irssi irssi && false))
-fi
-
-if [ "\$RTORRENT_CLIENT" == "yes" ]; then
-  (screen -ls|grep rtorrent >/dev/null || (screen -dmS rtorrent rtorrent && false))
-fi
-if [ "\$DELUGED_CLIENT" == "yes" ]; then
-  (screen -ls|grep deluged >/dev/null || (screen -fa -dmS deluged deluged -d && false))
-fi
-if [ "\$DELUGEWEB_CLIENT" == "yes" ]; then
-  (screen -ls|grep deluge-web >/dev/null || (screen -fa -dmS deluge-web deluge-web && false))
-fi
-SU
-  chown ${username}.${username} /home/${username}/.startup >/dev/null 2>&1
-  chmod +x /home/${username}/.startup >/dev/null 2>&1
-echo $OK
-
-echo -n "enabling $username cron script ... "
   mkdir "/srv/rutorrent/conf/users/${username}" >/dev/null 2>&1
   mkdir -p /srv/rutorrent/conf/users/"${username}"/plugins/fileupload/ >/dev/null 2>&1
   cp /srv/rutorrent/plugins/fileupload/conf.php /srv/rutorrent/conf/users/"${username}"/plugins/fileupload/conf.php
   chown -R www-data: /srv/rutorrent/conf/users/"${username}" >/dev/null 2>&1
-  chown $username.$username /home/$username/.startup >/dev/null 2>&1
-  sudo -u $username chmod 775 /home/${username}/.startup >/dev/null 2>&1
   sudo -u $username chmod 750 /home/$username/ >/dev/null 2>&1
   chown -R $username.www-data /home/${username} >/dev/null 2>&1
 echo $OK
@@ -1280,7 +1244,9 @@ cat >/home/$username/.config/deluge/core.conf<<DC
   0,
   0
 ],
-"enabled_plugins": [],
+"enabled_plugins": [
+  "ltConfig"
+],
 "max_half_open_connections": 50,
 "download_location": "/home/${username}/torrents/deluge",
 "compact_allocation": true,
@@ -1396,27 +1362,23 @@ cat >/home/$username/.config/deluge/hostlist.conf.1.2<<DWHOSTS
   ]
 }
 DWHOSTS
+if [[ ! -f /home/${username}/.config/deluge/plugins/ltConfig-0.2.5.0-py2.7.egg ]]; then
+  cd /home/${username}/.config/deluge/plugins/
+  wget -q https://github.com/ratanakvlun/deluge-ltconfig/releases/download/v0.2.5.0/ltConfig-0.2.5.0-py2.7.egg
+fi
 chown -R ${username}.${username} /home/${username}/.config/
-sed -i '/RTORRENT_CLIENT=yes/a DELUGEWEB_CLIENT=yes' /home/${username}/.startup
-sed -i '/RTORRENT_CLIENT=yes/a DELUGED_CLIENT=yes' /home/${username}/.startup
 fi
 echo $OK
 
-if [[ -f /install/.cron.lock ]]; then
-sudo -u $username /home/$username/.startup >/dev/null 2>&1
-command1="*/1 * * * * /home/${username}/.startup"
-cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
-else
-  systemctl start rtorrent@${username}
-  systemctl enable rtorrent@${username}
-  systemctl start irssi@${username}
-  systemctl enable irssi@${username}
-  if [[ -f /install/.deluge.lock ]]; then
-    systemctl start deluged@${username}
-    systemctl start deluge-web@${username}
-    systemctl enable deluged@${username}
-    systemctl enable deluge-web@${username}
-  fi
+systemctl start rtorrent@${username}
+systemctl enable rtorrent@${username}
+systemctl start irssi@${username}
+systemctl enable irssi@${username}
+if [[ -f /install/.deluge.lock ]]; then
+  systemctl start deluged@${username}
+  systemctl start deluge-web@${username}
+  systemctl enable deluged@${username}
+  systemctl enable deluge-web@${username}
 fi
 
 cat >/etc/apache2/sites-enabled/alias.${username}.download.conf<<AS
@@ -1427,7 +1389,7 @@ Alias /${username}.rtorrent.downloads "/home/${username}/torrents/rtorrent"
           AuthType Digest
           AuthName "rutorrent"
           AuthUserFile '/etc/htpasswd'
-          Require valid-user
+          Require user ${username}
     Order allow,deny
     Allow from all
   </Directory>
@@ -1438,10 +1400,16 @@ Alias /${username}.deluge.downloads "/home/${username}/torrents/deluge"
           AuthType Digest
           AuthName "rutorrent"
           AuthUserFile '/etc/htpasswd'
-          Require valid-user
+          Require user ${username}
     Order allow,deny
     Allow from all
   </Directory>
+  <Location "/${username}">
+      AuthType Digest
+      AuthName "rutorrent"
+      AuthUserFile "/etc/htpasswd"
+      Require user ${username}
+  </Location>
 AS
 
 local_setup=/root/QuickBox/setup/

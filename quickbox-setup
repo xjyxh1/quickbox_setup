@@ -395,6 +395,11 @@ function _skel() {
   mv GeoLiteCity.dat /usr/share/GeoIP/GeoIPCity.dat>>"${OUTTO}" 2>&1
   (echo y;echo o conf prerequisites_policy follow;echo o conf commit)>/dev/null 2>&1|cpan Digest::SHA1 >>"${OUTTO}" 2>&1
   (echo y;echo o conf prerequisites_policy follow;echo o conf commit)>/dev/null 2>&1|cpan Digest::SHA >>"${OUTTO}" 2>&1
+  if [[ $DELUGE != NO ]]; then
+    mkdir -p /etc/skel/.config/deluge/plugins/
+    cd /etc/skel/.config/deluge/plugins/
+    wget -q https://github.com/ratanakvlun/deluge-ltconfig/releases/download/v0.2.5.0/ltConfig-0.2.5.0-py2.7.egg
+  fi
 }
 
 function _qmount() {
@@ -550,6 +555,9 @@ function _deluge() {
   if [[ $DELUGE == REPO ]]; then
     apt-get -q -y update >>"${OUTTO}" 2>&1
     apt-get -q -y install deluged deluge-web >>"${OUTTO}" 2>&1
+    systemctl stop deluged
+    update-rc.d deluged remove
+    rm /etc/init.d/deluged
   elif [[ $DELUGE == 1.0.9 ]] || [[ $DELUGE == 1.1.0 ]]; then
     if [[ $DELUGE == 1.0.9 ]]; then
       LTRC=RC_1_0
@@ -588,7 +596,11 @@ fi
   # -- Secondary awk command -- #
   #DPORT=$(awk -v min=59000 -v max=69024 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
   DWPORT=$(shuf -i 10001-11000 -n 1)
-  mkdir -p /home/${username}/.config/deluge/
+  mkdir -p /home/${username}/.config/deluge/plugins
+  if [[ ! -f /home/${username}/.config/deluge/plugins/ltConfig-0.2.5.0-py2.7.egg ]]; then
+    cd /home/${username}/.config/deluge/plugins/
+    wget -q https://github.com/ratanakvlun/deluge-ltconfig/releases/download/v0.2.5.0/ltConfig-0.2.5.0-py2.7.egg
+  fi
   chmod 755 /home/${username}/.config
   chmod 755 /home/${username}/.config/deluge
   cp ${local_setup}templates/core.conf.template /home/${username}/.config/deluge/core.conf
@@ -834,9 +846,13 @@ function _quickstats() {
   cd /usr/share/zoneinfo
   find * -type f -exec sh -c "diff -q /etc/localtime '{}' > /dev/null && echo {}" \; > ~/tz.txt
   cd ~
-  echo "  date_default_timezone_set('$(cat tz.txt)');" >> /srv/rutorrent/home/widgets/config.php
-  echo "" >> /srv/rutorrent/home/widgets/config.php
-  echo "?>" >> /srv/rutorrent/home/widgets/config.php
+  LOCALE=en_GB.UTF-8
+  LANG=lang_en
+  sed -i "s/LOCALE/${locale}/g" /srv/rutorrent/home/inc/localize.php
+  sed -i "s/LANG/${lang}/g" /srv/rutorrent/home/inc/localize.php
+  #echo "  date_default_timezone_set('$(cat tz.txt)');" >> /srv/rutorrent/home/widgets/config.php
+  #echo "" >> /srv/rutorrent/home/widgets/config.php
+  #echo "?>" >> /srv/rutorrent/home/widgets/config.php
   if [[ ${primaryroot} == "home" ]]; then
     cd /srv/rutorrent/home/widgets && rm disk_data.php
     mv disk_datah.php disk_data.php
