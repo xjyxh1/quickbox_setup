@@ -343,7 +343,7 @@ function _depends() {
                      pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libapache2-mod-fastcgi libapache2-mod-geoip \
                      libxslt-dev libncurses5-dev yasm pcregrep apache2 php-net-socket libapache2-mod-php7.0 \
-                     php7.0-dev php7.0-geoip libgeoip-dev php7.0 php7.0-fpm php7.0-mysql \
+                     php7.0-dev php7.0-geoip libgeoip-dev php7.0 php7.0-fpm php7.0-mbstring php7.0-mysql \
                      php7.0-curl php7.0-memcached memcached php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache \
                      php7.0-xml fontconfig comerr-dev ca-certificates libfontconfig1-dev \
                      libdbd-mysql-perl libdbi-perl libfontconfig1 rar unrar mediainfo ifstat \
