@@ -1502,6 +1502,21 @@ function upgradeDeluge() {
   apt-get install -y -f --only-upgrade deluged deluge-common deluge-web
 }
 
+function upgradeJackett() {
+  OK=$(echo -e "[ \e[0;32mUpgrade Complete\e[00m ]")
+  username=$(cat /srv/rutorrent/home/db/master.txt)
+  cd /home/${username}
+  jackettver=$(wget -q https://github.com/Jackett/Jackett/releases/latest -O - | grep -E \/tag\/ | awk -F "[><]" '{print $3}')
+  echo "Setting up Jackett-${jackettver} in /home/${username}/Jackett ... "
+  wget -q https://github.com/Jackett/Jackett/releases/download/$jackettver/Jackett.Binaries.Mono.tar.gz
+  tar -xvzf Jackett.Binaries.Mono.tar.gz >/dev/null 2>&1
+  echo "Removing leftover binaries ... "
+  rm -f Jackett.Binaries.Mono.tar.gz
+  echo "Adjusting permissions ... "
+  chown ${username}.${username} -R Jackett
+  echo ${OK}
+}
+
 
 
 commandprompt_on
