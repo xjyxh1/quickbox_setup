@@ -1492,8 +1492,34 @@ function upgradeBTSync() {
 }
 
 function upgradePlex() {
-  apt-get install -yqq -f --only-upgrade plexmediaserver
+  OK=$(echo -e "[ \e[0;32mUpgrade Complete\e[00m ]")
+  echo "Downloading plex.deb ... "
+  mkdir -p /root/plex-tmp
+  wget -O /root/plex-tmp/plex.deb "https://plex.tv/downloads/latest/1?channel=16&build=linux-ubuntu-x86_64&distro=ubuntu&X-Plex-Token=removed"
+  echo "Comparing versions ... "
+  newplex="$(dpkg -I /root/plex-tmp/plex.deb | grep Version | awk '{print $2}' | awk -F'[ -]' '{print $1}')"
+  currentplex="$(dpkg -l | grep plexmediaserver | awk '{print $3}' | awk -F'[ -]' '{print $1}')"
+  echo "Currently installed version is $currentplex ... "
+  echo "Downloaded version is $newplex ... "
+  cd plex-tmp
+  /usr/bin/dpkg --compare-versions $newplex gt $currentplex
+  if (($? < 1)); then
+    echo "$newplex is greater than $currentplex"
+    echo "Installing downloaded plex ... "
+    /usr/bin/dpkg -i /root/plex-tmp/plex.deb
+    echo "Renaming downloaded package to plex.$newplex.deb ... "
+    mv /root/plex-tmp/plex.deb /root/plex-tmp/plex.$newplex.deb
+  else
+    echo "$newplex is not greater than $currentplex"
+    echo "Deleting downloaded package ... "
+    rm plex.deb
+  fi
+  cd
+  echo "Deleting /root/plex-tmp directory ... "
+  rm -rf plex-tmp
+  echo "Restarting Plex Media Server ... "
   service plexmediaserver restart
+  echo ${OK}
 }
 
 function upgradeDeluge() {
