@@ -1002,7 +1002,6 @@ if [ -e ~/.custom ]; then source ~/.custom; fi
 function changeUserpass() {
 REALM=rutorrent
 HTPASSWD=/etc/htpasswd
-master=$(cat /srv/rutorrent/home/db/master.txt)
 genpass=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)
 echo -n "Username: "; read user
         username=$(echo "$user"|sed 's/.*/\L&/')
@@ -1025,18 +1024,16 @@ echo -n "Username: "; read user
                 (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
         fi
         echo "$username : $passwd" >/root/${username}.info
-        if [[ $username == $master ]]; then sed -i "s/.*PASSWORD = .*/\$PASSWORD = \'$passwd\';/" /home/$username/.console/index.php; fi
         if [[ -e /install/.deluge.lock ]]; then
-          systemctl stop deluged@${username}
-          systemctl stop deluge-web@${username}
-          DWSALT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-          DWP=$(python /usr/local/bin/quickbox/system/deluge.Userpass.py ${passwd} ${DWSALT})
-          sed -i "s/.*$username.*/${username}:${passwd}:10/" /home/$username/.config/deluge/auth
-          sed -i "s/.*pwd_salt.*/  \"pwd_salt\": \"${DWSALT}\",/" /home/$username/.config/deluge/web.conf
-          sed -i "s/.*pwd_sha1.*/  \"pwd_sha1\": \"${DWP}\",/" /home/$username/.config/deluge/web.conf
-          sed -i "/$username/{n;s/.*/      \"${passwd}\"/}" /home/${username}/.config/deluge/hostlist.conf.1.2
-          systemctl start deluged@${username}
-          systemctl start deluge-web@${username}
+        systemctl stop deluged@${username}
+        systemctl stop deluge-web@${username}
+        DWSALT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+        DWP=$(python /usr/local/bin/quickbox/system/deluge.Userpass.py ${passwd} ${DWSALT})
+        sed -i "s/.*$username.*/${username}:${passwd}:10/" /home/$username/.config/deluge/auth
+        sed -i "s/.*pwd_salt.*/  \"pwd_salt\": \"${DWSALT}\",/" /home/$username/.config/deluge/web.conf
+        sed -i "s/.*pwd_sha1.*/  \"pwd_sha1\": \"${DWP}\",/" /home/$username/.config/deluge/web.conf
+        systemctl start deluged@${username}
+        systemctl start deluge-web@${username}
         fi
 }
 
@@ -1493,6 +1490,7 @@ function upgradeBTSync() {
 
 function upgradePlex() {
   OK=$(echo -e "[ \e[0;32mUpgrade Complete\e[00m ]")
+  FIN=$(echo -e "[ \e[0;32mNo Upgrade Needed\e[00m ]")
   echo "Downloading plex.deb ... "
   mkdir -p /root/plex-tmp
   wget -O /root/plex-tmp/plex.deb "https://plex.tv/downloads/latest/1?channel=16&build=linux-ubuntu-x86_64&distro=ubuntu&X-Plex-Token=removed"
@@ -1509,17 +1507,23 @@ function upgradePlex() {
     /usr/bin/dpkg -i /root/plex-tmp/plex.deb
     echo "Renaming downloaded package to plex.$newplex.deb ... "
     mv /root/plex-tmp/plex.deb /root/plex-tmp/plex.$newplex.deb
+    cd
+    echo "Deleting /root/plex-tmp directory ... "
+    rm -rf plex-tmp
+    echo "Restarting Plex Media Server ... "
+    service plexmediaserver restart
+    echo ${OK}
   else
     echo "$newplex is not greater than $currentplex"
     echo "Deleting downloaded package ... "
-    rm plex.deb
+    rm -f plex.deb
+    cd
+    echo "Deleting /root/plex-tmp directory ... "
+    rm -rf plex-tmp
+    echo "Restarting Plex Media Server ... "
+    service plexmediaserver restart
+    echo ${FIN}
   fi
-  cd
-  echo "Deleting /root/plex-tmp directory ... "
-  rm -rf plex-tmp
-  echo "Restarting Plex Media Server ... "
-  service plexmediaserver restart
-  echo ${OK}
 }
 
 function upgradeDeluge() {
