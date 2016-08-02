@@ -113,6 +113,15 @@ function _askquota() {
     esac
 }
 
+function _ask10g() {
+  echo -ne "${bold}${yellow}Is this a 10 gigabit server?${normal} (Default: ${green}${bold}N${normal}) "; read input
+    case $input in
+      [yY] | [yY][Ee][Ss] | "" ) touch /install/.10g.lock;echo "${bold}The devs are officially jealous${normal}" ;;
+      [nN] | [nN][Oo] ) echo "${cyan}Who can afford that stuff anyway?${normal}" ;;
+    *)  echo "${cyan}Who can afford that stuff anyway?${normal}"  ;;
+    esac
+}
+
 # primary partition question
 function _askpartition() {
   if [[ $quota == yes ]]; then
@@ -708,6 +717,10 @@ function _rconf() {
   sed -i "s/USERNAME/${username}/g" /home/${username}/.rtorrent.rc
   sed -i "s/XXX/${PORT}/g" /home/${username}/.rtorrent.rc
   sed -i "s/YYY/${PORTEND}/g" /home/${username}/.rtorrent.rc
+  if [[ -f /install/.10g.lock ]]; then
+    sed -i "s/max_peers = 100/max_peers = 300/g" /home/${username}/.rtorrent.rc
+    sed -i "s/max_uploads = 100/max_uploads = 300/g" /home/${username}/.rtorrent.rc
+  fi
 }
 
 # function to set proper diskspace plugin (26)
@@ -737,8 +750,8 @@ function _plugins() {
   rm -rf ${rutorrent}plugins/tracklabels/labels/nlb.png
 
   # Needed for fileupload
-  wget http://ftp.nl.debian.org/debian/pool/main/p/plowshare/plowshare4_2.1.3-1_all.deb -O plowshare4.deb >>"${OUTTO}" 2>&1
-  wget http://ftp.nl.debian.org/debian/pool/main/p/plowshare/plowshare_2.1.3-1_all.deb -O plowshare.deb >>"${OUTTO}" 2>&1
+  # wget http://ftp.nl.debian.org/debian/pool/main/p/plowshare/plowshare4_2.1.3-1_all.deb -O plowshare4.deb >>"${OUTTO}" 2>&1
+  # wget http://ftp.nl.debian.org/debian/pool/main/p/plowshare/plowshare_2.1.3-1_all.deb -O plowshare.deb >>"${OUTTO}" 2>&1
   apt-get -y install plowshare >>"${OUTTO}" 2>&1
   dpkg -i plowshare*.deb >>"${OUTTO}" 2>&1
   rm -rf plowshare*.deb >>"${OUTTO}" 2>&1
@@ -792,14 +805,14 @@ function _makedirs() {
 }
 
 # function to make crontab .statup file (29)
-function _cronfile() {
-  cp ${local_setup}templates/startup.template /home/${username}/.startup
-  chmod 775 /home/${username}/.startup
-  if [[ $DELUGE != NO ]]; then
-  sed -i 's/DELUGEWEB_CLIENT=no/DELUGEWEB_CLIENT=yes/g' /home/${username}/.startup
-  sed -i 's/DELUGED_CLIENT=no/DELUGED_CLIENT=yes/g' /home/${username}/.startup
-fi
-}
+#function _cronfile() {
+#  cp ${local_setup}templates/startup.template /home/${username}/.startup
+#  chmod 775 /home/${username}/.startup
+#  if [[ $DELUGE != NO ]]; then
+#  sed -i 's/DELUGEWEB_CLIENT=no/DELUGEWEB_CLIENT=yes/g' /home/${username}/.startup
+#  sed -i 's/DELUGED_CLIENT=no/DELUGED_CLIENT=yes/g' /home/${username}/.startup
+#fi
+#}
 
 # function to configure first user config.php (30)
 function _ruconf() {
@@ -1059,6 +1072,7 @@ clear
 
 #_askservices
 _askpartition
+_asklinkspeed
 _askrtorrent
 _askdeluge
 _adduser
