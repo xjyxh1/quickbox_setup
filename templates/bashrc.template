@@ -1002,6 +1002,7 @@ if [ -e ~/.custom ]; then source ~/.custom; fi
 function changeUserpass() {
 REALM=rutorrent
 HTPASSWD=/etc/htpasswd
+master=$(cat /srv/rutorrent/home/db/master.txt)
 genpass=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)
 echo -n "Username: "; read user
         username=$(echo "$user"|sed 's/.*/\L&/')
@@ -1024,6 +1025,7 @@ echo -n "Username: "; read user
                 (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
         fi
         echo "$username : $passwd" >/root/${username}.info
+        if [[ $username == $master ]]; then sed -i "s/.*PASSWORD = .*/\$PASSWORD = \'$passwd\';/" /home/$username/.console/index.php; fi
         if [[ -e /install/.deluge.lock ]]; then
         systemctl stop deluged@${username}
         systemctl stop deluge-web@${username}
@@ -1032,6 +1034,7 @@ echo -n "Username: "; read user
         sed -i "s/.*$username.*/${username}:${passwd}:10/" /home/$username/.config/deluge/auth
         sed -i "s/.*pwd_salt.*/  \"pwd_salt\": \"${DWSALT}\",/" /home/$username/.config/deluge/web.conf
         sed -i "s/.*pwd_sha1.*/  \"pwd_sha1\": \"${DWP}\",/" /home/$username/.config/deluge/web.conf
+        sed -i "/$username/{n;s/.*/      \"${passwd}\"/}" /home/${username}/.config/deluge/hostlist.conf.1.2
         systemctl start deluged@${username}
         systemctl start deluge-web@${username}
         fi
@@ -1130,6 +1133,10 @@ check_hash = no
 execute_nothrow=chmod,777,/home/${username}/.sessions/
 # -- END HERE --
 RC
+if [[ -f /install/.10g.lock ]]; then
+  sed -i "s/max_peers = 100/max_peers = 300/g" /home/${username}/.rtorrent.rc
+  sed -i "s/max_uploads = 100/max_uploads = 300/g" /home/${username}/.rtorrent.rc
+fi
 echo $OK
 
 echo -n "setting permissions ... "
