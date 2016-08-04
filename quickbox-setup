@@ -1114,7 +1114,6 @@ echo -n "Installing .rtorrent.rc for ${username} ... ";_rconf & spinner $!;echo
 echo -n "Adjusting fileupload & filemanager plugins ... ";_plugins & spinner $!;echo
 echo -n "Installing autodl-irssi ... ";_autodl & spinner $!;echo
 echo -n "Making ${username} directory structure ... ";_makedirs & spinner $!;echo
-echo -n "Writing ${username} system crontab script ... ";_cronfile & spinner $!;echo
 echo -n "Writing ${username} rutorrent config.php file ... ";_ruconf & spinner $!;echo
 #echo -n "Writing seedbox reload script ... ";_reloadscript & spinner $!;echo
 echo -n "Installing vsftpd ... ";_installftpd & spinner $!;echo
