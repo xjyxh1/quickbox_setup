@@ -116,8 +116,8 @@ function _askquota() {
 function _ask10g() {
   echo -ne "${bold}${yellow}Is this a 10 gigabit server?${normal} (Default: ${green}${bold}N${normal}) "; read input
     case $input in
-      [yY] | [yY][Ee][Ss] | "" ) touch /install/.10g.lock;echo "${bold}The devs are officially jealous${normal}" ;;
-      [nN] | [nN][Oo] ) echo "${cyan}Who can afford that stuff anyway?${normal}" ;;
+      [yY] | [yY][Ee][Ss] ) touch /install/.10g.lock;echo "${bold}The devs are officially jealous${normal}" ;;
+      [nN] | [nN][Oo] | "" ) echo "${cyan}Who can afford that stuff anyway?${normal}" ;;
     *)  echo "${cyan}Who can afford that stuff anyway?${normal}"  ;;
     esac
 }
