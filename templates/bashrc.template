@@ -396,12 +396,16 @@ alias syscommands='cd /usr/local/bin/quickbox'
 
 # -> Performs some quick adjustments for certain conditions.
 home_diskwidget() {
-  cd /srv/rutorrent/home/widgets
-  rm disk_data.php && mv disk_datah.php disk_data.php
-  cd
+  cp /root/QuickBox/dashboard/widgets/disk_datah.php /srv/rutorrent/home/widgets/disk_data.php
+  service apache2 restart
+}
+root_diskwidget() {
+  cp /root/QuickBox/dashboard/widgets/disk_data.php /srv/rutorrent/home/widgets/disk_data.php
+  service apache2 restart
 }
 
-alias fix-disk_widget='home_diskwidget'
+alias fix-disk_widget_home='home_diskwidget'
+alias fix-disk_widget_root='root_diskwidget'
 
 #-------------------------------------------------------------
 # The 'ls' family (this assumes you use a recent GNU ls).
