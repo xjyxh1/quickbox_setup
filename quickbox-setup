@@ -1007,7 +1007,7 @@ function _finished() {
   ip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
   echo
   echo
-  echo -e " ${black}${on_green}    [quickbox] Seddbox & GUI Installation Completed    ${normal} "
+  echo -e " ${black}${on_green}    [quickbox] Seedbox & GUI Installation Completed    ${normal} "
   echo -e "        ${standout}    INSTALLATION COMPLETED in ${FIN}/min    ${normal}             "
   echo;echo
   echo "  Valid Commands:  "
