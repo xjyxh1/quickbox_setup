@@ -1029,7 +1029,6 @@ echo -n "Username: "; read user
                 (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
         fi
         echo "$username : $passwd" >/root/${username}.info
-        if [[ $username == $master ]]; then sed -i "s/.*PASSWORD = .*/\$PASSWORD = \'$passwd\';/" /home/$username/.console/index.php; fi
         if [[ -e /install/.deluge.lock ]]; then
         systemctl stop deluged@${username}
         systemctl stop deluge-web@${username}
