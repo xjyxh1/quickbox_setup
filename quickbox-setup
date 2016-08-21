@@ -248,13 +248,13 @@ function _askrtorrent() {
 function _askdeluge() {
   echo -e "1) Deluge ${green}repo${normal} (fastest)"
   echo -e "2) Deluge with ${green}libtorrent 1.0.9 (stable)${normal}"
-  echo -e "3) Deluge with ${green}libtorrent 1.1.0 (dev)${normal}"
+  echo -e "3) Deluge with ${green}libtorrent 1.1.1 (dev)${normal}"
   echo -e "4) Do not install Deluge"
   echo -ne "${bold}${yellow}What version of Deluge do you want?${normal} (Default ${green}1${normal}): "; read version
   case $version in
     1 | "") DELUGE=REPO  ;;
     2) DELUGE=1.0.9  ;;
-    3) DELUGE=1.1.0 ;;
+    3) DELUGE=1.1.1 ;;
     4) DELUGE=NO ;;
     *) DELUGE=REPO ;;
   esac
@@ -601,10 +601,10 @@ function _deluge() {
     systemctl stop deluged
     update-rc.d deluged remove
     rm /etc/init.d/deluged
-  elif [[ $DELUGE == 1.0.9 ]] || [[ $DELUGE == 1.1.0 ]]; then
+  elif [[ $DELUGE == 1.0.9 ]] || [[ $DELUGE == 1.1.1 ]]; then
     if [[ $DELUGE == 1.0.9 ]]; then
       LTRC=RC_1_0
-    elif [[ $DELUGE == 1.1.0 ]]; then
+    elif [[ $DELUGE == 1.1.1 ]]; then
       LTRC=RC_1_1
     fi
   apt-get -qy update >/dev/null 2>&1
