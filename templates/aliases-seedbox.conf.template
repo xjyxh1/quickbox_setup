@@ -19,6 +19,7 @@ Alias /USERNAME.rtorrent.downloads "/home/USERNAME/torrents/rtorrent/"
   AllowOverride None
   Order allow,deny
   allow from all
+  php_admin_value engine Off
 </Directory>
 Alias /USERNAME.deluge.downloads "/home/USERNAME/torrents/deluge/"
 <Directory "/home/USERNAME/torrents/deluge/">
@@ -30,17 +31,7 @@ Alias /USERNAME.deluge.downloads "/home/USERNAME/torrents/deluge/"
   AllowOverride None
   Order allow,deny
   allow from all
-</Directory>
-Alias /USERNAME.console "/home/USERNAME/.console/"
-<Directory "/home/USERNAME/.console/">
-  Options Indexes FollowSymLinks MultiViews
-  AuthType Digest
-  AuthName "rutorrent"
-  AuthUserFile '/etc/htpasswd'
-  Require user USERNAME
-  AllowOverride None
-  Order allow,deny
-  allow from all
+  php_admin_value engine Off
 </Directory>
 <Location "/USERNAME">
     AuthType Digest
