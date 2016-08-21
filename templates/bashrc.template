@@ -1399,6 +1399,7 @@ Alias /${username}.rtorrent.downloads "/home/${username}/torrents/rtorrent"
           Require user ${username}
     Order allow,deny
     Allow from all
+    php_admin_value engine Off
   </Directory>
 Alias /${username}.deluge.downloads "/home/${username}/torrents/deluge"
   <Directory "/home/${username}/torrents/deluge">
@@ -1410,6 +1411,7 @@ Alias /${username}.deluge.downloads "/home/${username}/torrents/deluge"
           Require user ${username}
     Order allow,deny
     Allow from all
+    php_admin_value engine Off
   </Directory>
   <Location "/${username}">
       AuthType Digest
