@@ -974,7 +974,7 @@ function rarit() { rar a -m5 -v1m $1 $1; }
 function paste() { $* | curl -F 'sprunge=<-' http://sprunge.us ; }
 function disktest() { dd if=/dev/zero of=test bs=64k count=16k conv=fdatasync;rm -rf test ; }
 function newpass() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15 ; }
-function fixhome() { chmod -R u=rwX,g=rX,o= "$HOME" ;}
+function fixhome() { find $HOME -type f -exec chmod --changes 644 {} + -o -type d -exec chmod --changes 755 {} + ; }
 
 transfer() {
   if [ $# -eq 0 ]; then
@@ -1454,6 +1454,7 @@ SC
 service apache2 reload >/dev/null 2>&1
 
 }
+
 function deleteSeedboxUser() {
 
 rutorrent="/srv/rutorrent"
@@ -1557,8 +1558,6 @@ function upgradeJackett() {
   chown ${username}.${username} -R Jackett
   echo ${OK}
 }
-
-
 
 commandprompt_on
 powerprompt_on
