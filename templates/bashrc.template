@@ -1030,16 +1030,16 @@ echo -n "Username: "; read user
         fi
         echo "$username : $passwd" >/root/${username}.info
         if [[ -e /install/.deluge.lock ]]; then
-        systemctl stop deluged@${username}
-        systemctl stop deluge-web@${username}
-        DWSALT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-        DWP=$(python /usr/local/bin/quickbox/system/deluge.Userpass.py ${passwd} ${DWSALT})
-        sed -i "s/.*$username.*/${username}:${passwd}:10/" /home/$username/.config/deluge/auth
-        sed -i "s/.*pwd_salt.*/  \"pwd_salt\": \"${DWSALT}\",/" /home/$username/.config/deluge/web.conf
-        sed -i "s/.*pwd_sha1.*/  \"pwd_sha1\": \"${DWP}\",/" /home/$username/.config/deluge/web.conf
-        sed -i "/$username/{n;s/.*/      \"${passwd}\"/}" /home/${username}/.config/deluge/hostlist.conf.1.2
-        systemctl start deluged@${username}
-        systemctl start deluge-web@${username}
+          systemctl stop deluged@${username}
+          systemctl stop deluge-web@${username}
+          DWSALT=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+          DWP=$(python /usr/local/bin/quickbox/system/deluge.Userpass.py ${passwd} ${DWSALT})
+          sed -i "s/.*$username.*/${username}:${passwd}:10/" /home/$username/.config/deluge/auth
+          sed -i "s/.*pwd_salt.*/  \"pwd_salt\": \"${DWSALT}\",/" /home/$username/.config/deluge/web.conf
+          sed -i "s/.*pwd_sha1.*/  \"pwd_sha1\": \"${DWP}\",/" /home/$username/.config/deluge/web.conf
+          sed -i "/$username/{n;s/.*/      \"${passwd}\"/}" /home/${username}/.config/deluge/hostlist.conf.1.2
+          systemctl start deluged@${username}
+          systemctl start deluge-web@${username}
         fi
 }
 
@@ -1502,40 +1502,263 @@ function upgradeBTSync() {
 }
 
 function upgradePlex() {
-  OK=$(echo -e "[ \e[0;32mUpgrade Complete\e[00m ]")
-  FIN=$(echo -e "[ \e[0;32mNo Upgrade Needed\e[00m ]")
-  echo "Downloading plex.deb ... "
-  mkdir -p /root/plex-tmp
-  wget -O /root/plex-tmp/plex.deb "https://plex.tv/downloads/latest/1?channel=16&build=linux-ubuntu-x86_64&distro=ubuntu&X-Plex-Token=removed"
-  echo "Comparing versions ... "
-  newplex="$(dpkg -I /root/plex-tmp/plex.deb | grep Version | awk '{print $2}' | awk -F'[ -]' '{print $1}')"
+
+  #############################################################################
+  # Credits to MrWorf for supplying a means to NOT reinvent the wheel
+  # Check out the full Plex Update Script at the following repo:
+  # https://github.com/mrworf/plexupdate/blob/master/plexupdate.sh
+  # We've merely modified a means for cleaner QuickBox integration
+  #############################################################################
+
+  echo "  Please enter in your Plex Email and Password"
+  echo "  Note, this is not shared outside this update"
+  echo ""
+  echo -n "  Email: "; read email
+  echo -n "  Pass: "; read pass
+  echo ""
+  PUBLICIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
+  EMAIL=$email
+  PASS=$pass
+  DOWNLOADDIR="/root/plex-tmp"
+  PLEXSERVER=$PUBLICIP
+
+  mkdir /root/plex-tmp
+
+  FORCE=no
+  PUBLIC=no
+  AUTOINSTALL=yes
+  AUTODELETE=yes
+  AUTOSTART=yes
+  QUIET=no
+  ARCH=$(uname -m)
+
+  # Default options for package managers, override if needed
+  DEBIAN_INSTALL="dpkg -i"
+  DISTRO_INSTALL=""
+
+  # Current pages we need - Do not change unless Plex.tv changes again
+  URL_LOGIN=https://plex.tv/users/sign_in.json
+  URL_DOWNLOAD=https://plex.tv/api/downloads/1.json?channel=plexpass
+  URL_DOWNLOAD_PUBLIC=https://plex.tv/api/downloads/1.json
+
+  # Sanity check
+  if [ -z "${EMAIL}" -o -z "${PASS}" ] && [ "${PUBLIC}" = "no" ] && [ ! -f /tmp/cookies ]; then
+  	echo "ERROR: Need username & password to download PlexPass version." >&2
+  	exit 1
+  fi
+
+  # Remove any ~ or other oddness in the path we're given
+  DOWNLOADDIR="$(eval cd ${DOWNLOADDIR// /\\ } && pwd)"
+  if [ ! -d "${DOWNLOADDIR}" ]; then
+  	echo "ERROR: Download directory does not exist or is not a directory" >&2
+  	exit 1
+  fi
+
+  if [ -z "${DISTRO_INSTALL}" ]; then
+  	# Detect if we're running on redhat instead of ubuntu
+  	BUILD="linux-ubuntu-${ARCH}"
+  	DISTRO="ubuntu"
+  	DISTRO_INSTALL="${DEBIAN_INSTALL}"
+  fi
+
+  # Useful functions
+  rawurlencode() {
+  	local string="${1}"
+  	local strlen=${#string}
+  	local encoded=""
+  	for (( pos=0 ; pos<strlen ; pos++ )); do
+  		c=${string:$pos:1}
+  		case "$c" in
+  		[-_.~a-zA-Z0-9] ) o="${c}" ;;
+  		* )               printf -v o '%%%02x' "'$c"
+  	esac
+  	encoded+="${o}"
+  	done
+  	echo "${encoded}"
+  }
+
+  keypair() {
+  	local key="$( rawurlencode "$1" )"
+  	local val="$( rawurlencode "$2" )"
+  	echo "${key}=${val}"
+  }
+
+  function cleanup {
+  	rm -f "${STDOUTLOG}" 2>/dev/null >/dev/null
+  	rm -f /tmp/postdata 2>/dev/null >/dev/null
+  	rm -f /tmp/raw 2>/dev/null >/dev/null
+  	rm -f /tmp/failcause 2>/dev/null >/dev/null
+  	rm -f /tmp/cookies 2>/dev/null >/dev/null
+  }
+  trap cleanup EXIT
+
+  # Fields we need to submit for login to work
+  #
+  # Field			Value
+  # utf8			&#x2713;
+  # authenticity_token	<Need to be obtained from web page>
+  # user[login]		$EMAIL
+  # user[password]	$PASSWORD
+  # user[remember_me]	0
+  # commit		Sign in
+
+  # Load previous token if stored
+  if [ -f /tmp/cookies_token ]; then
+  	TOKEN=$(cat /tmp/cookies_token)
+  fi
+
+  if [ "${PUBLIC}" = "no" ]; then
+    echo -ne "Authenticating ..."
+
+  	# Clean old session
+  	rm -f /tmp/cookies 2>/dev/null
+
+  	# Build post data
+  	echo -ne >/tmp/postdata "$(keypair "user[login]" "${EMAIL}" )"
+  	echo -ne >>/tmp/postdata "&$(keypair "user[password]" "${PASS}" )"
+  	echo -ne >>/tmp/postdata "&$(keypair "user[remember_me]" "0" )"
+
+  	# Authenticate (using Plex Single Sign On)
+  	wget --header "X-Plex-Client-Identifier: 4a745ae7-1839-e44e-1e42-aebfa578c865" --header "X-Plex-Product: Plex SSO" --load-cookies /tmp/cookies --save-cookies /tmp/cookies --keep-session-cookies "${URL_LOGIN}" --post-file=/tmp/postdata -q -S -O /tmp/failcause 2>/tmp/raw
+  	# Delete authentication data
+  	rm -f /tmp/postdata
+
+  	# Provide some details to the end user
+  	RESULTCODE=$(head -n1 /tmp/raw | grep -oe '[1-5][0-9][0-9]')
+  	if [ $RESULTCODE -eq 401 ]; then
+  		echo -e " ${BWhite}${On_Red}ERROR: Username and/or password incorrect${NC}" >&2
+  	elif [ $RESULTCODE -ne 201 ]; then
+  		echo -e " ${BWhite}${On_Red}ERROR: Failed to login, debug information:${NC}" >&2
+  		cat /tmp/failcause >&2
+    else
+      # If the system got here, it means the login was successfull, so we set the TOKEN variable to the authToken from the response
+    	# I use cut -c 14- to cut off the "authToken":" string from the grepped result, can probably be done in a different way
+    	TOKEN=$(</tmp/failcause  grep -ioe '"authToken":"[^"]*' | cut -c 14-)
+
+    	# Remove this, since it contains more information than we should leave hanging around
+    	rm -f /tmp/failcause
+
+      echo -e " ${Green}OK${NC}"
+  	fi
+
+
+  elif [ "$PUBLIC" != "no" ]; then
+  	# It's a public version, so change URL and make doubly sure that cookies are empty
+  	rm 2>/dev/null >/dev/null /tmp/cookies
+  	touch /tmp/cookies
+  	URL_DOWNLOAD=${URL_DOWNLOAD_PUBLIC}
+  fi
+
+  if [ "${LISTOPTS}" = "yes" ]; then
+  	opts="$(wget --load-cookies /tmp/cookies --save-cookies /tmp/cookies --keep-session-cookies "${URL_DOWNLOAD}" -O - 2>/dev/null | grep -oe '"label"[^}]*' | grep -v Download | sed 's/"label":"\([^"]*\)","build":"\([^"]*\)","distro":"\([^"]*\)".*/"\3" "\2" "\1"/' | uniq | sort)"
+  	eval opts=( "DISTRO" "BUILD" "DESCRIPTION" "======" "=====" "==============================================" $opts )
+  	BUILD=
+  	DISTRO=
+  	for X in "${opts[@]}" ; do
+  		if [ -z "$DISTRO" ]; then
+  			DISTRO="$X"
+  		elif [ -z "$BUILD" ]; then
+  			BUILD="$X"
+  		else
+  			if [ "${QUIET}" = "yes" ]; then
+  				printf "%-12s %-30s %s\n" "$DISTRO" "$BUILD" "$X" >&3
+  			else
+  				printf "%-12s %-30s %s\n" "$DISTRO" "$BUILD" "$X"
+  			fi
+  			BUILD=
+  			DISTRO=
+  		fi
+  	done
+  fi
+
+  # Extract the URL for our release
+  echo -n "Finding download URL to download ..."
+
+  # Set "X-Plex-Token" to the auth token, if no token is specified or it is invalid, the list will return public downloads by default
+  DOWNLOAD=$(wget --header "X-Plex-Token:"${TOKEN}"" --load-cookies /tmp/cookies --save-cookies /tmp/cookies --keep-session-cookies "${URL_DOWNLOAD}" -O - 2>/dev/null | grep -ioe '"label"[^}]*' | grep -i "\"distro\":\"${DISTRO}\"" | grep -i "\"build\":\"${BUILD}\"" | grep -m1 -ioe 'https://[^\"]*' )
+
+  echo -e " ${Green}OK${NC}"
+
+  if [ -z "${DOWNLOAD}" ]; then
+  	echo -e " ${BWhite}${On_Red}ERROR: Unable to retrieve the URL needed for download (Query DISTRO: $DISTRO, BUILD: $BUILD)${NC}" >&2
+  	exit 1
+  fi
+
+  FILENAME="$(basename 2>/dev/null ${DOWNLOAD})"
+  if [ $? -ne 0 ]; then
+  	echo -e " ${BWhite}${On_Red}ERROR: Failed to parse HTML, download cancelled.${NC}" >&2
+  	exit 1
+  fi
+
+  if [ "${PRINT_URL}" = "yes" ]; then
+    if [ "${QUIET}" = "yes" ]; then
+      echo "${DOWNLOAD}" >&3
+    else
+      echo "${DOWNLOAD}"
+    fi
+    exit 1
+  fi
+
+  # By default, try downloading
+  SKIP_DOWNLOAD="no"
+
+  if [ "${SKIP_DOWNLOAD}" = "no" ]; then
+  	if [ -f "${DOWNLOADDIR}/${FILENAME}" ]; then
+  	  echo "Note! File exists, but asked to overwrite with new copy"
+  	fi
+  	echo -ne "Downloading release \"${FILENAME}\" ..."
+  	ERROR=$(wget --load-cookies /tmp/cookies --save-cookies /tmp/cookies --keep-session-cookies "${DOWNLOAD}" -O "${DOWNLOADDIR}/${FILENAME}" 2>&1)
+  	CODE=$?
+  	if [ ${CODE} -ne 0 ]; then
+  		echo -e "\n  !! Download failed with code ${CODE}, \"${ERROR}\""
+  		exit ${CODE}
+  	fi
+  	echo -e " ${Green}OK${NC}"
+  fi
+
+  newplex="$(dpkg -I /root/plex-tmp/*.deb | grep Version | awk '{print $2}' | awk -F'[ -]' '{print $1}')"
   currentplex="$(dpkg -l | grep plexmediaserver | awk '{print $3}' | awk -F'[ -]' '{print $1}')"
-  echo "Currently installed version is $currentplex ... "
-  echo "Downloaded version is $newplex ... "
-  cd plex-tmp
+  echo -e "${BBlack}${On_White}Starting Version Comparison${NC}"
+  sleep 2
+  echo -e "Currently installed version is ${BWhite}$currentplex${NC}"
+  echo -e "Downloaded version is ${BWhite}$newplex${NC}"
   /usr/bin/dpkg --compare-versions $newplex gt $currentplex
   if (($? < 1)); then
-    echo "$newplex is greater than $currentplex"
+    echo -e "${Green}$newplex${NC} is greater than ${Yellow}$currentplex${NC}"
     echo "Installing downloaded plex ... "
-    /usr/bin/dpkg -i /root/plex-tmp/plex.deb
-    echo "Renaming downloaded package to plex.$newplex.deb ... "
-    mv /root/plex-tmp/plex.deb /root/plex-tmp/plex.$newplex.deb
-    cd
-    echo "Deleting /root/plex-tmp directory ... "
-    rm -rf plex-tmp
-    echo "Restarting Plex Media Server ... "
-    service plexmediaserver restart
-    echo ${OK}
+    if [ "${AUTOINSTALL}" = "yes" ]; then
+  	   sudo ${DISTRO_INSTALL} "${DOWNLOADDIR}/${FILENAME}"
+    fi
+    if [ "${AUTOSTART}" = "yes" ]; then
+      # Check for systemd
+      echo "Restarting Plex Media Server service ... "
+      if hash systemctl 2>/dev/null; then
+        systemctl start plexmediaserver.service
+      elif hash service 2>/dev/null; then
+        service plexmediaserver start
+      elif [ -x /etc/init.d/plexmediaserver ]; then
+        /etc/init.d/plexmediaserver start
+      else
+        echo -e " ${BWhite}${On_Red}ERROR: No startup scripts were found for 'plexmediaserver'.${NC}" >&2
+        exit 1
+      fi
+    fi
+    if [ "${AUTODELETE}" = "yes" ]; then
+      if [ "${AUTOINSTALL}" = "yes" ]; then
+        rm -rf "${DOWNLOADDIR}/${FILENAME}" && rm -rf /root/plex-tmp
+        echo "Deleted \"${FILENAME}\""
+      fi
+    fi
   else
-    echo "$newplex is not greater than $currentplex"
-    echo "Deleting downloaded package ... "
-    rm -f plex.deb
-    cd
-    echo "Deleting /root/plex-tmp directory ... "
-    rm -rf plex-tmp
-    echo "Restarting Plex Media Server ... "
-    service plexmediaserver restart
-    echo ${FIN}
+    echo -e "${Yellow}$newplex${NC} is not greater than ${Green}$currentplex${NC}"
+    echo "Plex Upgrade is currently not necessary "
+
+    if [ "${AUTODELETE}" = "yes" ]; then
+  	  if [ "${AUTOINSTALL}" = "yes" ]; then
+  		  rm -rf "${DOWNLOADDIR}/${FILENAME}" && rm -rf /root/plex-tmp
+  		  echo "Deleted \"${FILENAME}\""
+      fi
+    fi
   fi
 }
 
@@ -1565,9 +1788,9 @@ for i in "${users[@]}"; do
   systemctl stop deluge-web@$i
 done
   if [[ $DELUGE == REPO ]]; then
-  add-apt-repository 'deb http://ppa.launchpad.net/deluge-team/ppa/ubuntu precise main'
-  apt-get -y update
-  apt-get install -y -f --only-upgrade deluged deluge-common deluge-web
+    add-apt-repository 'deb http://ppa.launchpad.net/deluge-team/ppa/ubuntu precise main'
+    apt-get -y update
+    apt-get install -y -f --only-upgrade deluged deluge-common deluge-web
     systemctl stop deluged
     update-rc.d deluged remove
     rm /etc/init.d/deluged
