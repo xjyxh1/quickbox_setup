@@ -79,6 +79,7 @@ function _checkroot() {
 
 function _checkkernel() {
   grsec=$(uname -a | grep -i grs)
+  DISTRO=$(lsb_release -is)
   if [[ -n $grsec ]]; then
     echo -e "Your server is currently running with kernel version: $(uname -r)"
     echo -e "Kernels with ${bold}grsec${normal} are not supported"
@@ -1076,6 +1077,7 @@ cd
 _bashrc
 _intro
 _checkroot
+_checkkernel
 _logcheck
 _hostname
 _askquota
