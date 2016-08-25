@@ -22,4 +22,5 @@ scgi_port = localhost:XXX
 execute_nothrow=chmod,777,/home/USERNAME/.config/rpc.socket
 execute_nothrow=chmod,777,/home/USERNAME/.sessions/
 check_hash = no
+encoding.add = UTF-8
 # -- END HERE --
