@@ -33,3 +33,4 @@ pasv_min_port=0
 pasv_max_port=0
 listen_port=5757
 seccomp_sandbox=no
+utf8_filesystem=YES
