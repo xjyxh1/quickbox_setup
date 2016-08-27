@@ -339,7 +339,10 @@ esac
 }
 
 prompt_OFF() {
+PROMPT_COMMAND="history -a"
 PS1='${debian_chroot:+($debian_chroot)}\h:\w\$ '
+#PSTMP=${PS1}
+#PS1='[${USER}@${HOSTNAME}]'
 umask 022
 
 # You may uncomment the following lines if you want `ls' to be colorized:
