@@ -1872,6 +1872,29 @@ function upgradeJackett() {
   echo ${OK}
 }
 
+function setup-pyLoad() {
+  username=$(cat /srv/rutorrent/home/db/master.txt)
+  if [ -d /home/${username}/.pyload ]; then
+    cd /home/${username}/.pyload
+    /usr/bin/python /home/${username}/.pyload/pyLoadCore.py --setup --config=/home/${username}/.pyload
+  else
+    echo "pyLoad is not installed. You can install by typing: box install pyload"
+    exit 1
+  fi
+}
+
+function upgradepyLoad() {
+  username=$(cat /srv/rutorrent/home/db/master.txt)
+  if [ -d /home/${username}/.pyload ]; then
+    cd /home/${username}/.pyload
+    git checkout stable && git pull
+    chown -R ${username}.${username} /home/${username}/.pyload
+  else
+    echo "pyLoad is not installed. You can install by typing: box install pyload"
+    exit 1
+  fi
+}
+
 commandprompt_on
 powerprompt_on
 basicprompt_on
