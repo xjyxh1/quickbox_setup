@@ -145,25 +145,30 @@ On_White='\e[47m'       # White
 NC="\e[m"               # Color Reset
 
 
-ALERT=${BWhite}${On_Red} # Bold White on red background
+  ALERT=${BWhite}${On_Red} # Bold White on red background
+  date=`date`
 
-
-echo -e "${BCyan}You are running QuickBox ${BRed}${QUICKBOX_VERSION}${BCyan}\
- - on ${BRed}$DISPLAY${NC}"
-echo -e "${BCyan}Your BASH version is ${BRed}${BASH_VERSION%.*}${BCyan}${NC}"
-date
-echo
-echo "#-------------------------------------------------------------"
-echo "#  Just type any one of the following commands"
-echo "#  to turn on different bash prompts"
-echo "#-------------------------------------------------------------"
-echo "#  commandprompt_on - this prompt shows last command used & more"
-echo "#  powerprompt_on - this prompt shows colorful system data"
-echo "#  basicprompt_on - this prompt shows color coded load & cpu avg."
-echo "#  prompt_OFF - this turns off extreme prompts and goes back to default"
-echo "#-------------------------------------------------------------"
-echo
-
+  echo ""
+  echo ""
+  echo "|========================================================================|"
+  echo -e "        ${BCyan}You are running QuickBox v${BRed}${QUICKBOX_VERSION}${BCyan} - on ${BRed}$DISPLAY${NC}          "
+  echo -e "                    ${BCyan}Your BASH version is ${BRed}${BASH_VERSION%.*}${BCyan}${NC}                             "
+  echo "                  $date                           "
+  echo "|------------------------------------------------------------------------|"
+  echo "|  Just type any one of the following commands                           |"
+  echo "|  to turn on different bash prompts                                     |"
+  echo "|------------------------------------------------------------------------|"
+  echo -e "|  ${BGreen}commandprompt_on${NC}                                                      |"
+  echo "|  this prompt shows last command used & more                            |"
+  echo -e "|  ${BGreen}powerprompt_on${NC} (default)                                              |"
+  echo "|  this prompt shows colorful system data - cpu, load etc.               |"
+  echo -e "|  ${BGreen}basicprompt_on${NC}                                                        |"
+  echo "|  this prompt shows color coded load & cpu avg                          |"
+  echo -e "|  ${BGreen}prompt_OFF${NC}                                                            |"
+  echo "|  this turns off prompts and goes back to default                       |"
+  echo "|========================================================================|"
+  echo ""
+  echo ""
 
 if [ -x /usr/games/fortune ]; then
     /usr/games/fortune -s     # Makes our day a bit more fun.... :-)
