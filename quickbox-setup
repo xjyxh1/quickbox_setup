@@ -83,7 +83,6 @@ function _checkroot() {
 
 function _checkkernel() {
   grsec=$(uname -a | grep -i grs)
-  DISTRO=$(lsb_release -is)
   if [[ -n $grsec ]]; then
     echo -e "Your server is currently running with kernel version: $(uname -r)"
     echo -e "Kernels with ${bold}grsec${normal} are not supported"
@@ -744,6 +743,9 @@ function _apacheconf() {
     # ensure fastcgi module is activated
     a2enmod actions >>"${OUTTO}" 2>&1
     a2enmod fastcgi >>"${OUTTO}" 2>&1
+    a2enmod proxy_fcgi setenvif >>"${OUTTO}" 2>&1
+    a2enconf php7.0-fpm >>"${OUTTO}" 2>&1
+
 
     #sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.0/apache2/php.ini
 }
