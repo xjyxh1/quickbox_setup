@@ -982,7 +982,19 @@ function rarit() { rar a -m5 -v1m $1 $1; }
 function paste() { $* | curl -F 'sprunge=<-' http://sprunge.us ; }
 function disktest() { dd if=/dev/zero of=test bs=64k count=16k conv=fdatasync;rm -rf test ; }
 function newpass() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15 ; }
-function fixhome() { find $HOME -type f -exec chmod --changes 644 {} + -o -type d -exec chmod --changes 755 {} + ; }
+function fixhome() {
+  echo "Please tell me which users home I am to fix"
+  echo -n "Username: "; read user
+  OK=`echo -e "[\e[0;32mTask Complete\e[00m]"`
+  echo
+  echo -e "Checking ${BGreen}${user}'s${NC} directory and file permissions ... "
+  fix=$(find /home/${user} -type f -exec chmod --changes 644 {} \; && \
+        find /home/${user} -type d -exec chmod --changes 755 {} \;)
+  echo -e "Logging in as ${BGreen}${user}${NC} and adjusting permissions ... "
+  runuser -l ${user} -c '${fix}'
+  echo $OK
+  echo
+}
 
 transfer() {
   if [ $# -eq 0 ]; then
