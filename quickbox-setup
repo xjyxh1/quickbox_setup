@@ -845,7 +845,17 @@ function _makedirs() {
   usermod -a -G "${username}" www-data >>"${OUTTO}" 2>&1
 }
 
-# function to configure first user config.php (29)
+# function to make crontab .statup file (29)
+#function _cronfile() {
+#  cp ${local_setup}templates/startup.template /home/${username}/.startup
+#  chmod 775 /home/${username}/.startup
+#  if [[ $DELUGE != NO ]]; then
+#  sed -i 's/DELUGEWEB_CLIENT=no/DELUGEWEB_CLIENT=yes/g' /home/${username}/.startup
+#  sed -i 's/DELUGED_CLIENT=no/DELUGED_CLIENT=yes/g' /home/${username}/.startup
+#fi
+#}
+
+# function to configure first user config.php (30)
 function _ruconf() {
   mkdir -p ${rutorrent}conf/users/${username}/
 
@@ -864,13 +874,13 @@ function _ruconf() {
   sed -i "s/ZZZ/\"${AUTODLPASSWORD}\"/g" /srv/rutorrent/conf/users/${username}/config.php
 }
 
-# function to install pure-ftpd (30)
+# function to install pure-ftpd (31)
 function _installftpd() {
   apt-get purge -q -y vsftpd pure-ftpd >>"${OUTTO}" 2>&1
   apt-get install -q -y vsftpd >>"${OUTTO}" 2>&1
 }
 
-# function to configure pure-ftpd (31)
+# function to configure pure-ftpd (32)
 function _ftpdconfig() {
   cp ${local_setup}templates/openssl.cnf.template /root/.openssl.cnf
 
@@ -937,19 +947,25 @@ EOF
 
 }
 
-# seedbox boot for first user (32)
+# seedbox boot for first user (35)
 function _boot() {
+  #if [[ $cron == yes ]]; then
+  #  touch /install/.cron.lock
+  #  command1="*/1 * * * * /home/${username}/.startup >/dev/null 2>&1"
+  #  cat <(fgrep -iv "${command1}" <(sh -c 'sudo -u ${username} crontab -l' >/dev/null 2>&1)) <(echo "${command1}") | sudo -u ${username} crontab -
+  #elif [[ $cron == no ]]; then
   cp ${local_setup}templates/sysd/rtorrent.template /etc/systemd/system/rtorrent@.service >/dev/null 2>&1
   cp ${local_setup}templates/sysd/autodlirssi.template /etc/systemd/system/irssi@.service >/dev/null 2>&1
   cp ${local_setup}templates/sysd/deluged.template /etc/systemd/system/deluged@.service >/dev/null 2>&1
   cp ${local_setup}templates/sysd/deluge-web.template /etc/systemd/system/deluge-web@.service >/dev/null 2>&1
   systemctl enable {rtorrent,irssi,deluged,deluge-web}@${username} >/dev/null 2>&1
   systemctl start {rtorrent,irssi,deluged,deluge-web}@${username} >/dev/null 2>&1
+  #fi
 
   echo "*/1 * * * * root bash /usr/local/bin/quickbox/system/set_interface" > /etc/cron.d/set_interface
 }
 
-# function to set permissions on first user (33)
+# function to set permissions on first user (36)
 function _perms() {
   chown -R ${username}.${username} /home/${username}/ >>"${OUTTO}" 2>&1
   sudo -u ${username} chmod 755 /home/${username}/ >>"${OUTTO}" 2>&1
