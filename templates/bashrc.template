@@ -992,6 +992,7 @@ function fixhome() {
         find /home/${user} -type d -exec chmod --changes 755 {} \;)
   echo -e "Logging in as ${BGreen}${user}${NC} and adjusting permissions ... "
   runuser -l ${user} -c '${fix}'
+  chmod u+x /home/${user}/.du.sh
   echo $OK
   echo
 }
