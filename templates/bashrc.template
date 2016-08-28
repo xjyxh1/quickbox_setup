@@ -1877,9 +1877,9 @@ function setup-pyLoad() {
   if [ -d /home/${username}/.pyload ]; then
     cd /home/${username}/.pyload
     /usr/bin/python /home/${username}/.pyload/pyLoadCore.py --setup --config=/home/${username}/.pyload
+    chown -R ${username}.${username} /home/${username}/.pyload
   else
     echo "pyLoad is not installed. You can install by typing: box install pyload"
-    exit 1
   fi
 }
 
@@ -1891,7 +1891,6 @@ function upgradepyLoad() {
     chown -R ${username}.${username} /home/${username}/.pyload
   else
     echo "pyLoad is not installed. You can install by typing: box install pyload"
-    exit 1
   fi
 }
 
