@@ -996,6 +996,42 @@ function fixhome() {
   echo $OK
   echo
 }
+adjust-user-directory() {
+  echo "Please tell me which users torrent directory I am to adjust"
+  echo -n "Username: "; read user
+  OK=`echo -e "[\e[0;32mTask Complete\e[00m]"`
+  echo
+  echo -e "Checking ${BGreen}${user}'s${NC} directory for rtorrent/deluge ... "
+  cd /home/"${user}"/torrents
+  if [[ -d rtorrent ]]; then
+    cd
+    echo -e "rtorrent and deluge torrent directories already exist, exiting now ... "
+    exit 0
+  else
+    echo -e "Creating and moving ${BGreen}${user}'s${NC} torrents to new directories ... "
+    mv deluge /home/"${user}"/deluge
+    cd ..
+    mv torrents rtorrent
+    rm -rf torrents
+    mkdir -p torrents
+    mv deluge torrents/deluge
+    mv rtorrent torrents/rtorrent
+    sed -i "s/directory = \/home\/${user}\/torrents\//directory = \/home\/${user}\/torrents\/rtorrent/g" /home/"${user}"/.rtorrent.rc
+    chown -R ${user}:${user} /home/${user}
+  fi
+  echo -e "Restarting ${BGreen}${user}'s${NC} rtorrent service ... "
+  systemctl restart rtorrent@"${user}".service
+  echo $OK
+  echo
+}
+
+
+
+  echo -e "Logging in as ${BGreen}${user}${NC} and adjusting permissions ... "
+  runuser -l ${user} -c '${fix}' >/dev/null 2>&1
+  echo $OK
+  echo
+}
 
 transfer() {
   if [ $# -eq 0 ]; then
