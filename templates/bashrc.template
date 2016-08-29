@@ -990,7 +990,7 @@ function fixhome() {
   echo -e "Checking ${BGreen}${user}'s${NC} directory and file permissions ... "
   fix=$(find /home/${user} -type f -exec chmod --changes 644 {} \; && \
         find /home/${user} -type d -exec chmod --changes 755 {} \; && \
-        find /home/jmsolo -name ".du.sh" -exec chmod u+x {} \;)
+        find /home/${user} -name ".du.sh" -exec chmod u+x {} \;)
   echo -e "Logging in as ${BGreen}${user}${NC} and adjusting permissions ... "
   runuser -l ${user} -c '${fix}' >/dev/null 2>&1
   echo $OK
