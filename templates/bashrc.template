@@ -1025,14 +1025,6 @@ adjust-user-directory() {
   echo
 }
 
-
-
-  echo -e "Logging in as ${BGreen}${user}${NC} and adjusting permissions ... "
-  runuser -l ${user} -c '${fix}' >/dev/null 2>&1
-  echo $OK
-  echo
-}
-
 transfer() {
   if [ $# -eq 0 ]; then
     echo "No arguments specified. Usage: transfer /tmp/test.md OR: cat /tmp/test.md | transfer test.md"
