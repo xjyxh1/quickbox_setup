@@ -1100,8 +1100,8 @@ cd
 _bashrc
 _intro
 _checkroot
-_checkkernel
 _logcheck
+_checkkernel
 _hostname
 _askquota
 _askcontinue
