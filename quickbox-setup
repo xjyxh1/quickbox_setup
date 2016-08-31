@@ -497,7 +497,11 @@ function _lshell() {
 function _ffmpeg() {
   if [[ ${ffmpeg} == "yes" ]]; then
     MAXCPUS=$(echo "$(nproc) / 2"|bc)
-    apt-get -y install cmake cmake-curses-gui >>"${OUTTO}" 2>&1
+    if [[ $DISTRO == Ubuntu ]]; then
+      apt-get -y install x265 >>"${OUTTO}" 2>&1
+    elif [[ $DISTRO == Debian ]]; then
+      apt-get -y install -t jessie-backports x265 >>"${OUTTO}" 2>&1
+    fi
     mkdir /root/tmp
     cd /root/tmp
     if [[ -d /root/tmp/ffmpeg ]]; then rm -rf ffmpeg;fi
@@ -507,7 +511,7 @@ function _ffmpeg() {
     git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg >>"${OUTTO}" 2>&1
     git clone git://github.com/yasm/yasm.git ffmpeg/yasm >>"${OUTTO}" 2>&1
     git clone https://github.com/yixia/x264.git ffmpeg/x264 >>"${OUTTO}" 2>&1
-    git clone https://github.com/videolan/x265.git ffmpeg/x265 >>"${OUTTO}" 2>&1
+    #git clone https://github.com/videolan/x265.git ffmpeg/x265 >>"${OUTTO}" 2>&1
     ####---- Github Mirror source ----####
     #git clone git://github.com/FFmpeg/FFmpeg.git ffmpeg >>"${OUTTO}" 2>&1
     cd ffmpeg/yasm
@@ -520,11 +524,11 @@ function _ffmpeg() {
     make >>"${OUTTO}" 2>&1
     make install >>"${OUTTO}" 2>&1
     ldconfig >>"${OUTTO}" 2>&1
-    cd ../x265/build/linux
-    ./make-Makefiles.bash >>"${OUTTO}" 2>&1
-    make >>"${OUTTO}" 2>&1
-    make install >>"${OUTTO}" 2>&1
-    ldconfig >>"${OUTTO}" 2>&1
+    #cd ../x265/build/linux
+    #./make-Makefiles.bash >>"${OUTTO}" 2>&1
+    #make >>"${OUTTO}" 2>&1
+    #make install >>"${OUTTO}" 2>&1
+    #ldconfig >>"${OUTTO}" 2>&1
     cd /root/tmp/ffmpeg
     export FC_CONFIG_DIR=/etc/fonts
     export FC_CONFIG_FILE=/etc/fonts/fonts.conf
