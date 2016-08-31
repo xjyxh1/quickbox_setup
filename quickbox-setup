@@ -760,8 +760,8 @@ function _rconf() {
   sed -i "s/XXX/${PORT}/g" /home/${username}/.rtorrent.rc
   sed -i "s/YYY/${PORTEND}/g" /home/${username}/.rtorrent.rc
   if [[ -f /install/.10g.lock ]]; then
-    sed -i "s/max_peers = 100/max_peers = 300/g" /home/${username}/.rtorrent.rc
-    sed -i "s/max_uploads = 100/max_uploads = 300/g" /home/${username}/.rtorrent.rc
+    sed -i "s/hrottle.max_peers.normal.set = 100/hrottle.max_peers.normal.set = 300/g" /home/${username}/.rtorrent.rc
+    sed -i "s/throttle.max_uploads.global.set = 100/throttle.max_uploads.global.set = 300/g" /home/${username}/.rtorrent.rc
   fi
 }
 
