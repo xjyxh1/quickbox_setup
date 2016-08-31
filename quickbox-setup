@@ -497,7 +497,7 @@ function _lshell() {
 function _ffmpeg() {
   if [[ ${ffmpeg} == "yes" ]]; then
     MAXCPUS=$(echo "$(nproc) / 2"|bc)
-    apt-get install -y -q cmake >>"${OUTTO}" 2>&1
+    apt-get -y install cmake cmake-curses-gui >>"${OUTTO}" 2>&1
     mkdir /root/tmp
     cd /root/tmp
     if [[ -d /root/tmp/ffmpeg ]]; then rm -rf ffmpeg;fi
