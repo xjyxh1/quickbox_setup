@@ -2,8 +2,8 @@
 Description=Subsonic Sound-Server
 
 [Service]
-User=%I
-Group=%I
+User=MASTER
+Group=MASTER
 WorkingDirectory=/srv/subsonic
 ExecStart=/usr/share/subsonic/subsonic.sh
 Restart=on-abort
