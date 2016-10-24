@@ -505,15 +505,16 @@ function _ffmpeg() {
     mkdir /root/tmp
     cd /root/tmp
     if [[ -d /root/tmp/ffmpeg ]]; then rm -rf ffmpeg;fi
-    ####---- Old source ----####
-    #git clone git://source.ffmpeg.org/ffmpeg.git ffmpeg >>"${OUTTO}" 2>&1
-    ####---- New source ----####
-    git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg --depth 1 >>"${OUTTO}" 2>&1
+    git clone --depth 1 https://github.com/FFmpeg/FFmpeg.git ffmpeg
     git clone git://github.com/yasm/yasm.git ffmpeg/yasm >>"${OUTTO}" 2>&1
     git clone https://github.com/yixia/x264.git ffmpeg/x264 >>"${OUTTO}" 2>&1
+    ############################################################################
+    ## x265 needs to be manually compiled - there is no non-interactive option.
     #git clone https://github.com/videolan/x265.git ffmpeg/x265 >>"${OUTTO}" 2>&1
+    ############################################################################
     ####---- Github Mirror source ----####
-    #git clone git://github.com/FFmpeg/FFmpeg.git ffmpeg >>"${OUTTO}" 2>&1
+    #git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg >>"${OUTTO}" 2>&1
+    ############################################################################
     cd ffmpeg/yasm
     ./autogen.sh >>"${OUTTO}" 2>&1
     ./configure >>"${OUTTO}" 2>&1
@@ -524,11 +525,14 @@ function _ffmpeg() {
     make >>"${OUTTO}" 2>&1
     make install >>"${OUTTO}" 2>&1
     ldconfig >>"${OUTTO}" 2>&1
+    ############################################################################
+    ## x265 needs to be manually compiled - there is no non-interactive option.
     #cd ../x265/build/linux
     #./make-Makefiles.bash >>"${OUTTO}" 2>&1
     #make >>"${OUTTO}" 2>&1
     #make install >>"${OUTTO}" 2>&1
     #ldconfig >>"${OUTTO}" 2>&1
+    ############################################################################
     cd /root/tmp/ffmpeg
     export FC_CONFIG_DIR=/etc/fonts
     export FC_CONFIG_FILE=/etc/fonts/fonts.conf
