@@ -1121,6 +1121,7 @@ _hostname
 _askquota
 _askcontinue
 _ssdpblock
+_locale
 clear
 
 #_askservices
@@ -1165,7 +1166,8 @@ echo -n "Making ${username} directory structure ... ";_makedirs & spinner $!;ech
 echo -n "Writing ${username} rutorrent config.php file ... ";_ruconf & spinner $!;echo
 echo -n "Installing vsftpd ... ";_installftpd & spinner $!;echo
 echo -n "Setting up vsftpd ... ";_ftpdconfig & spinner $!;echo
-_quickstats;_quickconsole
+_quickstats;
+_quickconsole;
 echo -n "Setting irssi/rtorrent to start on boot ... ";_boot & spinner $!;echo;
 echo -n "Setting permissions on ${username} ... ";_perms & spinner $!;echo;
 cd
