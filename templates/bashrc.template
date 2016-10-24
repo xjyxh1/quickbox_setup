@@ -1815,6 +1815,27 @@ function upgradePlex() {
   fi
 }
 
+function upgradePlexRequests {
+  user=$(cat /srv/rutorrent/home/db/master.txt)
+  echo -e "Stopping PlexRequsts Service ... "
+  systemctl stop plexrequests
+  cd /opt
+  if [[ -f PlexRequests.zip ]]; then rm -f PlexRequests.zip; fi
+  echo -e "Backing up your database ... "
+  cp plexrequests/PlexRequests.sqlite .
+  echo -e "Installing newest version ... "
+  rm -rf plexrequests
+  curl -sL https://git.io/vKEJz | grep release | grep zip | cut -d "\"" -f 2 | sed -e 's/\/tidusjar/https:\/\/github.com\/tidusjar/g' | xargs wget --quiet -O PlexRequests.zip >/dev/null 2>&1
+  unzip PlexRequests.zip >/dev/null 2>&1
+  mv Release plexrequests
+  mv PlexRequests.sqlite plexrequests
+  if [[ -f PlexRequests.zip ]]; then rm -f PlexRequests.zip; fi
+  chown -R ${user}: plexrequests
+  echo -e "Starting PlexRequests ... "
+  systemctl start plexrequests
+  echo -e "Done! ... "
+}
+
 function upgradeDeluge() {
   OUTTO=/dev/null
   green=$(tput setaf 2)
