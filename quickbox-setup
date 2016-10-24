@@ -885,8 +885,9 @@ function _ruconf() {
 
 # function to install pure-ftpd (31)
 function _installftpd() {
-  apt-get purge -q -y vsftpd pure-ftpd >>"${OUTTO}" 2>&1
-  apt-get install -q -y vsftpd >>"${OUTTO}" 2>&1
+  apt-get purge -y vsftpd pure-ftpd >>"${OUTTO}" 2>&1
+  apt-get autoremove >>"${OUTTO}" 2>&1
+  apt-get install -y vsftpd >>"${OUTTO}" 2>&1
 }
 
 # function to configure pure-ftpd (32)
