@@ -5,7 +5,7 @@ After=network-online.target
 User=USER
 Group=USER
 Type=forking
-ExecStart=/usr/bin/screen -f -a -d -m -S plexrequests mono /opt/plexrequests/PlexRequests.exe -p 3000 -base plexrequests
+ExecStart=/usr/bin/screen -f -a -d -m -S plexrequests mono /opt/plexrequests/PlexRequests.exe -p 3000 --base plexrequests
 ExecStop=-/bin/kill -HUP
 WorkingDirectory=/home/USER/
 
