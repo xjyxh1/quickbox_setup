@@ -345,6 +345,7 @@ function _updates() {
   if [[ $DISTRO == Debian ]]; then
     cp ${local_setup}templates/apt.sources/debian.template /etc/apt/sources.list
     sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
+    apt-get update >>"${OUTTO}" 2>&1
     yes '' | apt-get install --force-yes build-essential debian-archive-keyring \
                              python-software-properties >>"${OUTTO}" 2>&1
     apt-get --yes --force-yes update >>"${OUTTO}" 2>&1
@@ -352,6 +353,7 @@ function _updates() {
   else
     cp ${local_setup}templates/apt.sources/ubuntu.template /etc/apt/sources.list
     sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
+    apt-get update >>"${OUTTO}" 2>&1
     apt-get -y -f install build-essential debian-archive-keyring \
                              python-software-properties >>"${OUTTO}" 2>&1
     #apt-get -y -f --allow-unauthenticated install deb-multimedia-keyring >>"${OUTTO}" 2>&1
