@@ -9,7 +9,7 @@ Group=%I
 ExecStart=/usr/bin/python /home/%I/couchpotato/CouchPotato.py --daemon --data_dir="/home/%I/.couchpotato/" --config_file="/home/%I/.couchpotato/settings.conf"
 GuessMainPID=no
 ExecStop=-/bin/kill -HUP
-
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
