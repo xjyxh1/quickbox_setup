@@ -801,10 +801,10 @@ function _plugins() {
   sed -i 's/showhidden: true,/showhidden: false,/g' "${rutorrent}plugins/filemanager/init.js"
   chown -R www-data.www-data "${rutorrent}"
   cd ${rutorrent}plugins/theme/themes/
-  git clone https://lab.quickbox.io/Swizards/club-Swizards club-Swizards >>"${OUTTO}" 2>&1
-  chown -R www-data:www-data club-Swizards
+  git clone https://github.com/QuickBox/club-QuickBox club-QuickBox >>"${OUTTO}" 2>&1
+  chown -R www-data:www-data club-QuickBox
   cd ${rutorrent}plugins
-  perl -pi -e "s/\$defaultTheme \= \"\"\;/\$defaultTheme \= \"club-Swizards\"\;/g" ${rutorrent}plugins/theme/conf.php
+  perl -pi -e "s/\$defaultTheme \= \"\"\;/\$defaultTheme \= \"club-QuickBox\"\;/g" ${rutorrent}plugins/theme/conf.php
   rm -rf ${rutorrent}plugins/tracklabels/labels/nlb.png
 
   # Needed for fileupload
