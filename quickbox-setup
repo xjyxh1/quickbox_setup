@@ -834,10 +834,16 @@ function _plugins() {
 function _autodl() {
   mkdir -p "/home/${username}/.irssi/scripts/autorun/" >>"${OUTTO}" 2>&1
   cd "/home/${username}/.irssi/scripts/"
-  #wget -qO autodl-irssi.zip https://github.com/autodl-community/autodl-irssi/releases/download/community-v1.62/autodl-irssi-community-v1.62.zip
+  # Grab the most recent version of AutoDL
   curl -sL http://git.io/vlcND | grep -Po '(?<="browser_download_url": ")(.*-v[\d.]+.zip)' | xargs wget --quiet -O autodl-irssi.zip
+  # Grab the most recent version of AutoDL-trackers
+  curl -sL https://api.github.com/repos/autodl-community/autodl-trackers/releases/latest | grep -Po '(?<="browser_download_url": ")(.*-v[\d.]+.zip)' | xargs wget --quiet -O autodl-trackers.zip
   unzip -o autodl-irssi.zip >>"${OUTTO}" 2>&1
-  rm autodl-irssi.zip
+  cd AutodlIrssi
+  rm -rf trackers
+  unzip /home/${username}/.irssi/scripts/autodl-trackers.zip -d /home/${username}/.irssi/scripts/AutodlIrssi/trackers
+  cd "/home/${username}/.irssi/scripts/"
+  rm autodl-irssi.zip && rm autodl-trackers.zip
   cp autodl-irssi.pl autorun/
   mkdir -p "/home/${username}/.autodl" >>"${OUTTO}" 2>&1
   touch "/home/${username}/.autodl/autodl.cfg"
