@@ -262,6 +262,7 @@ sub doHeaderFilter {
 			maxPreTime => '',
 			seasons => '',
 			episodes => '',
+			smartEpisode => 0,
 			resolutions => '',
 			sources => '',
 			encoders => '',
@@ -291,6 +292,7 @@ sub doHeaderFilter {
 			maxDownloads => '',
 			maxDownloadsPer => '',
 			downloadDupeReleases => 0,
+			priority => 0,
 			useRegex => 0,
 			uploadType => '',
 			uploadWatchDir => '',
@@ -328,6 +330,7 @@ sub doHeaderFilter {
 			'max-pretime' => 'maxPreTime',
 			'seasons' => 'seasons',
 			'episodes' => 'episodes',
+			'smart-episode' => 'smartEpisode',
 			'resolutions' => 'resolutions',
 			'sources' => 'sources',
 			'encoders' => 'encoders',
@@ -357,6 +360,7 @@ sub doHeaderFilter {
 			'max-downloads' => 'maxDownloads',
 			'max-downloads-per' => 'maxDownloadsPer',
 			'download-duplicates' => 'downloadDupeReleases',
+			'priority' => 'priority',
 			'use-regex' => 'useRegex',
 			'upload-type' => 'uploadType',
 			'upload-watch-dir' => 'uploadWatchDir',
@@ -383,6 +387,7 @@ sub doHeaderFilter {
 			$self->checkValidUploadType($filter->{uploadType}, $options->{'upload-type'});
 		}
 		$filter->{enabled} = convertStringToBoolean($filter->{enabled});
+		$filter->{smartEpisode} = convertStringToBoolean($filter->{smartEpisode});
 		$filter->{scene} = convertStringToBoolean($filter->{scene}) if $filter->{scene};
 		$filter->{freeleech} = convertStringToBoolean($filter->{freeleech}) if $filter->{freeleech};
 		$filter->{log} = convertStringToBoolean($filter->{log}) if $filter->{log};
