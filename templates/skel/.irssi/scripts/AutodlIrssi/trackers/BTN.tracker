@@ -76,7 +76,7 @@
 				</vars>
 			</extract>
 			<extract>
-				<regex value="^\[ (\d+) \] \[ (.*) \] \[ (.*) \] \[ Uploader: (.*?) \](?: \[ Pretime: (.*) \])?"/>
+				<regex value="^(?:\[ (\d+) \] )?\[ (.*) \] \[ (.*) \] \[ Uploader: (.*?) \](?: \[ Pretime: (.*) \])?"/>
 				<vars>
 					<var name="year"/>
 					<var name="category"/>
@@ -117,24 +117,6 @@
 					<var name="episode"/>
 				</vars>
 			</extract>
-
-			<if srcvar="torrentName" regex="^\[(.*)]">
-				<extract srcvar="torrentName" optional="true">
-					<regex value="^\[(.*?)]"/>
-					<vars>
-						<var name="releaseGroup"/>
-					</vars>
-				</extract>
-			</if>
-
-			<if srcvar="torrentName" regex="^(?!\[.*]).*">
-				<extract srcvar="torrentName" optional="true">
-					<regex value="(?:.*?[\._\s])+.*?-(.*?)(?:\..*)?$"/>
-					<vars>
-						<var name="releaseGroup"/>
-					</vars>
-				</extract>
-			</if>
 
 			<varreplace name="tags" srcvar="tags" regex="[\|]" replace=", "/>
 			<setregex srcvar="tags" regex="Scene" varName="scene" newValue="true"/>
