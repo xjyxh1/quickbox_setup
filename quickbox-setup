@@ -693,6 +693,20 @@ fi
 # scgi enable function (22-nixed)
 # function _scgi() { ln -s /etc/apache2/mods-available/scgi.load /etc/apache2/mods-enabled/scgi.load >>"${OUTTO}" 2>&1 ; }
 
+# mktorrent function (xx)
+function _mktorrent() {
+  if [[ -d /root/tmp ]]; then rm -r tmp;fi
+  mkdir /root/tmp && cd /root/tmp
+  mktorrent_version=1.1
+  wget --quiet https://github.com/Rudde/mktorrent/archive/v$mktorrent_version.zip -O mktorrent.zip  >>"${OUTTO}" 2>&1
+  unzip -o mktorrent.zip  >>"${OUTTO}" 2>&1
+  cd mktorrent-1.1
+  make >>"${OUTTO}" 2>&1
+  make install >>"${OUTTO}" 2>&1
+  cd ..
+  rm -rf mktorrent-1.1 && rm -f mktorrent.zip
+}
+
 # function to install rutorrent (22)
 function _rutorrent() {
   cd /srv
@@ -1166,6 +1180,7 @@ echo -n "Installing rtorrent-${green}$RTVERSION${normal} ... ";_rtorrent & spinn
 echo -n "Installing rutorrent into /srv ... ";_rutorrent & spinner $!;echo
 echo -n "Installing rutorrent plugins ... ";_rutorrent-plugins & spinner $!;echo
 echo -n "Installing deluge ... ";_deluge & spinner $!;echo
+echo -n "Installing mktorrent from source ... ";_mktorrent & spinner $!;echo
 echo -n "Installing quickbox dashboard ... ";_dashboard & spinner $!;echo
 echo -n "Setting up seedbox.conf for apache ... ";_apacheconf & spinner $!;echo
 echo -n "Installing .rtorrent.rc for ${username} ... ";_rconf & spinner $!;echo
