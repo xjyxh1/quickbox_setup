@@ -405,13 +405,13 @@ alias syscommands='cd /usr/local/bin/quickbox'
 # -> Performs some quick adjustments for certain conditions.
 home_diskwidget() {
   rm -f /srv/rutorrent/home/widgets/disk_data.php
-  cp /root/QuickBox/dashboard/widgets/disk_datah.php /srv/rutorrent/home/widgets/disk_data.php
+  cp /etc/QuickBox/dashboard/widgets/disk_datah.php /srv/rutorrent/home/widgets/disk_data.php
   chown www-data: /srv/rutorrent/home/widgets/disk_data.php
   service apache2 restart
 }
 root_diskwidget() {
   rm -f /srv/rutorrent/home/widgets/disk_data.php
-  cp /root/QuickBox/dashboard/widgets/disk_data.php /srv/rutorrent/home/widgets/disk_data.php
+  cp /etc/QuickBox/dashboard/widgets/disk_data.php /srv/rutorrent/home/widgets/disk_data.php
   chown www-data: /srv/rutorrent/home/widgets/disk_data.php
   service apache2 restart
 }
@@ -1474,7 +1474,7 @@ Alias /${username}.deluge.downloads "/home/${username}/torrents/deluge"
   </Location>
 AS
 
-local_setup=/root/QuickBox/setup/
+local_setup=/etc/QuickBox/setup/
 PUBLICIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 cp ${local_setup}templates/web-console.conf.template /etc/apache2/sites-enabled/${username}.console.conf
 sed -i "s/PUBLICIP/${PUBLICIP}/g" /etc/apache2/sites-enabled/${username}.console.conf
@@ -1572,10 +1572,10 @@ function upgradePlex() {
   PUBLICIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
   EMAIL=$email
   PASS=$pass
-  DOWNLOADDIR="/root/plex-tmp"
+  DOWNLOADDIR="/opt/plex-tmp"
   PLEXSERVER=$PUBLICIP
 
-  mkdir /root/plex-tmp
+  mkdir /opt/plex-tmp
 
   FORCE=no
   PUBLIC=no
@@ -1769,7 +1769,7 @@ function upgradePlex() {
   	echo -e " ${Green}OK${NC}"
   fi
 
-  newplex="$(dpkg -I /root/plex-tmp/*.deb | grep Version | awk '{print $2}' | awk -F'[ -]' '{print $1}')"
+  newplex="$(dpkg -I /opt/plex-tmp/*.deb | grep Version | awk '{print $2}' | awk -F'[ -]' '{print $1}')"
   currentplex="$(dpkg -l | grep plexmediaserver | awk '{print $3}' | awk -F'[ -]' '{print $1}')"
   echo -e "${BBlack}${On_White}Starting Version Comparison${NC}"
   sleep 2
@@ -1798,7 +1798,7 @@ function upgradePlex() {
     fi
     if [ "${AUTODELETE}" = "yes" ]; then
       if [ "${AUTOINSTALL}" = "yes" ]; then
-        rm -rf "${DOWNLOADDIR}/${FILENAME}" && rm -rf /root/plex-tmp
+        rm -rf "${DOWNLOADDIR}/${FILENAME}" && rm -rf /opt/plex-tmp
         echo "Deleted \"${FILENAME}\""
       fi
     fi
@@ -1808,7 +1808,7 @@ function upgradePlex() {
 
     if [ "${AUTODELETE}" = "yes" ]; then
   	  if [ "${AUTOINSTALL}" = "yes" ]; then
-  		  rm -rf "${DOWNLOADDIR}/${FILENAME}" && rm -rf /root/plex-tmp
+  		  rm -rf "${DOWNLOADDIR}/${FILENAME}" && rm -rf /opt/plex-tmp
   		  echo "Deleted \"${FILENAME}\""
       fi
     fi
