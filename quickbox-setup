@@ -605,7 +605,7 @@ function _rtorrent() {
   tar -xzvf rtorrent-${RTVERSION}.tar.gz >>"${OUTTO}" 2>&1
   cd rtorrent-${RTVERSION}
   ./autogen.sh >>"${OUTTO}" 2>&1
-  ./configure --prefix=/usr --with-xmlrpc-c >>"${OUTTO}" 2>&1
+  ./configure --prefix=/usr --with-xmlrpc-c --enable-ipv6>>"${OUTTO}" 2>&1
   make -j${MAXCPUS} >>"${OUTTO}" 2>&1
   make install >>"${OUTTO}" 2>&1
   cd /root/tmp
